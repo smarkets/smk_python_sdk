@@ -1,6 +1,6 @@
 
 
-    >>> from example_client import Client
+    >>> from smk import Client
     >>> from seto_pb2 import buy,sell
     >>> c = Client()
     >>> c.login('you@domain.com', 'password')
