@@ -1,15 +1,8 @@
-#!/usr/bin/python
-
 import socket
 import seto_pb2
 import struct
 from Queue import Queue
 from threading import Thread
-
-from seto_pb2 import buy, sell
-
-HOST = 'localhost'
-PORT = 3701
 
 class Client(Thread):
 
@@ -69,9 +62,9 @@ class Client(Thread):
         msg.payload.ping = True
         self.out.send(msg)
 
-    def login(self, username, password, session=None, inseq=1, outseq=1):
+    def login(self, host, port, username, password, session=None, inseq=1, outseq=1):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((HOST, PORT))
+        sock.connect((host, port))
         self.out = Client.Out(sock, outseq)
         self.out.start()
         self.inseq = inseq

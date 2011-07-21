@@ -3,7 +3,7 @@
     >>> from smk import Client
     >>> from seto_pb2 import buy,sell
     >>> c = Client()
-    >>> c.login('you@domain.com', 'password')
+    >>> c.login('10.100.1.188', 3701, 'you@domain.com', 'password')
     Session 37087943-b12f-4753-9af8-32814061097d
     >>> c.order(400000, '25', buy, '000000000000000000000001dc91c024', '000000000000000000000002ab9acccc')
 
