@@ -44,21 +44,21 @@ class Client(Thread):
         Thread.__init__(self)
 
     def order(self, qty, price, side, group, contract):
-        msg = seto_pb2.message()
-        msg.payload.order.quantity = qty
-        msg.payload.order.price = price
-        msg.payload.order.side = side
-        msg.payload.order.group = group
-        msg.payload.order.contract = contract
+        msg = seto_pb2.seq_message()
+        msg.payload.order_create.quantity = qty
+        msg.payload.order_create.price = price
+        msg.payload.order_create.side = side
+        msg.payload.order_create.group = group
+        msg.payload.order_create.contract = contract
         self.out.send(msg)
 
     def order_cancel(self, order):
-        msg = seto_pb2.message()
+        msg = seto_pb2.seq_message()
         msg.payload.order_cancel.order = order
         self.out.send(msg)
 
     def ping(self):
-        msg = seto_pb2.message()
+        msg = seto_pb2.seq_message()
         msg.payload.ping = True
         self.out.send(msg)
 
@@ -68,7 +68,7 @@ class Client(Thread):
         self.out = Client.Out(sock, outseq)
         self.out.start()
         self.inseq = inseq
-        msg = seto_pb2.message()
+        msg = seto_pb2.seq_message()
         msg.payload.login.username = username
         msg.payload.login.password = password
         if session:
@@ -82,7 +82,7 @@ class Client(Thread):
             header = self.sock.recv(2)
             (byte_count,) = struct.unpack('>H', header)
             msg_bytes = self.sock.recv(byte_count)
-            msg = seto_pb2.message()
+            msg = seto_pb2.seq_message()
             msg.ParseFromString(msg_bytes)
             if self.pre_handle(msg):
                 try:
@@ -99,7 +99,7 @@ class Client(Thread):
             # replay message, sequence not important, process it here
             return False
         elif msg.seq > self.inseq:
-            replay = seto_pb2.message()
+            replay = seto_pb2.seq_message()
             replay.payload.replay.seq = self.inseq
             self.out.send(replay)
             return False
