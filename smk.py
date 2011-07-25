@@ -62,6 +62,16 @@ class Client(Thread):
         msg.payload.ping = True
         self.out.send(msg)
 
+    def subscribe(self, group):
+        msg = seto_pb2.seq_message()
+        msg.payload.market_subscription.group = group
+        self.out.send(msg)
+
+    def unsubscribe(self, group):
+        msg = seto_pb2.seq_message()
+        msg.payload.market_unsubscription.group = group
+        self.out.send(msg)
+
     def login(self, host, port, username, password, session=None, inseq=1, outseq=1):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((host, port))
@@ -79,17 +89,24 @@ class Client(Thread):
 
     def run(self):
         while True:
-            header = self.sock.recv(2)
-            (byte_count,) = struct.unpack('>H', header)
-            msg_bytes = self.sock.recv(byte_count)
-            msg = seto_pb2.seq_message()
-            msg.ParseFromString(msg_bytes)
-            if self.pre_handle(msg):
-                try:
-                    self.handle(msg)
-                    self.inseq += 1
-                except Exception, e:
-                    print "Error handling message", msg, e
+            header_bytes = self.sock.recv(2)
+            (header,) = struct.unpack('>H', header_bytes)
+            if header&32768:
+                byte_count = header - 32768
+                msg_bytes = self.sock.recv(byte_count)
+                msg = seto_pb2.transient()
+                msg.ParseFromString(msg_bytes)
+                self.handle_transient(msg)
+            else:
+                msg_bytes = self.sock.recv(header)
+                msg = seto_pb2.seq_message()
+                msg.ParseFromString(msg_bytes)
+                if self.pre_handle(msg):
+                    try:
+                        self.handle(msg)
+                        self.inseq += 1
+                    except Exception, e:
+                        print "Error handling message", msg, e
 
     def pre_handle(self, msg):
         print "Received", msg.seq
@@ -119,3 +136,13 @@ class Client(Thread):
             print "Order Cancelled", msg.payload.order_cancelled.order, msg.payload.order_cancelled.reason
         elif msg.payload.pong:
             print "Pong"
+        elif msg.payload.market_subscribed.group:
+            print "Subscribed to market", msg.payload.market_subscribed.group
+
+    def handle_transient(self, msg):
+        if msg.push_accepted.quantity:
+            payload = msg.push_accepted
+            print "Push Accepted", payload.quantity, payload.price, payload.side
+        elif msg.push_executed.quantity:
+            payload = msg.push_executed
+            print "Push Execution", payload.quantity, payload.price, payload.side
