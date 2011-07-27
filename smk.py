@@ -38,7 +38,6 @@ class Client(Thread):
                 self.sock.send(header + msg_bytes)
                 self.q.task_done()
                 self.seq += 1
-                print "Sending", msg.seq, msg_bytes
 
     def __init__(self):
         Thread.__init__(self)
@@ -109,7 +108,6 @@ class Client(Thread):
                         print "Error handling message", msg, e
 
     def pre_handle(self, msg):
-        print "Received", msg.seq
         if msg.seq == self.inseq:
             return True # correct sequence
         elif msg.payload.replay.seq:
@@ -125,6 +123,8 @@ class Client(Thread):
 
     def handle(self, msg):
         if msg.payload.login_response.session:
+            self.session = msg.payload.login_response.session
+            self.out.seq = msg.payload.login_response.reset
             print "Session", msg.payload.login_response.session
         elif msg.payload.order_accepted.order:
             print "Order Accepted", msg.payload.order_accepted.seq, msg.payload.order_accepted.order
