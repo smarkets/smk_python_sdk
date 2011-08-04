@@ -5,6 +5,13 @@ from Queue import Queue
 from threading import Thread
 
 
+__version__ = '0.1.0'
+__all__ = ['DecodeError', 'Client']
+
+
+VERSION = tuple(map(int, __version__.split('.')))
+
+
 class DecodeError(Exception):
     "Error encountered decoding a frame"
     pass

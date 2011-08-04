@@ -1,4 +1,6 @@
 *.pyc
 seto_pb2.py
 seto.proto
-pb/
+build/
+dist/
+*.egg-info/
