@@ -9,16 +9,23 @@ Python API client for Smarkets.
 
 ## Getting Started
 
-    >>> from smk import Client
+    >>> import logging
+    >>> logging.basicConfig(level=logging.DEBUG)
+    >>> import smk
     >>> from smk.seto_pb2 import buy,sell
-    >>> c = Client()
-    >>> c.login('api-dev.corp.smarkets.com', 3701, 'you@domain.com', 'password')
+    >>> session = smk.Session('hunter.morris@smarkets.com', 'abc,123', 'api-dev.corp.smarkets.com', 3701)
+    >>> client = smk.Smarkets(session)
+    >>> client.login()
     Session 37087943-b12f-4753-9af8-32814061097d
+    >>> client.ping()
+    >>> client.read()
+    Pong
     >>> c.subscribe('000000000000000000000001dc91c024') # subscribe to a market
     >>> c.order(400000, '25', buy, '000000000000000000000001dc91c024', '000000000000000000000002ab9acccc')
+    >>> client.read()
 
 ### Resuming a session
 
 When resuming a session you need to know the incoming and outgoing sequence numbers you were using when the session was last used, from the example above they will now both be 3.
 
-    c.login('api-dev.corp.smarkets.com', 3701, 'you@domain.com', 'password', '37087943-b12f-4753-9af8-32814061097d', 3, 3)
+    session = smk.Session('you@domain.com', 'password', 'api-dev.corp.smarkets.com', 3701, '37087943-b12f-4753-9af8-32814061097d', 3, 3)
