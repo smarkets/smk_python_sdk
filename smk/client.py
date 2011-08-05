@@ -60,6 +60,10 @@ class Smarkets(object):
         if receive:
             self.read()
 
+    def logout(self):
+        "Disconnect. TODO: send logout message before"
+        self.session.disconnect()
+
     def read(self):
         "Receive the next payload and block"
         frame = self.session.next_frame()
