@@ -9,6 +9,7 @@ from smk.seto_pb2 import payload
 class Session(object):
     "Manages TCP communication via Smarkets streaming API"
     logger = logging.getLogger('smk.session')
+    wire_logger = logging.getLogger('smk.session.wire')
 
     def __init__(self, username, password, host='localhost', port=3701,
                  session=None, inseq=1, outseq=1, socket_timeout=None):
@@ -92,7 +93,7 @@ class Session(object):
                 "send_frame called while disconnected. connecting...")
             self.connect()
         try:
-            self.logger.debug("sending frame bytes %r", frame)
+            self.wire_logger.debug("sending frame bytes %r", frame)
             self._sock.sendall(frame)
         except socket.error as exc:
             # Die fast
@@ -148,7 +149,7 @@ class Session(object):
                     # Read the actual message if necessary
                     self._fill_buffer(to_read + len(self._buffer))
                 msg_bytes = self._buffer[:result]
-                self.logger.debug("parsing bytes %r", msg_bytes)
+                self.wire_logger.debug("parsing bytes %r", msg_bytes)
                 msg = self.in_payload
                 msg.Clear()
                 msg.ParseFromString(msg_bytes)
@@ -190,8 +191,8 @@ class Session(object):
             return None
         elif payload_in.sequenced.seq > self.inseq:
             # Need a replay
-            self.logger.debug(
-                "received incoming sequence %d, expected %d",
+            self.logger.info(
+                "received incoming sequence %d, expected %d, need replay",
                 payload_in.sequenced.seq,
                 self.inseq)
             replay = self.out_payload
