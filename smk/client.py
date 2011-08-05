@@ -1,4 +1,5 @@
 "Smarkets API client"
+import logging
 
 
 class Callback(object):
@@ -49,6 +50,8 @@ class Smarkets(object):
         'market_quotes',
         )
     CALLBACKS = dict(((name, Callback()) for name in CALLBACK_NAMES))
+
+    logger = logging.getLogger('smk.smarkets')
 
     def __init__(self, session):
         self.session = session
@@ -142,5 +145,8 @@ class Smarkets(object):
         elif msg.sequenced.message_data.market_quotes.group:
             name = 'market_quotes'
         if name in self.callbacks:
+            self.logger.debug('dispatching callback %s', name)
             callback = self.callbacks[name]
             callback(msg)
+        else:
+            self.logger.info('ignoring unknown message: %s', name)
