@@ -1,5 +1,4 @@
 "Smarkets API client"
-from smk.seto_pb2 import payload
 
 
 class Callback(object):
@@ -69,42 +68,47 @@ class Smarkets(object):
 
     def order(self, qty, price, side, group, contract):
         "Create a new order"
-        msg = payload()
+        msg = self.session.out_payload
+        msg.Clear()
         # pylint: disable-msg=E1101
         msg.sequenced.message_data.order_create.quantity = qty
         msg.sequenced.message_data.order_create.price = price
         msg.sequenced.message_data.order_create.side = side
         msg.sequenced.message_data.order_create.group = group
         msg.sequenced.message_data.order_create.contract = contract
-        self._send(msg)
+        self._send()
 
     def order_cancel(self, order):
         "Cancel an existing order"
-        msg = payload()
+        msg = self.session.out_payload
+        msg.Clear()
         # pylint: disable-msg=E1101
         msg.sequenced.message_data.order_cancel.order = order
-        self._send(msg)
+        self._send()
 
     def ping(self):
         "Ping the service"
-        msg = payload()
+        msg = self.session.out_payload
+        msg.Clear()
         # pylint: disable-msg=E1101
         msg.sequenced.message_data.ping = True
-        self._send(msg)
+        self._send()
 
     def subscribe(self, group):
         "Subscribe to a market"
-        msg = payload()
+        msg = self.session.out_payload
+        msg.Clear()
         # pylint: disable-msg=E1101
         msg.sequenced.message_data.market_subscription.group = group
-        self._send(msg)
+        self._send()
 
     def unsubscribe(self, group):
         "Unsubscribe from a market"
-        msg = payload()
+        msg = self.session.out_payload
+        msg.Clear()
         # pylint: disable-msg=E1101
         msg.message.market_unsubscription.group = group
-        self._send(msg)
+        self._send()
 
     def add_handler(self, name, callback):
         "Add a callback handler"
@@ -114,9 +118,9 @@ class Smarkets(object):
         "Remove a callback handler"
         self.callbacks[name] -= callback
 
-    def _send(self, payload_out):
+    def _send(self):
         "Send a payload via the session"
-        self.session.send_payload(payload_out)
+        self.session.send_payload()
 
     def _dispatch(self, msg):
         "Dispatch a frame to the callbacks"

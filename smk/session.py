@@ -22,6 +22,8 @@ class Session(object):
         self.socket_timeout = socket_timeout
         self._buffer = ''
         self._sock = None
+        self.in_payload = payload()
+        self.out_payload = payload()
 
     def connect(self):
         "Connects to the API if not already connected"
@@ -59,7 +61,8 @@ class Session(object):
 
     def on_connect(self):
         "Initialise the connection by logging in"
-        login_payload = payload()
+        login_payload = self.out_payload
+        login_payload.Clear()
         # pylint: disable-msg=E1101
         login_payload.sequenced.message_data.login.username = self.username
         login_payload.sequenced.message_data.login.password = self.password
@@ -67,7 +70,7 @@ class Session(object):
         if self.session is not None:
             self.logger.info("attempting to resume session %s", self.session)
             login_payload.sequenced.message_data.login.session = self.session
-        self.send_payload(login_payload)
+        self.send_payload()
 
     def disconnect(self):
         "Disconnect from the API"
@@ -105,12 +108,13 @@ class Session(object):
             self.disconnect()
             raise
 
-    def send_payload(self, payload_out):
+    def send_payload(self):
         "Serialise, sequence, add header, and send payload"
         self.logger.debug(
             "sending payload with outgoing sequence %d", self.outseq)
-        payload_out.sequenced.seq = self.outseq
-        msg_bytes = payload_out.SerializeToString()
+        # pylint: disable-msg=E1101
+        self.out_payload.sequenced.seq = self.outseq
+        msg_bytes = self.out_payload.SerializeToString()
         byte_count = len(msg_bytes)
         # Pad to 4 bytes
         padding = '\x00' * max(0, 3 - byte_count)
@@ -123,7 +127,6 @@ class Session(object):
 
     def read_frame(self):
         "Read a frame with header"
-        msg = payload()
         # Read a minimum of 4 bytes
         bytes_needed = 4 - len(self._buffer)
         if bytes_needed:
@@ -150,15 +153,19 @@ class Session(object):
                         to_read, socket.MSG_WAITALL)
                 msg_bytes = self._buffer[:result]
                 self.logger.debug("parsing bytes %s", msg_bytes)
+                msg = self.in_payload
+                msg.Clear()
                 msg.ParseFromString(msg_bytes)
                 # Consume the buffer
                 self._buffer = self._buffer[result:]
-                return self._handle_login_response(msg)
+                return self._handle_in_payload()
             shift += 7
 
     def next_frame(self):
         "Get the next frame and increment inseq"
-        payload_in = self.read_frame()
+        self.read_frame()
+        # pylint: disable-msg=E1101
+        payload_in = self.in_payload
         if payload_in.sequenced.seq == self.inseq:
             # Go ahead
             self.logger.debug("received sequence %d", self.inseq)
@@ -176,16 +183,19 @@ class Session(object):
                 "received incoming sequence %d, expected %d",
                 payload_in.sequenced.seq,
                 self.inseq)
-            replay = payload()
+            replay = self.out_payload
+            replay.Clear()
             # pylint: disable-msg=E1101
             replay.sequenced.message_data.replay.seq = self.inseq
-            self.send_payload(replay)
+            self.send_payload()
             return None
         else:
             return None
 
-    def _handle_login_response(self, msg):
+    def _handle_in_payload(self):
         "Pre-consume the login response message"
+        # pylint: disable-msg=E1101
+        msg = self.in_payload
         if msg.sequenced.message_data.login_response.session:
             self.session = msg.sequenced.message_data.login_response.session
             self.outseq = msg.sequenced.message_data.login_response.reset
