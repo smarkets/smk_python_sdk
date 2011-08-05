@@ -19,3 +19,8 @@ class DecodeError(SmkError):
 class ParseError(SmkError):
     "Error parsing a message or frame"
     pass
+
+
+class SocketDisconnected(SmkError):
+    "Socket was disconnected while reading"
+    pass

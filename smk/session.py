@@ -92,7 +92,7 @@ class Session(object):
                 "send_frame called while disconnected. connecting...")
             self.connect()
         try:
-            self.logger.debug("sending frame bytes %s", frame)
+            self.logger.debug("sending frame bytes %r", frame)
             self._sock.sendall(frame)
         except socket.error as exc:
             # Die fast
@@ -128,10 +128,7 @@ class Session(object):
     def read_frame(self):
         "Read a frame with header"
         # Read a minimum of 4 bytes
-        bytes_needed = 4 - len(self._buffer)
-        if bytes_needed:
-            self.logger.debug("receiving %d bytes", bytes_needed)
-            self._buffer += self._sock.recv(bytes_needed, socket.MSG_WAITALL)
+        self._fill_buffer()
         result = 0
         shift = 0
         pos = 0
@@ -139,7 +136,7 @@ class Session(object):
             if pos > len(self._buffer) - 1:
                 pos = 0
                 # Empty buffer and read another 4 bytes
-                self._buffer = self._sock.recv(4, socket.MSG_WAITALL)
+                self._fill_buffer(4, socket.MSG_WAITALL)
             cbit = ord(self._buffer[pos])
             result |= ((cbit & 0x7f) << shift)
             pos += 1
@@ -149,10 +146,9 @@ class Session(object):
                 self.logger.debug("next message is %d bytes long", to_read)
                 if to_read:
                     # Read the actual message if necessary
-                    self._buffer += self._sock.recv(
-                        to_read, socket.MSG_WAITALL)
+                    self._fill_buffer(to_read + len(self._buffer))
                 msg_bytes = self._buffer[:result]
-                self.logger.debug("parsing bytes %s", msg_bytes)
+                self.logger.debug("parsing bytes %r", msg_bytes)
                 msg = self.in_payload
                 msg.Clear()
                 msg.ParseFromString(msg_bytes)
@@ -160,6 +156,21 @@ class Session(object):
                 self._buffer = self._buffer[result:]
                 return self._handle_in_payload()
             shift += 7
+
+    def _fill_buffer(self, min_size=4, empty=False):
+        "Ensure the buffer has at least 4 bytes"
+        if empty:
+            self._buffer = ''
+        while len(self._buffer) < min_size:
+            bytes_needed = min_size - len(self._buffer)
+            self.logger.debug("receiving %d bytes", bytes_needed)
+            bytes = self._sock.recv(bytes_needed, socket.MSG_WAITALL)
+            if len(bytes) != bytes_needed:
+                self.logger.warning(
+                    "socket disconnected while receiving, got %r", bytes)
+                self.disconnect()
+                raise SocketDisconnected()
+            self._buffer += bytes
 
     def next_frame(self):
         "Get the next frame and increment inseq"
