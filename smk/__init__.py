@@ -1,3 +1,4 @@
+"Smarkets API package"
 from smk.client import Smarkets
 from smk.exceptions import (
     SmkError,
@@ -13,4 +14,4 @@ __all__ = ['SmkError', 'ConnectionError', 'DecodeError',
            'ParseError', 'Smarkets', 'Session']
 
 
-VERSION = tuple(map(int, __version__.split('.')))
+VERSION = tuple((int(x) for x in __version__.split('.')))

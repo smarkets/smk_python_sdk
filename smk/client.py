@@ -1,6 +1,38 @@
-import callbacks
+"Smarkets API client"
+from smk.seto_pb2 import payload
 
-from seto_pb2 import payload
+
+class Callback(object):
+    "Container for callbacks"
+    def __init__(self):
+        self._handlers = set()
+
+    def handle(self, handler):
+        "Add a handler to the set of handlers"
+        self._handlers.add(handler)
+        return self
+
+    def unhandle(self, handler):
+        "Remove a handler from the set of handlers"
+        try:
+            self._handlers.remove(handler)
+        except KeyError:
+            raise ValueError(
+                "Callback is not handling this signal, "
+                "so it cannot unhandle it")
+        return self
+
+    def fire(self, msg):
+        "Raise the signal to the handlers"
+        for handler in self._handlers:
+            handler(msg)
+
+    def __len__(self):
+        return len(self._handlers)
+
+    __iadd__ = handle
+    __isub__ = unhandle
+    __call__ = fire
 
 
 class Smarkets(object):
@@ -9,15 +41,15 @@ class Smarkets(object):
 
     Provides a simple interface wrapping the protobufs.
     """
-    CALLBACKS = dict(
-        ((x.name, x) for x in [
-                callbacks.LoginResponse(),
-                callbacks.OrderAccepted(),
-                callbacks.OrderExecuted(),
-                callbacks.OrderCancelled(),
-                callbacks.Pong(),
-                callbacks.MarketQuotes()
-                ]))
+    CALLBACK_NAMES = (
+        'login_response',
+        'order_accepted',
+        'order_executed',
+        'order_cancelled',
+        'pong',
+        'market_quotes',
+        )
+    CALLBACKS = dict(((name, Callback()) for name in CALLBACK_NAMES))
 
     def __init__(self, session):
         self.session = session
@@ -34,12 +66,11 @@ class Smarkets(object):
         frame = self.session.next_frame()
         if frame:
             self._dispatch(frame)
-            # XXX: Should I increment here or in the session itself?
-            self.session.inseq += 1
 
     def order(self, qty, price, side, group, contract):
         "Create a new order"
         msg = payload()
+        # pylint: disable-msg=E1101
         msg.sequenced.message_data.order_create.quantity = qty
         msg.sequenced.message_data.order_create.price = price
         msg.sequenced.message_data.order_create.side = side
@@ -50,26 +81,38 @@ class Smarkets(object):
     def order_cancel(self, order):
         "Cancel an existing order"
         msg = payload()
+        # pylint: disable-msg=E1101
         msg.sequenced.message_data.order_cancel.order = order
         self._send(msg)
 
     def ping(self):
         "Ping the service"
         msg = payload()
+        # pylint: disable-msg=E1101
         msg.sequenced.message_data.ping = True
         self._send(msg)
 
     def subscribe(self, group):
         "Subscribe to a market"
         msg = payload()
+        # pylint: disable-msg=E1101
         msg.sequenced.message_data.market_subscription.group = group
         self._send(msg)
 
     def unsubscribe(self, group):
         "Unsubscribe from a market"
         msg = payload()
+        # pylint: disable-msg=E1101
         msg.message.market_unsubscription.group = group
         self._send(msg)
+
+    def add_handler(self, name, callback):
+        "Add a callback handler"
+        self.callbacks[name] += callback
+
+    def del_handler(self, name, callback):
+        "Remove a callback handler"
+        self.callbacks[name] -= callback
 
     def _send(self, payload_out):
         "Send a payload via the session"

@@ -1,4 +1,4 @@
-import errno
+"Smarkets TCP-based session management"
 import logging
 import socket
 
@@ -9,6 +9,7 @@ from smk.seto_pb2 import payload
 class Session(object):
     "Manages TCP communication via Smarkets streaming API"
     logger = logging.getLogger('smk.session')
+
     def __init__(self, username, password, host='localhost', port=3701,
                  session=None, inseq=1, outseq=1, socket_timeout=None):
         self.username = username
@@ -29,8 +30,8 @@ class Session(object):
             return
         try:
             sock = self._connect()
-        except socket.error as e:
-            raise ConnectionError(self._error_message(e))
+        except socket.error as exc:
+            raise ConnectionError(self._error_message(exc))
 
         self._sock = sock
         self.on_connect()
@@ -45,6 +46,7 @@ class Session(object):
         return sock
 
     def _error_message(self, exception):
+        "Stringify a socket exception"
         # args for socket.error can either be (errno, "message")
         # or just "message"
         if len(exception.args) == 1:
@@ -58,6 +60,7 @@ class Session(object):
     def on_connect(self):
         "Initialise the connection by logging in"
         login_payload = payload()
+        # pylint: disable-msg=E1101
         login_payload.sequenced.message_data.login.username = self.username
         login_payload.sequenced.message_data.login.password = self.password
         self.logger.info("sending login payload")
@@ -88,13 +91,13 @@ class Session(object):
         try:
             self.logger.debug("sending frame bytes %s", frame)
             self._sock.sendall(frame)
-        except socket.error as e:
+        except socket.error as exc:
             # Die fast
             self.disconnect()
-            if len(e.args) == 1:
-                _errno, errmsg = 'UNKNOWN', e.args[0]
+            if len(exc.args) == 1:
+                _errno, errmsg = 'UNKNOWN', exc.args[0]
             else:
-                _errno, errmsg = e.args
+                _errno, errmsg = exc.args
             raise ConnectionError("Error %s while writing to socket. %s." % (
                     _errno, errmsg))
         except:
@@ -134,16 +137,17 @@ class Session(object):
                 pos = 0
                 # Empty buffer and read another 4 bytes
                 self._buffer = self._sock.recv(4, socket.MSG_WAITALL)
-            b = ord(self._buffer[pos])
-            result |= ((b & 0x7f) << shift)
+            cbit = ord(self._buffer[pos])
+            result |= ((cbit & 0x7f) << shift)
             pos += 1
-            if not (b & 0x80):
+            if not (cbit & 0x80):
                 self._buffer = self._buffer[pos:]
                 to_read = max(0, result - len(self._buffer))
                 self.logger.debug("next message is %d bytes long", to_read)
                 if to_read:
                     # Read the actual message if necessary
-                    self._buffer += self._sock.recv(to_read, socket.MSG_WAITALL)
+                    self._buffer += self._sock.recv(
+                        to_read, socket.MSG_WAITALL)
                 msg_bytes = self._buffer[:result]
                 self.logger.debug("parsing bytes %s", msg_bytes)
                 msg.ParseFromString(msg_bytes)
@@ -158,11 +162,13 @@ class Session(object):
         if payload_in.sequenced.seq == self.inseq:
             # Go ahead
             self.logger.debug("received sequence %d", self.inseq)
+            self.inseq += 1
             return payload_in
         elif payload_in.sequenced.message_data.replay.seq:
             # Just a replay message, sequence not important
             seq = payload_in.sequenced.message_data.replay.seq
-            self.logger.debug("received a replay message with sequence %d", seq)
+            self.logger.debug(
+                "received a replay message with sequence %d", seq)
             return None
         elif payload_in.sequenced.seq > self.inseq:
             # Need a replay
@@ -171,6 +177,7 @@ class Session(object):
                 payload_in.sequenced.seq,
                 self.inseq)
             replay = payload()
+            # pylint: disable-msg=E1101
             replay.sequenced.message_data.replay.seq = self.inseq
             self.send_payload(replay)
             return None
@@ -197,7 +204,7 @@ def _encode_varint(value):
     value >>= 7
     ret = ''
     while value:
-        ret += chr(0x80|bits)
+        ret += chr(0x80 | bits)
         bits = value & 0x7f
         value >>= 7
     return ret + chr(bits)
