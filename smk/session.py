@@ -2,6 +2,8 @@
 import logging
 import socket
 
+from google.protobuf import text_format
+
 from smk.exceptions import ConnectionError
 from smk.seto_pb2 import payload
 
@@ -112,7 +114,8 @@ class Session(object):
     def send_payload(self):
         "Serialise, sequence, add header, and send payload"
         self.logger.debug(
-            "sending payload with outgoing sequence %d", self.outseq)
+            "sending payload with outgoing sequence %d: %s",
+            self.outseq, text_format.MessageToString(self.out_payload))
         # pylint: disable-msg=E1101
         self.out_payload.sequenced.seq = self.outseq
         msg_bytes = self.out_payload.SerializeToString()
@@ -208,6 +211,9 @@ class Session(object):
         "Pre-consume the login response message"
         # pylint: disable-msg=E1101
         msg = self.in_payload
+        self.logger.debug(
+            "received message to dispatch: %s",
+            text_format.MessageToString(msg))
         if msg.sequenced.message_data.login_response.session:
             self.session = msg.sequenced.message_data.login_response.session
             self.outseq = msg.sequenced.message_data.login_response.reset
