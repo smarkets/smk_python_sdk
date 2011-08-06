@@ -42,12 +42,26 @@ class Smarkets(object):
     Provides a simple interface wrapping the protobufs.
     """
     CALLBACK_NAMES = (
+        'ping',
+        'pong',
+        'gapfill',
+        'replay',
+        'login',
         'login_response',
+        'order_create',
+        'order_rejected',
         'order_accepted',
         'order_executed',
+        'order_cancel',
         'order_cancelled',
-        'pong',
+        'order_invalid',
+        'market_subscription',
+        'market_unsubscription',
+        'market_request',
+        'market_quotes_request',
         'market_quotes',
+        'contract_quote',
+        'id_invalid',
         )
     CALLBACKS = dict(((name, Callback()) for name in CALLBACK_NAMES))
 
@@ -132,21 +146,49 @@ class Smarkets(object):
     def _dispatch(self, msg):
         "Dispatch a frame to the callbacks"
         name = None
-        if msg.sequenced.message_data.login_response.session:
+        if msg.sequenced.message_data.ping:
+            name = 'ping'
+        elif msg.sequenced.message_data.pong:
+            name = 'pong'
+        elif msg.sequenced.message_data.gapfill:
+            name = 'gapfill'
+        elif msg.sequenced.message_data.replay.seq:
+            name = 'replay'
+        elif msg.sequenced.message_data.login.username:
+            name = 'login'
+        elif msg.sequenced.message_data.login_response.session:
             name = 'login_response'
+        elif msg.sequenced.message_data.order_create.quantity:
+            name = 'order_create'
+        elif msg.sequenced.message_data.order_rejected.seq:
+            name = 'order_rejected'
         elif msg.sequenced.message_data.order_accepted.order:
             name = 'order_accepted'
         elif msg.sequenced.message_data.order_executed.order:
             name = 'order_executed'
+        elif msg.sequenced.message_data.order_cancel.order:
+            name = 'order_cancel'
         elif msg.sequenced.message_data.order_cancelled.order:
             name = 'order_cancelled'
-        elif msg.sequenced.message_data.pong:
-            name = 'pong'
+        elif msg.sequenced.message_data.order_invalid.seq:
+            name = 'order_invalid'
+        elif msg.sequenced.message_data.market_subscription.group:
+            name = 'market_subscription'
+        elif msg.sequenced.message_data.market_unsubscription.group:
+            name = 'market_unsubscription'
+        elif msg.sequenced.message_data.market_request.group:
+            name = 'market_request'
+        elif msg.sequenced.message_data.market_quotes_request.group:
+            name = 'market_quotes_request'
         elif msg.sequenced.message_data.market_quotes.group:
             name = 'market_quotes'
+        elif msg.sequenced.message_data.contract_quote.contract:
+            name = 'contract_quote'
+        elif msg.sequenced.message_data.id_invalid.seq:
+            name = 'id_invalid'
         if name in self.callbacks:
-            self.logger.debug('dispatching callback %s', name)
+            self.logger.info("dispatching callback %s", name)
             callback = self.callbacks[name]
             callback(msg)
         else:
-            self.logger.info('ignoring unknown message: %s', name)
+            self.logger.info("ignoring unknown message: %s", name)
