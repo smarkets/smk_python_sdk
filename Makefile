@@ -5,6 +5,7 @@ seto.proto:
 	(cd build/pb && \
 		git clone git://git.corp.smarkets.com/smk_api_common.git && \
 		cd smk_api_common && \
+		git checkout ticket-3228-new-types && \
 		./rebar get-deps)
 	piqi to-proto -I build/pb/smk_api_common/deps/eto_common/ \
 		build/pb/smk_api_common/seto.piqi -o seto.proto
