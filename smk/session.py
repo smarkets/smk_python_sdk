@@ -223,6 +223,12 @@ class Session(object):
                 "received login_response with session %s and reset %d",
                 self.session,
                 self.outseq)
+        elif msg.sequenced.message_data.heartbeat:
+            self.logger.debug("received heartbeat message, responding...")
+            heartbeat = self.out_payload
+            heartbeat.Clear()
+            heartbeat.sequenced.message_data.heartbeat = True
+            self.send_payload()
         return msg
 
 
