@@ -4,7 +4,7 @@ import socket
 
 from google.protobuf import text_format
 
-from smk.exceptions import ConnectionError
+from smk.exceptions import ConnectionError, SocketDisconnected
 from smk.seto_pb2 import payload
 
 
