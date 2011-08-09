@@ -45,6 +45,7 @@ class Smarkets(object):
         'ping',
         'pong',
         'gapfill',
+        'heartbeat',
         'replay',
         'login',
         'login_response',
@@ -152,6 +153,8 @@ class Smarkets(object):
             name = 'pong'
         elif msg.sequenced.message_data.gapfill:
             name = 'gapfill'
+        elif msg.sequenced.message_data.heartbeat:
+            name = 'heartbeat'
         elif msg.sequenced.message_data.replay.seq:
             name = 'replay'
         elif msg.sequenced.message_data.login.username:
@@ -162,30 +165,31 @@ class Smarkets(object):
             name = 'order_create'
         elif msg.sequenced.message_data.order_rejected.seq:
             name = 'order_rejected'
-        elif msg.sequenced.message_data.order_accepted.order:
+        elif msg.sequenced.message_data.order_accepted.seq:
             name = 'order_accepted'
-        elif msg.sequenced.message_data.order_executed.order:
+        elif msg.sequenced.message_data.order_executed.price:
             name = 'order_executed'
-        elif msg.sequenced.message_data.order_cancel.order:
+        elif msg.sequenced.message_data.order_cancel.order.low:
             name = 'order_cancel'
-        elif msg.sequenced.message_data.order_cancelled.order:
+        elif msg.sequenced.message_data.order_cancelled.order.low:
             name = 'order_cancelled'
         elif msg.sequenced.message_data.order_invalid.seq:
             name = 'order_invalid'
-        elif msg.sequenced.message_data.market_subscription.group:
+        elif msg.sequenced.message_data.market_subscription.group.low:
             name = 'market_subscription'
-        elif msg.sequenced.message_data.market_unsubscription.group:
+        elif msg.sequenced.message_data.market_unsubscription.group.low:
             name = 'market_unsubscription'
-        elif msg.sequenced.message_data.market_request.group:
+        elif msg.sequenced.message_data.market_request.group.low:
             name = 'market_request'
-        elif msg.sequenced.message_data.market_quotes_request.group:
+        elif msg.sequenced.message_data.market_quotes_request.group.low:
             name = 'market_quotes_request'
-        elif msg.sequenced.message_data.market_quotes.group:
+        elif msg.sequenced.message_data.market_quotes.group.low:
             name = 'market_quotes'
-        elif msg.sequenced.message_data.contract_quote.contract:
+        elif msg.sequenced.message_data.contract_quote.contract.low:
             name = 'contract_quote'
         elif msg.sequenced.message_data.id_invalid.seq:
             name = 'id_invalid'
+
         if name in self.callbacks:
             self.logger.info("dispatching callback %s", name)
             callback = self.callbacks[name]
