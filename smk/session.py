@@ -90,7 +90,7 @@ class Session(object):
 
     def send_frame(self, frame):
         "Send a framed message to the service"
-        if not self._sock:
+        if self._sock is None:
             self.logger.warning(
                 "send_frame called while disconnected. connecting...")
             self.connect()
@@ -163,6 +163,8 @@ class Session(object):
 
     def _fill_buffer(self, min_size=4, empty=False):
         "Ensure the buffer has at least 4 bytes"
+        if self._sock is None:
+            raise SocketDisconnected()
         if empty:
             self._buffer = ''
         while len(self._buffer) < min_size:
