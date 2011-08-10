@@ -4,8 +4,10 @@ import socket
 
 from google.protobuf import text_format
 
+import eto.piqi_pb2
+import seto.piqi_pb2
+
 from smk.exceptions import ConnectionError, SocketDisconnected
-from smk.seto_pb2 import payload
 
 
 class Session(object):
@@ -25,8 +27,8 @@ class Session(object):
         self.socket_timeout = socket_timeout
         self._buffer = ''
         self._sock = None
-        self.in_payload = payload()
-        self.out_payload = payload()
+        self.in_payload = seto.piqi_pb2.Payload()
+        self.out_payload = seto.piqi_pb2.Payload()
 
     def connect(self):
         "Connects to the API if not already connected"
@@ -64,16 +66,18 @@ class Session(object):
 
     def on_connect(self):
         "Initialise the connection by logging in"
-        login_payload = self.out_payload
-        login_payload.Clear()
+        login = self.out_payload
+        login.Clear()
         # pylint: disable-msg=E1101
-        login_payload.sequenced.message_data.login.username = self.username
-        login_payload.sequenced.message_data.login.password = self.password
+        login.type = seto.piqi_pb2.PAYLOAD_LOGIN
+        login.login.username = self.username
+        login.login.password = self.password
         self.logger.info("sending login payload")
         if self.session is not None:
             self.logger.info("attempting to resume session %s", self.session)
-            login_payload.sequenced.message_data.login.session = self.session
-        self.send_payload()
+            login.eto_payload.type = eto.piqi_pb2.PAYLOAD_LOGIN
+            login.eto_payload.login.session_id = self.session
+        self.send()
 
     def disconnect(self):
         "Disconnect from the API"
@@ -111,13 +115,13 @@ class Session(object):
             self.disconnect()
             raise
 
-    def send_payload(self):
+    def send(self):
         "Serialise, sequence, add header, and send payload"
         self.logger.debug(
             "sending payload with outgoing sequence %d: %s",
             self.outseq, text_format.MessageToString(self.out_payload))
         # pylint: disable-msg=E1101
-        self.out_payload.sequenced.seq = self.outseq
+        self.out_payload.eto_payload.seq = self.outseq
         msg_bytes = self.out_payload.SerializeToString()
         byte_count = len(msg_bytes)
         # Pad to 4 bytes
@@ -183,28 +187,30 @@ class Session(object):
         self.read_frame()
         # pylint: disable-msg=E1101
         payload_in = self.in_payload
-        if payload_in.sequenced.seq == self.inseq:
+        if payload_in.eto_payload.seq == self.inseq:
             # Go ahead
             self.logger.debug("received sequence %d", self.inseq)
             self.inseq += 1
             return payload_in
-        elif payload_in.sequenced.message_data.replay.seq:
+        elif payload_in.eto_payload.type == eto.piqi_pb2.PAYLOAD_REPLAY:
             # Just a replay message, sequence not important
-            seq = payload_in.sequenced.message_data.replay.seq
+            seq = payload_in.eto_payload.replay.seq
             self.logger.debug(
                 "received a replay message with sequence %d", seq)
             return None
-        elif payload_in.sequenced.seq > self.inseq:
+        elif payload_in.eto_payload.seq > self.inseq:
             # Need a replay
             self.logger.info(
                 "received incoming sequence %d, expected %d, need replay",
-                payload_in.sequenced.seq,
+                payload_in.eto_payload.seq,
                 self.inseq)
             replay = self.out_payload
             replay.Clear()
             # pylint: disable-msg=E1101
-            replay.sequenced.message_data.replay.seq = self.inseq
-            self.send_payload()
+            replay.type = seto.piqi_pb2.PAYLOAD_ETO
+            replay.eto_payload.type = eto.piqi_pb2.PAYLOAD_REPLAY
+            replay.eto_payload.replay.seq = self.inseq
+            self.send()
             return None
         else:
             return None
@@ -216,19 +222,19 @@ class Session(object):
         self.logger.debug(
             "received message to dispatch: %s",
             text_format.MessageToString(msg))
-        if msg.sequenced.message_data.login_response.session:
-            self.session = msg.sequenced.message_data.login_response.session
-            self.outseq = msg.sequenced.message_data.login_response.reset
+        if msg.eto_payload.type == eto.piqi_pb2.PAYLOAD_LOGIN_RESPONSE:
+            self.session = msg.eto_payload.login_response.session
+            self.outseq = msg.eto_payload.login_response.reset
             self.logger.info(
                 "received login_response with session %s and reset %d",
                 self.session,
                 self.outseq)
-        elif msg.sequenced.message_data.heartbeat:
+        elif msg.eto_payload.type == eto.piqi_pb2.PAYLOAD_HEARTBEAT:
             self.logger.debug("received heartbeat message, responding...")
             heartbeat = self.out_payload
             heartbeat.Clear()
-            heartbeat.sequenced.message_data.heartbeat = True
-            self.send_payload()
+            heartbeat.eto_payload.type = eto.piqi_pb2.PAYLOAD_HEARTBEAT
+            self.send()
         return msg
 
 
