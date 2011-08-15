@@ -223,7 +223,7 @@ class Session(object):
             "received message to dispatch: %s",
             text_format.MessageToString(msg))
         if msg.eto_payload.type == eto.piqi_pb2.PAYLOAD_LOGIN_RESPONSE:
-            self.session = msg.eto_payload.login_response.session
+            self.session = msg.eto_payload.login_response.session_id
             self.outseq = msg.eto_payload.login_response.reset
             self.logger.info(
                 "received login_response with session %s and reset %d",
@@ -233,6 +233,7 @@ class Session(object):
             self.logger.debug("received heartbeat message, responding...")
             heartbeat = self.out_payload
             heartbeat.Clear()
+            heartbeat.type = seto.piqi_pb2.PAYLOAD_ETO
             heartbeat.eto_payload.type = eto.piqi_pb2.PAYLOAD_HEARTBEAT
             self.send()
         return msg
