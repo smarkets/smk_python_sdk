@@ -147,7 +147,7 @@ class Smarkets(object):
 
     def _send(self):
         "Send a payload via the session"
-        self.session.send_payload()
+        self.session.send()
 
     def _dispatch(self, msg):
         "Dispatch a frame to the callbacks"
