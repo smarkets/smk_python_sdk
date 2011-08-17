@@ -7,6 +7,13 @@ import smk
 
 
 class SessionTestCase(unittest.TestCase):
+    ping_total = 1000
+    ping_each = 100
+    market_id = '000000000000000000000001dc91c024'
+    contract_id = '000000000000000000000002ab9acccc'
+    price = 2500 # 25.00%
+    quantity = 400000 # 40GBP
+    side = seto.piqi_pb2.SIDE_BUY
 
     def get_session(self, cls=None):
         if cls is None:
@@ -31,7 +38,24 @@ class SessionTestCase(unittest.TestCase):
 
     def _do_login(self):
         time.sleep(1)
+        # We must start with a clean seq #1
+        self.assertEquals(self.client.session.outseq, 1)
+        self.assertEquals(self.client.session.inseq, 1)
         self.client.login()
+        # Should only have login, then login_response
+        self.assertEquals(self.client.session.outseq, 2)
+        self.assertEquals(self.client.session.inseq, 2)
+
+    def _simple_cb(self, name):
+        msg = seto.piqi_pb2.Payload()
+        def _inner_cb(recv_msg):
+            # Copy message in callback to the outer context
+            msg.CopyFrom(recv_msg)
+        self.client.add_handler(name, _inner_cb)
+        # Should be an empty message
+        self.assertEquals(msg.eto_payload.type, eto.piqi_pb2.PAYLOAD_NONE)
+        # Return message for comparison
+        return msg
 
     def test_invalid_callback(self):
         # Trying to add a non-existent callback will punish you with a
@@ -43,17 +67,10 @@ class SessionTestCase(unittest.TestCase):
             lambda: self.client.add_handler('eto.login', None))
 
     def test_login(self):
-        login_response_msg = seto.piqi_pb2.Payload()
-        def _login_response_cb(msg):
-            # Copy message in callback to the outer context
-            login_response_msg.CopyFrom(msg)
-        self.client.add_handler('eto.login_response', _login_response_cb)
+        login_response_msg = self._simple_cb('eto.login_response')
         self.assertEquals(self.client.session.outseq, 1)
         self.assertEquals(self.client.session.inseq, 1)
         self.assertTrue(self.client.session.session is None)
-        self.assertEquals(
-            login_response_msg.eto_payload.type,
-            eto.piqi_pb2.PAYLOAD_NONE)
         # Send login message and immediately read response; this
         # blocks until the login_response message is received
         self.client.login()
@@ -68,15 +85,8 @@ class SessionTestCase(unittest.TestCase):
         self.assertEquals(self.client.session.inseq, 2)
 
     def test_ping(self):
-        pong_msg = seto.piqi_pb2.Payload()
-        def _pong_cb(msg):
-            pong_msg.CopyFrom(msg)
-        self.client.add_handler('eto.pong', _pong_cb)
-        self.assertEquals(self.client.session.outseq, 1)
-        self.assertEquals(self.client.session.inseq, 1)
         self._do_login()
-        self.assertEquals(self.client.session.outseq, 2)
-        self.assertEquals(self.client.session.inseq, 2)
+        pong_msg = self._simple_cb('eto.pong')
         self.client.ping()
         self.assertEquals(self.client.session.outseq, 3)
         self.client.read()
@@ -89,17 +99,31 @@ class SessionTestCase(unittest.TestCase):
             eto.piqi_pb2.PAYLOAD_PONG)
 
     def test_ping_many(self):
-        self.assertEquals(self.client.session.outseq, 1)
-        self.assertEquals(self.client.session.inseq, 1)
         self._do_login()
-        self.assertEquals(self.client.session.outseq, 2)
-        self.assertEquals(self.client.session.inseq, 2)
-        total = 1000
-        each = 100
-        for seq in xrange(3, total + 3, each):
-            for offset in xrange(0, each):
+        for seq in xrange(3, self.ping_total + 3, self.ping_each):
+            for offset in xrange(0, self.ping_each):
                 self.client.ping()
                 self.assertEquals(self.client.session.outseq, seq + offset)
-            for offset in xrange(0, each):
+            for offset in xrange(0, self.ping_each):
                 self.client.read()
                 self.assertEquals(self.client.session.inseq, seq + offset)
+
+    def test_order(self):
+        self._do_login()
+        order_accepted_msg = self._simple_cb('seto.order_accepted')
+        self.client.order(
+            self.quantity,
+            self.price,
+            self.side,
+            self.market_id,
+            self.contract_id)
+        self.assertEquals(self.client.session.outseq, 3)
+        self.client.read() # should be accepted
+        self.assertEquals(self.client.session.inseq, 3)
+        self.assertEquals(
+            order_accepted_msg.type,
+            seto.piqi_pb2.PAYLOAD_ORDER_ACCEPTED)
+        # Order create message was #2
+        self.assertEquals(order_accepted_msg.order_accepted.seq, 2)
+        self.assertEquals(order_accepted_msg.order_accepted.order.high, 0)
+        self.assertTrue(order_accepted_msg.order_accepted.order.low > 0)

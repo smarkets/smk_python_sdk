@@ -12,6 +12,7 @@ Python API client for Smarkets.
     >>> import logging
     >>> logging.basicConfig(level=logging.DEBUG)
     >>> import smk
+    >>> import seto.piqi_pb2
     >>> username = 'username'
     >>> password = 'password'
     >>> host = 'api-dev.corp.smarkets.com'
