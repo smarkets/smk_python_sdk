@@ -87,3 +87,19 @@ class SessionTestCase(unittest.TestCase):
         self.assertEquals(
             pong_msg.eto_payload.type,
             eto.piqi_pb2.PAYLOAD_PONG)
+
+    def test_ping_many(self):
+        self.assertEquals(self.client.session.outseq, 1)
+        self.assertEquals(self.client.session.inseq, 1)
+        self._do_login()
+        self.assertEquals(self.client.session.outseq, 2)
+        self.assertEquals(self.client.session.inseq, 2)
+        total = 1000
+        each = 100
+        for seq in xrange(3, total + 3, each):
+            for offset in xrange(0, each):
+                self.client.ping()
+                self.assertEquals(self.client.session.outseq, seq + offset)
+            for offset in xrange(0, each):
+                self.client.read()
+                self.assertEquals(self.client.session.inseq, seq + offset)
