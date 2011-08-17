@@ -24,3 +24,8 @@ class ParseError(SmkError):
 class SocketDisconnected(SmkError):
     "Socket was disconnected while reading"
     pass
+
+
+class InvalidCallbackError(SmkError):
+    "Invalid callback was specified"
+    pass

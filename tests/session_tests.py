@@ -28,7 +28,11 @@ class SessionTestCase(unittest.TestCase):
     def test_invalid_callback(self):
         # Trying to add a non-existent callback will punish you with a
         # KeyError
-        self.assertRaises(KeyError, lambda: self.client.add_handler('baz', None))
+        self.assertRaises(
+            smk.InvalidCallbackError,
+            lambda: self.client.add_handler('baz', lambda: None))
+        self.assertRaises(ValueError,
+            lambda: self.client.add_handler('eto.login', None))
 
     def test_login(self):
         login_response_msg = seto.piqi_pb2.Payload()

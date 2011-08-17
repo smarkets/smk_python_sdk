@@ -6,6 +6,8 @@ from itertools import chain
 import eto.piqi_pb2
 import seto.piqi_pb2
 
+from exceptions import InvalidCallbackError
+
 
 _ETO_PAYLOAD_TYPES = dict((
     (getattr(eto.piqi_pb2, x),
@@ -139,10 +141,16 @@ class Smarkets(object):
 
     def add_handler(self, name, callback):
         "Add a callback handler"
+        if not hasattr(callback, '__call__'):
+            raise ValueError('callback must be a callable')
+        if name not in self.callbacks:
+            raise InvalidCallbackError(name)
         self.callbacks[name] += callback
 
     def del_handler(self, name, callback):
         "Remove a callback handler"
+        if name not in self.callbacks:
+            raise InvalidCallbackError(name)
         self.callbacks[name] -= callback
 
     def _send(self):
