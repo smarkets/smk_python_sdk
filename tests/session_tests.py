@@ -1,3 +1,4 @@
+import time
 import unittest
 
 import eto.piqi_pb2
@@ -21,9 +22,16 @@ class SessionTestCase(unittest.TestCase):
 
     def setUp(self):
         self.client = self.get_client()
+        self.assertTrue(self.client.session._sock is None)
+        self.assertTrue(self.client.session.session is None)
 
     def tearDown(self):
         self.client.logout()
+        self.client = None
+
+    def _do_login(self):
+        time.sleep(1)
+        self.client.login()
 
     def test_invalid_callback(self):
         # Trying to add a non-existent callback will punish you with a
@@ -51,7 +59,31 @@ class SessionTestCase(unittest.TestCase):
         self.client.login()
         self.assertFalse(self.client.session.session is None)
         self.assertEquals(
+            login_response_msg.type,
+            seto.piqi_pb2.PAYLOAD_ETO)
+        self.assertEquals(
             login_response_msg.eto_payload.type,
             eto.piqi_pb2.PAYLOAD_LOGIN_RESPONSE)
         self.assertEquals(self.client.session.outseq, 2)
         self.assertEquals(self.client.session.inseq, 2)
+
+    def test_ping(self):
+        pong_msg = seto.piqi_pb2.Payload()
+        def _pong_cb(msg):
+            pong_msg.CopyFrom(msg)
+        self.client.add_handler('eto.pong', _pong_cb)
+        self.assertEquals(self.client.session.outseq, 1)
+        self.assertEquals(self.client.session.inseq, 1)
+        self._do_login()
+        self.assertEquals(self.client.session.outseq, 2)
+        self.assertEquals(self.client.session.inseq, 2)
+        self.client.ping()
+        self.assertEquals(self.client.session.outseq, 3)
+        self.client.read()
+        self.assertEquals(self.client.session.inseq, 3)
+        self.assertEquals(
+            pong_msg.type,
+            seto.piqi_pb2.PAYLOAD_ETO)
+        self.assertEquals(
+            pong_msg.eto_payload.type,
+            eto.piqi_pb2.PAYLOAD_PONG)
