@@ -9,16 +9,20 @@ import smk
 class SessionTestCase(unittest.TestCase):
     ping_total = 1000
     ping_each = 100
-    market_id = '000000000000000000000001dc91c024'
-    contract_id = '000000000000000000000002ab9acccc'
+    market_id = smk.Smarkets.str_to_uuid128(
+        '000000000000000000000001dc91c024')
+    contract_id = smk.Smarkets.str_to_uuid128(
+        '000000000000000000000002ab9acccc')
     price = 2500 # 25.00%
     quantity = 400000 # 40GBP
     side = seto.piqi_pb2.SIDE_BUY
+    username = 'hunter.morris@smarkets.com'
+    password = 'abc,123'
 
     def get_session(self, cls=None):
         if cls is None:
             cls = smk.Session
-        return cls('hunter.morris@smarkets.com', 'abc,123')
+        return cls(self.username, self.password)
 
     def get_client(self, cls=None, session=None, session_cls=None):
         if cls is None:
@@ -108,7 +112,7 @@ class SessionTestCase(unittest.TestCase):
                 self.client.read()
                 self.assertEquals(self.client.session.inseq, seq + offset)
 
-    def test_order(self):
+    def test_order_accepted(self):
         self._do_login()
         order_accepted_msg = self._simple_cb('seto.order_accepted')
         self.client.order(

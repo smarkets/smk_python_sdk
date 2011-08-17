@@ -86,15 +86,15 @@ class Smarkets(object):
         if frame:
             self._dispatch(frame)
 
-    def order(self, qty, price, side, market_id, contract_id):
+    def order(self, qty, price, side, market, contract):
         "Create a new order"
         msg = self.session.out_payload
         msg.Clear()
         # pylint: disable-msg=E1101
         msg.type = seto.piqi_pb2.PAYLOAD_ORDER_CREATE
         msg.order_create.type = seto.piqi_pb2.ORDER_CREATE_LIMIT
-        _str_to_uuid128(market_id, msg.order_create.market)
-        _str_to_uuid128(contract_id, msg.order_create.contract)
+        msg.order_create.market.CopyFrom(market)
+        msg.order_create.contract.CopyFrom(contract)
         msg.order_create.side = side
         msg.order_create.quantity_type = seto.piqi_pb2.QUANTITY_PAYOFF_CURRENCY
         msg.order_create.quantity = qty
@@ -103,13 +103,13 @@ class Smarkets(object):
         msg.order_create.price = price
         self._send()
 
-    def order_cancel(self, order_id):
+    def order_cancel(self, order):
         "Cancel an existing order"
         msg = self.session.out_payload
         msg.Clear()
         # pylint: disable-msg=E1101
         msg.type = seto.piqi_pb2.PAYLOAD_ORDER_CANCEL
-        _str_to_uuid128(order_id, msg.order_cancel.order)
+        msg.order_cancel.order.CopyFrom(order)
         self._send()
 
     def ping(self):
@@ -121,22 +121,22 @@ class Smarkets(object):
         msg.eto_payload.type = eto.piqi_pb2.PAYLOAD_PING
         self._send()
 
-    def subscribe(self, market_id):
+    def subscribe(self, market):
         "Subscribe to a market"
         msg = self.session.out_payload
         msg.Clear()
         # pylint: disable-msg=E1101
         msg.type = seto.piqi_pb2.PAYLOAD_MARKET_SUBSCRIPTION
-        _str_to_uuid128(market_id, msg.market_subscription.market)
+        msg.market_subscription.market.CopyFrom(market)
         self._send()
 
-    def unsubscribe(self, market_id):
+    def unsubscribe(self, market):
         "Unsubscribe from a market"
         msg = self.session.out_payload
         msg.Clear()
         # pylint: disable-msg=E1101
         msg.type = seto.piqi_pb2.PAYLOAD_MARKET_UNSUBSCRIPTION
-        _str_to_uuid128(market_id, msg.market_unsubscription.market)
+        msg.market_unsubscription.market.CopyFrom(market)
         self._send()
 
     def add_handler(self, name, callback):
@@ -152,6 +152,23 @@ class Smarkets(object):
         if name not in self.callbacks:
             raise InvalidCallbackError(name)
         self.callbacks[name] -= callback
+
+    @staticmethod
+    def str_to_uuid128(uuid_str, uuid128=None, strip_tag=True):
+        "Convert a string to a uuid128"
+        if uuid128 is None:
+            uuid128 = seto.piqi_pb2.Uuid128()
+        uuid128.Clear()
+        if strip_tag:
+            uuid_str = uuid_str[:-4]
+        low = int(uuid_str[-16:], 16)
+        uuid128.low = low
+        high = uuid_str[:-16]
+        if high:
+            high = int(high, 16)
+            if high:
+                uuid128.high = high
+        return uuid128
 
     def _send(self):
         "Send a payload via the session"
@@ -171,17 +188,3 @@ class Smarkets(object):
                 self.logger.error("no callback %s", name)
         else:
             self.logger.info("ignoring unknown message: %s", name)
-
-
-def _str_to_uuid128(uuid_str, uuid128, strip_tag=True):
-    "Convert a string to a uuid128"
-    uuid128.Clear()
-    if strip_tag:
-        uuid_str = uuid_str[:-4]
-    low = int(uuid_str[-16:], 16)
-    uuid128.low = low
-    high = uuid_str[:-16]
-    if high:
-        high = int(high, 16)
-        if high:
-            uuid128.high = high
