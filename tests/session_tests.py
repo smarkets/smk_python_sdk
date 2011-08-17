@@ -131,3 +131,58 @@ class SessionTestCase(unittest.TestCase):
         self.assertEquals(order_accepted_msg.order_accepted.seq, 2)
         self.assertEquals(order_accepted_msg.order_accepted.order.high, 0)
         self.assertTrue(order_accepted_msg.order_accepted.order.low > 0)
+
+    def test_market_subscription(self):
+        self._do_login()
+        market_quotes_msg = self._simple_cb('seto.market_quotes')
+        self.client.subscribe(self.market_id)
+        self.assertEquals(self.client.session.outseq, 3)
+        self.client.read() # should be market quotes
+        self.assertEquals(self.client.session.inseq, 3)
+        self.assertEquals(
+            market_quotes_msg.type,
+            seto.piqi_pb2.PAYLOAD_MARKET_QUOTES)
+        self.assertEquals(
+            market_quotes_msg.market_quotes.market.low, self.market_id.low)
+        self.assertEquals(
+            market_quotes_msg.market_quotes.market.high, self.market_id.high)
+
+    def test_market_unsubscription(self):
+        self._do_login()
+        self.client.unsubscribe(self.market_id)
+        self.assertEquals(self.client.session.outseq, 3)
+
+    def test_order_cancel(self):
+        self._do_login()
+        order_accepted_msg = self._simple_cb('seto.order_accepted')
+        order_cancelled_msg = self._simple_cb('seto.order_cancelled')
+        self.client.order(
+            self.quantity,
+            self.price,
+            self.side,
+            self.market_id,
+            self.contract_id)
+        self.assertEquals(self.client.session.outseq, 3)
+        self.client.read() # should be accepted
+        self.assertEquals(self.client.session.inseq, 3)
+        self.assertEquals(
+            order_accepted_msg.type,
+            seto.piqi_pb2.PAYLOAD_ORDER_ACCEPTED)
+        # Order create message was #2
+        self.assertEquals(order_accepted_msg.order_accepted.seq, 2)
+        self.assertEquals(order_accepted_msg.order_accepted.order.high, 0)
+        self.assertTrue(order_accepted_msg.order_accepted.order.low > 0)
+        # Send a cancel
+        self.client.order_cancel(order_accepted_msg.order_accepted.order)
+        self.assertEquals(self.client.session.outseq, 4)
+        self.client.read() # should be cancelled
+        self.assertEquals(self.client.session.inseq, 4)
+        self.assertEquals(
+            order_cancelled_msg.type,
+            seto.piqi_pb2.PAYLOAD_ORDER_CANCELLED)
+        self.assertEquals(
+            order_cancelled_msg.order.high,
+            order_accepted.order.high)
+        self.assertEquals(
+            order_cancelled_msg.order.low, 
+            order_accepted.order.low)
