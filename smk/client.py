@@ -158,8 +158,9 @@ class Smarkets(object):
             self.logger.info("dispatching callback %s", name)
             callback = self.callbacks.get(name)
             if callback is not None:
-                self.logger.error("no callback %s", name)
                 callback(msg)
+            else:
+                self.logger.error("no callback %s", name)
         else:
             self.logger.info("ignoring unknown message: %s", name)
 
