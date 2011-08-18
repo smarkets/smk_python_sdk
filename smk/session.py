@@ -23,7 +23,10 @@ class Session(object):
         self.socket = SessionSocket(host, port, socket_timeout)
         self.session = session
         self.inseq = inseq
+        # Outgoing socket sequence number
         self.outseq = outseq
+        # Outgoing buffer sequence number
+        self.buf_outseq = outseq
         self.in_payload = seto.piqi_pb2.Payload()
         self.out_payload = seto.piqi_pb2.Payload()
         self.send_buffer = deque()
@@ -36,6 +39,10 @@ class Session(object):
     def connect(self):
         "Connects to the API and logs in if not already connected"
         if self.socket.connect():
+            # Clear the outgoing send buffer
+            self.send_buffer.clear()
+            # Reset separate outgoing buffer sequence number
+            self.buf_outseq = self.outseq
             login = self.out_payload
             login.Clear()
             # pylint: disable-msg=E1101
@@ -48,6 +55,7 @@ class Session(object):
                     "attempting to resume session %s", self.session)
                 login.eto_payload.type = eto.piqi_pb2.PAYLOAD_LOGIN
                 login.eto_payload.login.session_id = self.session
+            # Always flush outgoing login message
             self.send(True)
 
     def disconnect(self):
@@ -60,9 +68,9 @@ class Session(object):
             "buffering payload with outgoing sequence %d: %s",
             self.outseq, text_format.MessageToString(self.out_payload))
         # pylint: disable-msg=E1101
-        self.out_payload.eto_payload.seq = self.outseq
+        self.out_payload.eto_payload.seq = self.buf_outseq
         self.send_buffer.append(self.out_payload.SerializeToString())
-        self.outseq += 1
+        self.buf_outseq += 1
         if flush:
             self.flush()
 
@@ -72,6 +80,7 @@ class Session(object):
         while len(self.send_buffer):
             msg_bytes = self.send_buffer.pop()
             self.socket.send(msg_bytes)
+            self.outseq += 1
 
     def next_frame(self):
         "Get the next frame and increment inseq"
@@ -103,6 +112,8 @@ class Session(object):
             replay.type = seto.piqi_pb2.PAYLOAD_ETO
             replay.eto_payload.type = eto.piqi_pb2.PAYLOAD_REPLAY
             replay.eto_payload.replay.seq = self.inseq
+            # Do not auto-flush replay because we may be in another
+            # thread
             self.send()
             return None
         else:
@@ -118,6 +129,8 @@ class Session(object):
         if msg.eto_payload.type == eto.piqi_pb2.PAYLOAD_LOGIN_RESPONSE:
             self.session = msg.eto_payload.login_response.session_id
             self.outseq = msg.eto_payload.login_response.reset
+            self.buf_outseq = self.outseq
+            self.send_buffer.clear()
             self.logger.info(
                 "received login_response with session %s and reset %d",
                 self.session,
@@ -128,6 +141,8 @@ class Session(object):
             heartbeat.Clear()
             heartbeat.type = seto.piqi_pb2.PAYLOAD_ETO
             heartbeat.eto_payload.type = eto.piqi_pb2.PAYLOAD_HEARTBEAT
+            # Do not immediately flush heartbeat response because we
+            # may be in another thread
             self.send()
         return msg
 
