@@ -66,9 +66,10 @@ class SessionTestCase(unittest.TestCase):
         # KeyError
         self.assertRaises(
             smk.InvalidCallbackError,
-            lambda: self.client.add_handler('baz', lambda: None))
-        self.assertRaises(ValueError,
-            lambda: self.client.add_handler('eto.login', None))
+            self.client.add_handler, 'baz', lambda _: None)
+        self.assertRaises(
+            ValueError,
+            self.client.add_handler, 'eto.login', None)
 
     def test_login(self):
         login_response_msg = self._simple_cb('eto.login_response')
