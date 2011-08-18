@@ -66,8 +66,9 @@ class Smarkets(object):
 
     logger = logging.getLogger('smk.smarkets')
 
-    def __init__(self, session):
+    def __init__(self, session, auto_flush=True):
         self.session = session
+        self.auto_flush = auto_flush
         self.callbacks = self.__class__.CALLBACKS.copy()
 
     def login(self, receive=True):
@@ -85,6 +86,10 @@ class Smarkets(object):
         frame = self.session.next_frame()
         if frame:
             self._dispatch(frame)
+
+    def flush(self):
+        "Flush the send buffer"
+        self.session.flush()
 
     def order(self, qty, price, side, market, contract):
         "Create a new order"
@@ -172,7 +177,7 @@ class Smarkets(object):
 
     def _send(self):
         "Send a payload via the session"
-        self.session.send()
+        self.session.send(self.auto_flush)
 
     def _dispatch(self, msg):
         "Dispatch a frame to the callbacks"

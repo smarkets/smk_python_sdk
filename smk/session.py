@@ -2,6 +2,8 @@
 import logging
 import socket
 
+from collections import deque
+
 from google.protobuf import text_format
 
 import eto.piqi_pb2
@@ -24,6 +26,7 @@ class Session(object):
         self.outseq = outseq
         self.in_payload = seto.piqi_pb2.Payload()
         self.out_payload = seto.piqi_pb2.Payload()
+        self.send_buffer = deque()
 
     @property
     def connected(self):
@@ -45,21 +48,30 @@ class Session(object):
                     "attempting to resume session %s", self.session)
                 login.eto_payload.type = eto.piqi_pb2.PAYLOAD_LOGIN
                 login.eto_payload.login.session_id = self.session
-            self.send()
+            self.send(True)
 
     def disconnect(self):
         "Disconnects from the API"
         self.socket.disconnect()
 
-    def send(self):
+    def send(self, flush=False):
         "Serialise, sequence, add header, and send payload"
         self.logger.debug(
-            "sending payload with outgoing sequence %d: %s",
+            "buffering payload with outgoing sequence %d: %s",
             self.outseq, text_format.MessageToString(self.out_payload))
         # pylint: disable-msg=E1101
         self.out_payload.eto_payload.seq = self.outseq
-        self.socket.send(self.out_payload)
+        self.send_buffer.append(self.out_payload.SerializeToString())
         self.outseq += 1
+        if flush:
+            self.flush()
+
+    def flush(self):
+        "Flush payloads to the socket"
+        self.logger.debug("flushing %d payloads", len(self.send_buffer))
+        while len(self.send_buffer):
+            msg_bytes = self.send_buffer.pop()
+            self.socket.send(msg_bytes)
 
     def next_frame(self):
         "Get the next frame and increment inseq"
@@ -171,9 +183,8 @@ class SessionSocket(object):
             pass
         self._sock = None
 
-    def send(self, payload):
+    def send(self, msg_bytes):
         "Send a payload"
-        msg_bytes = payload.SerializeToString()
         byte_count = len(msg_bytes)
         # Pad to 4 bytes
         padding = '\x00' * max(0, 3 - byte_count)
