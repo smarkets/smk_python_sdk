@@ -151,11 +151,19 @@ class SessionSocket(object):
     "Wraps a socket with basic framing/deframing"
     logger = logging.getLogger('smk.session.socket')
     wire_logger = logging.getLogger('smk.session.wire')
+    # Most message are quite small, so this won't come into
+    # effect. For larger messages, it needs some performance testing
+    # to determine whether a single large recv() system call is worse
+    # than many smaller ones.
+    default_read_chunksize = 65536 # 64k
 
-    def __init__(self, host, port, socket_timeout=None):
+    def __init__(self, host, port, socket_timeout=None, read_chunksize=None):
         self.host = host
         self.port = port
         self.socket_timeout = socket_timeout
+        if read_chunksize is None:
+            read_chunksize = self.default_read_chunksize
+        self.read_chunksize = read_chunksize
         self._buffer = ''
         self._sock = None
 
@@ -248,7 +256,12 @@ class SessionSocket(object):
                 self.logger.debug("next message is %d bytes long", to_read)
                 if to_read:
                     # Read the actual message if necessary
-                    self._fill_buffer(to_read + len(self._buffer))
+                    while to_read > self.read_chunksize:
+                        self._fill_buffer(
+                            self.read_chunksize + len(self._buffer))
+                        to_read -= self.read_chunksize
+                    if to_read > 0:
+                        self._fill_buffer(to_read + len(self._buffer))
                 msg_bytes = self._buffer[:result]
                 self.wire_logger.debug("received bytes %r", msg_bytes)
                 # Consume the buffer
