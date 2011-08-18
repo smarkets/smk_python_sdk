@@ -33,7 +33,7 @@ class SessionTestCase(unittest.TestCase):
 
     def setUp(self):
         self.client = self.get_client()
-        self.assertTrue(self.client.session._sock is None)
+        self.assertFalse(self.client.session.connected)
         self.assertTrue(self.client.session.session is None)
 
     def tearDown(self):
