@@ -181,8 +181,8 @@ class SessionTestCase(unittest.TestCase):
             order_cancelled_msg.type,
             seto.piqi_pb2.PAYLOAD_ORDER_CANCELLED)
         self.assertEquals(
-            order_cancelled_msg.order.high,
-            order_accepted.order.high)
+            order_cancelled_msg.order_cancelled.order.high,
+            order_accepted_msg.order_accepted.order.high)
         self.assertEquals(
-            order_cancelled_msg.order.low, 
-            order_accepted.order.low)
+            order_cancelled_msg.order_cancelled.order.low, 
+            order_accepted_msg.order_accepted.order.low)
