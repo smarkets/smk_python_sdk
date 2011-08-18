@@ -9,10 +9,8 @@ import smk
 class SessionTestCase(unittest.TestCase):
     ping_total = 1000
     ping_each = 100
-    market_id = smk.Smarkets.str_to_uuid128(
-        '000000000000000000000001dc91c024')
-    contract_id = smk.Smarkets.str_to_uuid128(
-        '000000000000000000000002ab9acccc')
+    market_id = smk.Smarkets.str_to_uuid128('1dc91c024')
+    contract_id = smk.Smarkets.str_to_uuid128('2ab9acccc')
     price = 2500 # 25.00%
     quantity = 400000 # 40GBP
     side = seto.piqi_pb2.SIDE_BUY
