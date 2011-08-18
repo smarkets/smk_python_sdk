@@ -41,7 +41,8 @@ class Session(object):
             login.login.password = self.password
             self.logger.info("sending login payload")
             if self.session is not None:
-                self.logger.info("attempting to resume session %s", self.session)
+                self.logger.info(
+                    "attempting to resume session %s", self.session)
                 login.eto_payload.type = eto.piqi_pb2.PAYLOAD_LOGIN
                 login.eto_payload.login.session_id = self.session
             self.send()
@@ -238,13 +239,13 @@ class SessionSocket(object):
         while len(self._buffer) < min_size:
             bytes_needed = min_size - len(self._buffer)
             self.logger.debug("receiving %d bytes", bytes_needed)
-            bytes = self._sock.recv(bytes_needed, socket.MSG_WAITALL)
-            if len(bytes) != bytes_needed:
+            inbytes = self._sock.recv(bytes_needed, socket.MSG_WAITALL)
+            if len(inbytes) != bytes_needed:
                 self.logger.warning(
-                    "socket disconnected while receiving, got %r", bytes)
+                    "socket disconnected while receiving, got %r", inbytes)
                 self.disconnect()
                 raise SocketDisconnected()
-            self._buffer += bytes
+            self._buffer += inbytes
 
     def _error_message(self, exception):
         "Stringify a socket exception"
