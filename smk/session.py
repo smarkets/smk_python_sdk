@@ -183,7 +183,8 @@ class SessionSocket(object):
             return False
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(self.socket_timeout)
+            if self.socket_timeout is not None:
+                sock.settimeout(self.socket_timeout)
             self.logger.info(
                 "connecting with new socket to %s:%s", self.host, self.port)
             sock.connect((self.host, self.port))
@@ -208,6 +209,8 @@ class SessionSocket(object):
 
     def send(self, msg_bytes):
         "Send a payload"
+        if self._sock is None:
+            raise SocketDisconnected()
         byte_count = len(msg_bytes)
         # Pad to 4 bytes
         padding = '\x00' * max(0, 3 - byte_count)
@@ -215,9 +218,6 @@ class SessionSocket(object):
             "payload has %d bytes and needs %d padding",
             byte_count, len(padding))
         frame = _encode_varint(byte_count) + msg_bytes + padding
-        if self.connect():
-            self.logger.warning(
-                "send_frame called while disconnected. connecting...")
         try:
             self.wire_logger.debug("sending frame bytes %r", frame)
             self._sock.sendall(frame)
