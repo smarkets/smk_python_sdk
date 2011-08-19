@@ -188,6 +188,13 @@ class Smarkets(object):
                 uuid128.high = high
         return uuid128
 
+    @staticmethod
+    def copy_payload(payload):
+        "Copy a payload and return the copy"
+        payload_copy = seto.piqi_pb2.Payload()
+        payload_copy.CopyFrom(payload)
+        return payload_copy
+
     def _send(self):
         "Send a payload via the session"
         self.session.send(self.auto_flush)
