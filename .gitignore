@@ -1,6 +1,8 @@
 *.pyc
-seto_pb2.py
-seto.proto
+eto.piqi.proto
+seto.piqi.proto
 build/
 dist/
 *.egg-info/
+seto/
+eto/

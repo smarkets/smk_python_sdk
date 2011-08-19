@@ -12,6 +12,7 @@ Python API client for Smarkets.
     >>> import logging
     >>> logging.basicConfig(level=logging.DEBUG)
     >>> import smk
+    >>> import seto.piqi_pb2
     >>> username = 'username'
     >>> password = 'password'
     >>> host = 'api-dev.corp.smarkets.com'
@@ -26,7 +27,7 @@ Python API client for Smarkets.
     >>> client.read()
     >>> quantity = 400000
     >>> price = '25'
-    >>> side = smk.seto_pb2.buy
+    >>> side = seto.piqi_pb2.SIDE_BUY
     >>> contract_id = '000000000000000000000002ab9acccc'
     >>> client.order(quantity, price, side, market_id, contract_id)
     >>> client.read()
@@ -54,27 +55,26 @@ the example above they will now both be 5.
 ### Registering callbacks
 
     >>> def login_response(self, msg):
-    >>>     print "Session", msg.sequenced.message_data.login_response.session
+    >>>     print "Session", msg.eto_payload.login_response.session_id
     >>> def order_accepted(self, msg):
     >>>     print "Order Accepted", \
-    >>>         msg.sequenced.message_data.order_accepted.seq, \
-    >>>         msg.sequenced.message_data.order_accepted.order
+    >>>         msg.order_accepted.seq, msg.order_accepted.order
     >>> def order_executed(self, msg):
     >>>     print "Order Executed", \
-    >>>         msg.sequenced.message_data.order_executed.order, \
-    >>>         msg.sequenced.message_data.order_executed.price, \
-    >>>         msg.sequenced.message_data.order_executed.quantity
+    >>>         msg.order_executed.order, \
+    >>>         msg.order_executed.price, \
+    >>>         msg.order_executed.quantity
     >>> def order_cancelled(self, msg):
     >>>     print "Order Cancelled", \
-    >>>         msg.sequenced.message_data.order_cancelled.order, \
-    >>>         msg.sequenced.message_data.order_cancelled.reason
+    >>>         msg.order_cancelled.order, \
+    >>>         msg.order_cancelled.reason
     >>> def pong(self, msg):
     >>>     print "Pong"
     >>> def market_quotes(self, msg):
-    >>>     print "Quotes ", msg.sequenced.message_data.market_quotes.group
-    >>> client.add_handler('login_response', login_response)
-    >>> client.add_handler('order_accepted', order_accepted)
-    >>> client.add_handler('order_executed', order_executed)
-    >>> client.add_handler('order_cancelled', order_cancelled)
-    >>> client.add_handler('pong', pong)
-    >>> client.add_handler('market_quotes', market_quotes)
+    >>>     print "Quotes ", msg.market_quotes.market
+    >>> client.add_handler('eto.login_response', login_response)
+    >>> client.add_handler('seto.order_accepted', order_accepted)
+    >>> client.add_handler('seto.order_executed', order_executed)
+    >>> client.add_handler('seto.order_cancelled', order_cancelled)
+    >>> client.add_handler('eto.pong', pong)
+    >>> client.add_handler('seto.market_quotes', market_quotes)

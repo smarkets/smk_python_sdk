@@ -1,6 +1,25 @@
 "Smarkets API client"
 import logging
 
+from itertools import chain
+
+import eto.piqi_pb2
+import seto.piqi_pb2
+
+from exceptions import InvalidCallbackError
+
+
+_ETO_PAYLOAD_TYPES = dict((
+    (getattr(eto.piqi_pb2, x),
+     'eto.%s' % x.replace('PAYLOAD_', '').lower()) \
+        for x in dir(eto.piqi_pb2) if x.startswith('PAYLOAD_')))
+
+
+_SETO_PAYLOAD_TYPES = dict((
+    (getattr(seto.piqi_pb2, x),
+     'seto.%s' % x.replace('PAYLOAD_', '').lower()) \
+        for x in dir(seto.piqi_pb2) if x.startswith('PAYLOAD_')))
+
 
 class Callback(object):
     "Container for callbacks"
@@ -22,10 +41,13 @@ class Callback(object):
                 "so it cannot unhandle it")
         return self
 
-    def fire(self, msg):
+    def fire(self, msg, name=None):
         "Raise the signal to the handlers"
         for handler in self._handlers:
-            handler(msg)
+            if name is None:
+                handler(msg)
+            else:
+                handler(name, msg)
 
     def __len__(self):
         return len(self._handlers)
@@ -41,35 +63,17 @@ class Smarkets(object):
 
     Provides a simple interface wrapping the protobufs.
     """
-    CALLBACK_NAMES = (
-        'ping',
-        'pong',
-        'gapfill',
-        'replay',
-        'login',
-        'login_response',
-        'order_create',
-        'order_rejected',
-        'order_accepted',
-        'order_executed',
-        'order_cancel',
-        'order_cancelled',
-        'order_invalid',
-        'market_subscription',
-        'market_unsubscription',
-        'market_request',
-        'market_quotes_request',
-        'market_quotes',
-        'contract_quote',
-        'id_invalid',
-        )
-    CALLBACKS = dict(((name, Callback()) for name in CALLBACK_NAMES))
+    CALLBACKS = dict(((name, Callback()) for name in chain(
+                _ETO_PAYLOAD_TYPES.itervalues(),
+                _SETO_PAYLOAD_TYPES.itervalues())))
 
     logger = logging.getLogger('smk.smarkets')
 
-    def __init__(self, session):
+    def __init__(self, session, auto_flush=True):
         self.session = session
+        self.auto_flush = auto_flush
         self.callbacks = self.__class__.CALLBACKS.copy()
+        self.global_callback = Callback()
 
     def login(self, receive=True):
         "Connect and ensure the session is active"
@@ -87,16 +91,24 @@ class Smarkets(object):
         if frame:
             self._dispatch(frame)
 
-    def order(self, qty, price, side, group, contract):
+    def flush(self):
+        "Flush the send buffer"
+        self.session.flush()
+
+    def order(self, qty, price, side, market, contract):
         "Create a new order"
         msg = self.session.out_payload
         msg.Clear()
         # pylint: disable-msg=E1101
-        msg.sequenced.message_data.order_create.quantity = qty
-        msg.sequenced.message_data.order_create.price = price
-        msg.sequenced.message_data.order_create.side = side
-        msg.sequenced.message_data.order_create.group = group
-        msg.sequenced.message_data.order_create.contract = contract
+        msg.type = seto.piqi_pb2.PAYLOAD_ORDER_CREATE
+        msg.order_create.type = seto.piqi_pb2.ORDER_CREATE_LIMIT
+        msg.order_create.market.CopyFrom(market)
+        msg.order_create.contract.CopyFrom(contract)
+        msg.order_create.side = side
+        msg.order_create.quantity_type = seto.piqi_pb2.QUANTITY_PAYOFF_CURRENCY
+        msg.order_create.quantity = qty
+        msg.order_create.price_type = seto.piqi_pb2.PRICE_PERCENT_ODDS
+        msg.order_create.price = price
         self._send()
 
     def order_cancel(self, order):
@@ -104,7 +116,8 @@ class Smarkets(object):
         msg = self.session.out_payload
         msg.Clear()
         # pylint: disable-msg=E1101
-        msg.sequenced.message_data.order_cancel.order = order
+        msg.type = seto.piqi_pb2.PAYLOAD_ORDER_CANCEL
+        msg.order_cancel.order.CopyFrom(order)
         self._send()
 
     def ping(self):
@@ -112,83 +125,92 @@ class Smarkets(object):
         msg = self.session.out_payload
         msg.Clear()
         # pylint: disable-msg=E1101
-        msg.sequenced.message_data.ping = True
+        msg.type = seto.piqi_pb2.PAYLOAD_ETO
+        msg.eto_payload.type = eto.piqi_pb2.PAYLOAD_PING
         self._send()
 
-    def subscribe(self, group):
+    def subscribe(self, market):
         "Subscribe to a market"
         msg = self.session.out_payload
         msg.Clear()
         # pylint: disable-msg=E1101
-        msg.sequenced.message_data.market_subscription.group = group
+        msg.type = seto.piqi_pb2.PAYLOAD_MARKET_SUBSCRIPTION
+        msg.market_subscription.market.CopyFrom(market)
         self._send()
 
-    def unsubscribe(self, group):
+    def unsubscribe(self, market):
         "Unsubscribe from a market"
         msg = self.session.out_payload
         msg.Clear()
         # pylint: disable-msg=E1101
-        msg.message.market_unsubscription.group = group
+        msg.type = seto.piqi_pb2.PAYLOAD_MARKET_UNSUBSCRIPTION
+        msg.market_unsubscription.market.CopyFrom(market)
         self._send()
 
     def add_handler(self, name, callback):
         "Add a callback handler"
+        if not hasattr(callback, '__call__'):
+            raise ValueError('callback must be a callable')
+        if name not in self.callbacks:
+            raise InvalidCallbackError(name)
         self.callbacks[name] += callback
+
+    def add_global_handler(self, callback):
+        "Add a global callback handler, called for every message"
+        if not hasattr(callback, '__call__'):
+            raise ValueError('callback must be a callable')
+        self.global_callback += callback
 
     def del_handler(self, name, callback):
         "Remove a callback handler"
+        if name not in self.callbacks:
+            raise InvalidCallbackError(name)
         self.callbacks[name] -= callback
+
+    def del_global_handler(self, callback):
+        "Remove a global callback handler"
+        self.global_callback -= callback
+
+    @staticmethod
+    def str_to_uuid128(uuid_str, uuid128=None, strip_tag=True):
+        "Convert a string to a uuid128"
+        if uuid128 is None:
+            uuid128 = seto.piqi_pb2.Uuid128()
+        uuid128.Clear()
+        if strip_tag:
+            uuid_str = uuid_str[:-4]
+        low = int(uuid_str[-16:], 16)
+        uuid128.low = low
+        high = uuid_str[:-16]
+        if high:
+            high = int(high, 16)
+            if high:
+                uuid128.high = high
+        return uuid128
+
+    @staticmethod
+    def copy_payload(payload):
+        "Copy a payload and return the copy"
+        payload_copy = seto.piqi_pb2.Payload()
+        payload_copy.CopyFrom(payload)
+        return payload_copy
 
     def _send(self):
         "Send a payload via the session"
-        self.session.send_payload()
+        self.session.send(self.auto_flush)
 
     def _dispatch(self, msg):
         "Dispatch a frame to the callbacks"
-        name = None
-        if msg.sequenced.message_data.ping:
-            name = 'ping'
-        elif msg.sequenced.message_data.pong:
-            name = 'pong'
-        elif msg.sequenced.message_data.gapfill:
-            name = 'gapfill'
-        elif msg.sequenced.message_data.replay.seq:
-            name = 'replay'
-        elif msg.sequenced.message_data.login.username:
-            name = 'login'
-        elif msg.sequenced.message_data.login_response.session:
-            name = 'login_response'
-        elif msg.sequenced.message_data.order_create.quantity:
-            name = 'order_create'
-        elif msg.sequenced.message_data.order_rejected.seq:
-            name = 'order_rejected'
-        elif msg.sequenced.message_data.order_accepted.order:
-            name = 'order_accepted'
-        elif msg.sequenced.message_data.order_executed.order:
-            name = 'order_executed'
-        elif msg.sequenced.message_data.order_cancel.order:
-            name = 'order_cancel'
-        elif msg.sequenced.message_data.order_cancelled.order:
-            name = 'order_cancelled'
-        elif msg.sequenced.message_data.order_invalid.seq:
-            name = 'order_invalid'
-        elif msg.sequenced.message_data.market_subscription.group:
-            name = 'market_subscription'
-        elif msg.sequenced.message_data.market_unsubscription.group:
-            name = 'market_unsubscription'
-        elif msg.sequenced.message_data.market_request.group:
-            name = 'market_request'
-        elif msg.sequenced.message_data.market_quotes_request.group:
-            name = 'market_quotes_request'
-        elif msg.sequenced.message_data.market_quotes.group:
-            name = 'market_quotes'
-        elif msg.sequenced.message_data.contract_quote.contract:
-            name = 'contract_quote'
-        elif msg.sequenced.message_data.id_invalid.seq:
-            name = 'id_invalid'
+        name = _SETO_PAYLOAD_TYPES.get(msg.type)
+        if name == 'seto.eto':
+            name = _ETO_PAYLOAD_TYPES.get(msg.eto_payload.type)
         if name in self.callbacks:
             self.logger.info("dispatching callback %s", name)
-            callback = self.callbacks[name]
-            callback(msg)
+            callback = self.callbacks.get(name)
+            if callback is not None:
+                callback(msg)
+            else:
+                self.logger.error("no callback %s", name)
         else:
             self.logger.info("ignoring unknown message: %s", name)
+        self.global_callback(msg, name=name)
