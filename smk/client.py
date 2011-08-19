@@ -107,7 +107,6 @@ class Smarkets(object):
         msg.order_create.side = side
         msg.order_create.quantity_type = seto.piqi_pb2.QUANTITY_PAYOFF_CURRENCY
         msg.order_create.quantity = qty
-        msg.order_create.display_quantity = qty
         msg.order_create.price_type = seto.piqi_pb2.PRICE_PERCENT_ODDS
         msg.order_create.price = price
         self._send()

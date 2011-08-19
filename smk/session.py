@@ -47,14 +47,14 @@ class Session(object):
             login.Clear()
             # pylint: disable-msg=E1101
             login.type = seto.piqi_pb2.PAYLOAD_LOGIN
+            login.eto_payload.type = eto.piqi_pb2.PAYLOAD_LOGIN
             login.login.username = self.username
             login.login.password = self.password
             self.logger.info("sending login payload")
             if self.session is not None:
                 self.logger.info(
                     "attempting to resume session %s", self.session)
-                login.eto_payload.type = eto.piqi_pb2.PAYLOAD_LOGIN
-                login.eto_payload.login.session_id = self.session
+                login.eto_payload.login.session = self.session
             # Always flush outgoing login message
             self.send(True)
 
@@ -127,7 +127,7 @@ class Session(object):
             "received message to dispatch: %s",
             text_format.MessageToString(msg))
         if msg.eto_payload.type == eto.piqi_pb2.PAYLOAD_LOGIN_RESPONSE:
-            self.session = msg.eto_payload.login_response.session_id
+            self.session = msg.eto_payload.login_response.session
             self.outseq = msg.eto_payload.login_response.reset
             self.buf_outseq = self.outseq
             self.send_buffer.clear()
