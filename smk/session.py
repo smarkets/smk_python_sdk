@@ -200,6 +200,10 @@ class SessionSocket(object):
             self.logger.debug("disconnect() called with no socket, ignoring")
             return
         try:
+            self.logger.info("shutting down reads")
+            self._sock.shutdown(socket.SHUT_RD)
+            self.logger.info("shutting down reads/writes")
+            self._sock.shutdown(socket.SHUT_RDWR)
             self.logger.info("closing socket")
             self._sock.close()
         except socket.error:
@@ -222,18 +226,12 @@ class SessionSocket(object):
             self.wire_logger.debug("sending frame bytes %r", frame)
             self._sock.sendall(frame)
         except socket.error as exc:
-            # Die fast
-            self.disconnect()
             if len(exc.args) == 1:
                 _errno, errmsg = 'UNKNOWN', exc.args[0]
             else:
                 _errno, errmsg = exc.args
             raise ConnectionError("Error %s while writing to socket. %s." % (
                     _errno, errmsg))
-        except:
-            # Try to disconnect anyway
-            self.disconnect()
-            raise
 
     def recv(self):
         "Read a frame with header"
@@ -282,7 +280,6 @@ class SessionSocket(object):
             if len(inbytes) != bytes_needed:
                 self.logger.warning(
                     "socket disconnected while receiving, got %r", inbytes)
-                self.disconnect()
                 raise SocketDisconnected()
             self._buffer += inbytes
 
