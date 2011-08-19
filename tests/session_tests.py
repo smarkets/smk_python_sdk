@@ -61,13 +61,18 @@ class SessionTestCase(unittest.TestCase):
 
     def test_invalid_callback(self):
         # Trying to add a non-existent callback will punish you with a
-        # KeyError
+        # InvalidCallbackError
         self.assertRaises(
             smk.InvalidCallbackError,
             self.client.add_handler, 'baz', lambda _: None)
         self.assertRaises(
             ValueError,
             self.client.add_handler, 'eto.login', None)
+
+    def test_invalid_global_callback(self):
+        # Trying to add a 'None' callback will punish you with a
+        # ValueError
+        self.assertRaises(ValueError, self.client.add_global_handler, None)
 
     def test_login(self):
         login_response_msg = self._simple_cb('eto.login_response')

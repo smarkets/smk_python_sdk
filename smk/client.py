@@ -41,10 +41,13 @@ class Callback(object):
                 "so it cannot unhandle it")
         return self
 
-    def fire(self, msg):
+    def fire(self, msg, name=None):
         "Raise the signal to the handlers"
         for handler in self._handlers:
-            handler(msg)
+            if name is None:
+                handler(msg)
+            else:
+                handler(name, msg)
 
     def __len__(self):
         return len(self._handlers)
@@ -70,6 +73,7 @@ class Smarkets(object):
         self.session = session
         self.auto_flush = auto_flush
         self.callbacks = self.__class__.CALLBACKS.copy()
+        self.global_callback = Callback()
 
     def login(self, receive=True):
         "Connect and ensure the session is active"
@@ -152,11 +156,21 @@ class Smarkets(object):
             raise InvalidCallbackError(name)
         self.callbacks[name] += callback
 
+    def add_global_handler(self, callback):
+        "Add a global callback handler, called for every message"
+        if not hasattr(callback, '__call__'):
+            raise ValueError('callback must be a callable')
+        self.global_callback += callback
+
     def del_handler(self, name, callback):
         "Remove a callback handler"
         if name not in self.callbacks:
             raise InvalidCallbackError(name)
         self.callbacks[name] -= callback
+
+    def del_global_handler(self, callback):
+        "Remove a global callback handler"
+        self.global_callback -= callback
 
     @staticmethod
     def str_to_uuid128(uuid_str, uuid128=None, strip_tag=True):
@@ -193,3 +207,4 @@ class Smarkets(object):
                 self.logger.error("no callback %s", name)
         else:
             self.logger.info("ignoring unknown message: %s", name)
+        self.global_callback(msg, name=name)
