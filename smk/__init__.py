@@ -11,7 +11,7 @@ from smk.exceptions import (
 from smk.session import Session
 
 
-__version__ = '0.1.0'
+__version__ = '0.1-alpha'
 __all__ = ['SmkError', 'ConnectionError', 'DecodeError',
            'ParseError', 'SocketDisconnected', 'InvalidCallbackError',
            'Smarkets', 'Session']
