@@ -3,22 +3,22 @@ import logging
 
 from itertools import chain
 
-import eto.piqi_pb2
-import seto.piqi_pb2
+import eto.piqi_pb2 as eto
+import seto.piqi_pb2 as seto
 
 from exceptions import InvalidCallbackError
 
 
 _ETO_PAYLOAD_TYPES = dict((
-    (getattr(eto.piqi_pb2, x),
+    (getattr(eto, x),
      'eto.%s' % x.replace('PAYLOAD_', '').lower()) \
-        for x in dir(eto.piqi_pb2) if x.startswith('PAYLOAD_')))
+        for x in dir(eto) if x.startswith('PAYLOAD_')))
 
 
 _SETO_PAYLOAD_TYPES = dict((
-    (getattr(seto.piqi_pb2, x),
+    (getattr(seto, x),
      'seto.%s' % x.replace('PAYLOAD_', '').lower()) \
-        for x in dir(seto.piqi_pb2) if x.startswith('PAYLOAD_')))
+        for x in dir(seto) if x.startswith('PAYLOAD_')))
 
 
 class Callback(object):
@@ -100,14 +100,14 @@ class Smarkets(object):
         msg = self.session.out_payload
         msg.Clear()
         # pylint: disable-msg=E1101
-        msg.type = seto.piqi_pb2.PAYLOAD_ORDER_CREATE
-        msg.order_create.type = seto.piqi_pb2.ORDER_CREATE_LIMIT
+        msg.type = seto.PAYLOAD_ORDER_CREATE
+        msg.order_create.type = seto.ORDER_CREATE_LIMIT
         msg.order_create.market.CopyFrom(market)
         msg.order_create.contract.CopyFrom(contract)
         msg.order_create.side = side
-        msg.order_create.quantity_type = seto.piqi_pb2.QUANTITY_PAYOFF_CURRENCY
+        msg.order_create.quantity_type = seto.QUANTITY_PAYOFF_CURRENCY
         msg.order_create.quantity = qty
-        msg.order_create.price_type = seto.piqi_pb2.PRICE_PERCENT_ODDS
+        msg.order_create.price_type = seto.PRICE_PERCENT_ODDS
         msg.order_create.price = price
         self._send()
 
@@ -116,7 +116,7 @@ class Smarkets(object):
         msg = self.session.out_payload
         msg.Clear()
         # pylint: disable-msg=E1101
-        msg.type = seto.piqi_pb2.PAYLOAD_ORDER_CANCEL
+        msg.type = seto.PAYLOAD_ORDER_CANCEL
         msg.order_cancel.order.CopyFrom(order)
         self._send()
 
@@ -125,8 +125,8 @@ class Smarkets(object):
         msg = self.session.out_payload
         msg.Clear()
         # pylint: disable-msg=E1101
-        msg.type = seto.piqi_pb2.PAYLOAD_ETO
-        msg.eto_payload.type = eto.piqi_pb2.PAYLOAD_PING
+        msg.type = seto.PAYLOAD_ETO
+        msg.eto_payload.type = eto.PAYLOAD_PING
         self._send()
 
     def subscribe(self, market):
@@ -134,7 +134,7 @@ class Smarkets(object):
         msg = self.session.out_payload
         msg.Clear()
         # pylint: disable-msg=E1101
-        msg.type = seto.piqi_pb2.PAYLOAD_MARKET_SUBSCRIPTION
+        msg.type = seto.PAYLOAD_MARKET_SUBSCRIPTION
         msg.market_subscription.market.CopyFrom(market)
         self._send()
 
@@ -143,7 +143,7 @@ class Smarkets(object):
         msg = self.session.out_payload
         msg.Clear()
         # pylint: disable-msg=E1101
-        msg.type = seto.piqi_pb2.PAYLOAD_MARKET_UNSUBSCRIPTION
+        msg.type = seto.PAYLOAD_MARKET_UNSUBSCRIPTION
         msg.market_unsubscription.market.CopyFrom(market)
         self._send()
 
@@ -175,7 +175,7 @@ class Smarkets(object):
     def str_to_uuid128(uuid_str, uuid128=None, strip_tag=True):
         "Convert a string to a uuid128"
         if uuid128 is None:
-            uuid128 = seto.piqi_pb2.Uuid128()
+            uuid128 = seto.Uuid128()
         uuid128.Clear()
         if strip_tag:
             uuid_str = uuid_str[:-4]
@@ -191,7 +191,7 @@ class Smarkets(object):
     @staticmethod
     def copy_payload(payload):
         "Copy a payload and return the copy"
-        payload_copy = seto.piqi_pb2.Payload()
+        payload_copy = seto.Payload()
         payload_copy.CopyFrom(payload)
         return payload_copy
 

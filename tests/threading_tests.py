@@ -4,8 +4,8 @@ import time
 import threading
 import unittest
 
-import eto.piqi_pb2
-import seto.piqi_pb2
+import eto.piqi_pb2 as eto
+import seto.piqi_pb2 as seto
 import smk
 
 
@@ -46,7 +46,7 @@ class ThreadingTestCase(unittest.TestCase):
         self.assertEquals(name, 'eto.login_response')
         self.assertEquals(
             response.eto_payload.type,
-            eto.piqi_pb2.PAYLOAD_LOGIN_RESPONSE)
+            eto.PAYLOAD_LOGIN_RESPONSE)
 
     def tearDown(self):
         self.sender.send(self.client.logout)
@@ -64,10 +64,10 @@ class ThreadingTestCase(unittest.TestCase):
         self.assertEquals('eto.pong', name)
         self.assertEquals(
             pong_msg.type,
-            seto.piqi_pb2.PAYLOAD_ETO)
+            seto.PAYLOAD_ETO)
         self.assertEquals(
             pong_msg.eto_payload.type,
-            eto.piqi_pb2.PAYLOAD_PONG)
+            eto.PAYLOAD_PONG)
 
 
 class WorkItem(object):

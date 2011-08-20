@@ -1,0 +1,10 @@
+include MANIFEST
+include README.md
+include LICENSE
+include INSTALL
+include run_tests
+include eto.piqi
+include seto.piqi
+include eto.piqi.proto
+include seto.piqi.proto
+recursive-include tests *.py

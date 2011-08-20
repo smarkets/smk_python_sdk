@@ -6,8 +6,8 @@ from collections import deque
 
 from google.protobuf import text_format
 
-import eto.piqi_pb2
-import seto.piqi_pb2
+import eto.piqi_pb2 as eto
+import seto.piqi_pb2 as seto
 
 from smk.exceptions import ConnectionError, SocketDisconnected
 
@@ -27,8 +27,8 @@ class Session(object):
         self.outseq = outseq
         # Outgoing buffer sequence number
         self.buf_outseq = outseq
-        self.in_payload = seto.piqi_pb2.Payload()
-        self.out_payload = seto.piqi_pb2.Payload()
+        self.in_payload = seto.Payload()
+        self.out_payload = seto.Payload()
         self.send_buffer = deque()
 
     @property
@@ -46,8 +46,8 @@ class Session(object):
             login = self.out_payload
             login.Clear()
             # pylint: disable-msg=E1101
-            login.type = seto.piqi_pb2.PAYLOAD_LOGIN
-            login.eto_payload.type = eto.piqi_pb2.PAYLOAD_LOGIN
+            login.type = seto.PAYLOAD_LOGIN
+            login.eto_payload.type = eto.PAYLOAD_LOGIN
             login.login.username = self.username
             login.login.password = self.password
             self.logger.info("sending login payload")
@@ -94,7 +94,7 @@ class Session(object):
             self.logger.debug("received sequence %d", self.inseq)
             self.inseq += 1
             return self.in_payload
-        elif self.in_payload.eto_payload.type == eto.piqi_pb2.PAYLOAD_REPLAY:
+        elif self.in_payload.eto_payload.type == eto.PAYLOAD_REPLAY:
             # Just a replay message, sequence not important
             seq = self.in_payload.eto_payload.replay.seq
             self.logger.debug(
@@ -109,8 +109,8 @@ class Session(object):
             replay = self.out_payload
             replay.Clear()
             # pylint: disable-msg=E1101
-            replay.type = seto.piqi_pb2.PAYLOAD_ETO
-            replay.eto_payload.type = eto.piqi_pb2.PAYLOAD_REPLAY
+            replay.type = seto.PAYLOAD_ETO
+            replay.eto_payload.type = eto.PAYLOAD_REPLAY
             replay.eto_payload.replay.seq = self.inseq
             # Do not auto-flush replay because we may be in another
             # thread
@@ -126,7 +126,7 @@ class Session(object):
         self.logger.debug(
             "received message to dispatch: %s",
             text_format.MessageToString(msg))
-        if msg.eto_payload.type == eto.piqi_pb2.PAYLOAD_LOGIN_RESPONSE:
+        if msg.eto_payload.type == eto.PAYLOAD_LOGIN_RESPONSE:
             self.session = msg.eto_payload.login_response.session
             self.outseq = msg.eto_payload.login_response.reset
             self.buf_outseq = self.outseq
@@ -135,12 +135,12 @@ class Session(object):
                 "received login_response with session %s and reset %d",
                 self.session,
                 self.outseq)
-        elif msg.eto_payload.type == eto.piqi_pb2.PAYLOAD_HEARTBEAT:
+        elif msg.eto_payload.type == eto.PAYLOAD_HEARTBEAT:
             self.logger.debug("received heartbeat message, responding...")
             heartbeat = self.out_payload
             heartbeat.Clear()
-            heartbeat.type = seto.piqi_pb2.PAYLOAD_ETO
-            heartbeat.eto_payload.type = eto.piqi_pb2.PAYLOAD_HEARTBEAT
+            heartbeat.type = seto.PAYLOAD_ETO
+            heartbeat.eto_payload.type = eto.PAYLOAD_HEARTBEAT
             # Do not immediately flush heartbeat response because we
             # may be in another thread
             self.send()

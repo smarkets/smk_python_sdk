@@ -1,5 +1,6 @@
 Please use:
 
+    make all
     sudo python setup.py install
 
 Report problems to Smarkets support (support@smarkets.com).

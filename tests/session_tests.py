@@ -1,8 +1,8 @@
 import time
 import unittest
 
-import eto.piqi_pb2
-import seto.piqi_pb2
+import eto.piqi_pb2 as eto
+import seto.piqi_pb2 as seto
 import smk
 
 
@@ -13,7 +13,7 @@ class SessionTestCase(unittest.TestCase):
     contract_id = smk.Smarkets.str_to_uuid128('2ab9acccc')
     price = 2500 # 25.00%
     quantity = 400000 # 40GBP
-    side = seto.piqi_pb2.SIDE_BUY
+    side = seto.SIDE_BUY
     username = 'hunter.morris@smarkets.com'
     password = 'abc,123'
 
@@ -49,13 +49,13 @@ class SessionTestCase(unittest.TestCase):
         self.assertEquals(self.client.session.inseq, 2)
 
     def _simple_cb(self, name):
-        msg = seto.piqi_pb2.Payload()
+        msg = seto.Payload()
         def _inner_cb(recv_msg):
             # Copy message in callback to the outer context
             msg.CopyFrom(recv_msg)
         self.client.add_handler(name, _inner_cb)
         # Should be an empty message
-        self.assertEquals(msg.eto_payload.type, eto.piqi_pb2.PAYLOAD_NONE)
+        self.assertEquals(msg.eto_payload.type, eto.PAYLOAD_NONE)
         # Return message for comparison
         return msg
 
@@ -85,10 +85,10 @@ class SessionTestCase(unittest.TestCase):
         self.assertFalse(self.client.session.session is None)
         self.assertEquals(
             login_response_msg.type,
-            seto.piqi_pb2.PAYLOAD_ETO)
+            seto.PAYLOAD_ETO)
         self.assertEquals(
             login_response_msg.eto_payload.type,
-            eto.piqi_pb2.PAYLOAD_LOGIN_RESPONSE)
+            eto.PAYLOAD_LOGIN_RESPONSE)
         self.assertEquals(self.client.session.outseq, 2)
         self.assertEquals(self.client.session.inseq, 2)
 
@@ -101,10 +101,10 @@ class SessionTestCase(unittest.TestCase):
         self.assertEquals(self.client.session.inseq, 3)
         self.assertEquals(
             pong_msg.type,
-            seto.piqi_pb2.PAYLOAD_ETO)
+            seto.PAYLOAD_ETO)
         self.assertEquals(
             pong_msg.eto_payload.type,
-            eto.piqi_pb2.PAYLOAD_PONG)
+            eto.PAYLOAD_PONG)
 
     def test_ping_many(self):
         self._do_login()
@@ -130,7 +130,7 @@ class SessionTestCase(unittest.TestCase):
         self.assertEquals(self.client.session.inseq, 3)
         self.assertEquals(
             order_accepted_msg.type,
-            seto.piqi_pb2.PAYLOAD_ORDER_ACCEPTED)
+            seto.PAYLOAD_ORDER_ACCEPTED)
         # Order create message was #2
         self.assertEquals(order_accepted_msg.order_accepted.seq, 2)
         self.assertEquals(order_accepted_msg.order_accepted.order.high, 0)
@@ -145,7 +145,7 @@ class SessionTestCase(unittest.TestCase):
         self.assertEquals(self.client.session.inseq, 3)
         self.assertEquals(
             market_quotes_msg.type,
-            seto.piqi_pb2.PAYLOAD_MARKET_QUOTES)
+            seto.PAYLOAD_MARKET_QUOTES)
         self.assertEquals(
             market_quotes_msg.market_quotes.market.low, self.market_id.low)
         self.assertEquals(
@@ -171,7 +171,7 @@ class SessionTestCase(unittest.TestCase):
         self.assertEquals(self.client.session.inseq, 3)
         self.assertEquals(
             order_accepted_msg.type,
-            seto.piqi_pb2.PAYLOAD_ORDER_ACCEPTED)
+            seto.PAYLOAD_ORDER_ACCEPTED)
         # Order create message was #2
         self.assertEquals(order_accepted_msg.order_accepted.seq, 2)
         self.assertEquals(order_accepted_msg.order_accepted.order.high, 0)
@@ -183,7 +183,7 @@ class SessionTestCase(unittest.TestCase):
         self.assertEquals(self.client.session.inseq, 4)
         self.assertEquals(
             order_cancelled_msg.type,
-            seto.piqi_pb2.PAYLOAD_ORDER_CANCELLED)
+            seto.PAYLOAD_ORDER_CANCELLED)
         self.assertEquals(
             order_cancelled_msg.order_cancelled.order.high,
             order_accepted_msg.order_accepted.order.high)
