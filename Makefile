@@ -7,7 +7,7 @@ all: seto.piqi.proto
 build/pb:
 	mkdir -p build/pb
 	(cd build/pb && \
-		git clone git://git.corp.smarkets.com/smk_api_common.git && \
+		git clone https://github.com/smarkets/smk_api_common.git && \
 		cd smk_api_common && \
 		./rebar get-deps)
 
