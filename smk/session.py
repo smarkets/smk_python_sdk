@@ -1,8 +1,7 @@
 "Smarkets TCP-based session management"
 import logging
+import Queue
 import socket
-
-from collections import deque
 
 from google.protobuf import text_format
 
@@ -29,7 +28,7 @@ class Session(object):
         self.buf_outseq = outseq
         self.in_payload = seto.Payload()
         self.out_payload = seto.Payload()
-        self.send_buffer = deque()
+        self.send_buffer = Queue.Queue()
 
     @property
     def connected(self):
@@ -40,7 +39,7 @@ class Session(object):
         "Connects to the API and logs in if not already connected"
         if self.socket.connect():
             # Clear the outgoing send buffer
-            self.send_buffer.clear()
+            self.send_buffer = Queue.Queue()
             # Reset separate outgoing buffer sequence number
             self.buf_outseq = self.outseq
             login = self.out_payload
@@ -69,18 +68,21 @@ class Session(object):
             self.outseq, text_format.MessageToString(self.out_payload))
         # pylint: disable-msg=E1101
         self.out_payload.eto_payload.seq = self.buf_outseq
-        self.send_buffer.append(self.out_payload.SerializeToString())
+        self.send_buffer.put_nowait(self.out_payload.SerializeToString())
         self.buf_outseq += 1
         if flush:
             self.flush()
 
     def flush(self):
         "Flush payloads to the socket"
-        self.logger.debug("flushing %d payloads", len(self.send_buffer))
-        while len(self.send_buffer):
-            msg_bytes = self.send_buffer.pop()
-            self.socket.send(msg_bytes)
-            self.outseq += 1
+        self.logger.debug("flushing %d payloads", self.send_buffer.qsize())
+        while not self.send_buffer.empty():
+            try:
+                msg_bytes = self.send_buffer.get_nowait()
+                self.socket.send(msg_bytes)
+                self.outseq += 1
+            except Queue.Empty:
+                break
 
     def next_frame(self):
         "Get the next frame and increment inseq"
@@ -130,7 +132,7 @@ class Session(object):
             self.session = msg.eto_payload.login_response.session
             self.outseq = msg.eto_payload.login_response.reset
             self.buf_outseq = self.outseq
-            self.send_buffer.clear()
+            self.send_buffer = Queue.Queue()
             self.logger.info(
                 "received login_response with session %s and reset %d",
                 self.session,
