@@ -2,8 +2,15 @@
 
 Python API client for Smarkets.
 
+## Requirements
+
+* Python >= 2.5
+* Google protocol buffers compiler and libraries
+
+
 ## Installation
 
+    $ make
     $ sudo python setup.py install
 
 
@@ -12,24 +19,30 @@ Python API client for Smarkets.
     >>> import logging
     >>> logging.basicConfig(level=logging.DEBUG)
     >>> import smk
-    >>> import seto.piqi_pb2
+    >>> import eto.piqi_pb2 as eto
+    >>> import seto.piqi_pb2 as seto
     >>> username = 'username'
     >>> password = 'password'
-    >>> host = 'api-dev.corp.smarkets.com'
+    >>> host = 'api.smarkets.com'
     >>> port = 3701
     >>> session = smk.Session(username, password, host, port)
     >>> client = smk.Smarkets(session)
     >>> client.login()
     >>> client.ping()
+    >>> client.flush()
     >>> client.read()
-    >>> market_id = '000000000000000000000001dc91c024'
+    >>> market_id = seto.Uuid128()
+    >>> market_id.low = 1234
     >>> client.subscribe(market_id) # subscribe to a market
+    >>> client.flush()
     >>> client.read()
-    >>> quantity = 400000
-    >>> price = '25'
-    >>> side = seto.piqi_pb2.SIDE_BUY
-    >>> contract_id = '000000000000000000000002ab9acccc'
+    >>> quantity = 400000 # £40 payout
+    >>> price = 2500 # 25.00%
+    >>> side = seto.SIDE_BUY
+    >>> contract_id = seto.Uuid128()
+    >>> contract_id.low = 5678
     >>> client.order(quantity, price, side, market_id, contract_id)
+    >>> client.flush()
     >>> client.read()
 
 
@@ -41,7 +54,7 @@ the example above they will now both be 5.
 
     >>> username = 'username'
     >>> password = 'password'
-    >>> host = 'api-dev.corp.smarkets.com'
+    >>> host = 'api.smarkets.com'
     >>> port = 3701
     >>> session_id = 'session-id'
     >>> inseq = 5
@@ -50,31 +63,34 @@ the example above they will now both be 5.
     >>>     username, password, host, port, session_id, inseq, outseq)
     >>> client = smk.Smarkets(session)
     >>> client.login()
+    >>> client.read()
 
 
 ### Registering callbacks
 
-    >>> def login_response(self, msg):
-    >>>     print "Session", msg.eto_payload.login_response.session_id
-    >>> def order_accepted(self, msg):
-    >>>     print "Order Accepted", \
-    >>>         msg.order_accepted.seq, msg.order_accepted.order
-    >>> def order_executed(self, msg):
-    >>>     print "Order Executed", \
-    >>>         msg.order_executed.order, \
-    >>>         msg.order_executed.price, \
-    >>>         msg.order_executed.quantity
-    >>> def order_cancelled(self, msg):
-    >>>     print "Order Cancelled", \
-    >>>         msg.order_cancelled.order, \
-    >>>         msg.order_cancelled.reason
-    >>> def pong(self, msg):
-    >>>     print "Pong"
-    >>> def market_quotes(self, msg):
-    >>>     print "Quotes ", msg.market_quotes.market
+    >>> from google.protobuf import text_format
+    >>> def login_response(msg):
+    >>>     print "seto.login_response", text_format.MessageToString(msg)
+    >>> def global_callback(name, msg):
+    >>>     print name, text_format.MessageToString(msg)
     >>> client.add_handler('eto.login_response', login_response)
-    >>> client.add_handler('seto.order_accepted', order_accepted)
-    >>> client.add_handler('seto.order_executed', order_executed)
-    >>> client.add_handler('seto.order_cancelled', order_cancelled)
-    >>> client.add_handler('eto.pong', pong)
-    >>> client.add_handler('seto.market_quotes', market_quotes)
+    >>> client.add_global_handler(global_callback)
+
+
+## Connections
+
+The `smk.session.SessionSocket` class wraps the vanilla Python
+`socket.socket` class, providing the basic framing and padding
+functionality. It opens a single TCP connection and keeps it open for
+the duration of the session.
+
+
+## Thread Safety
+
+It is not safe to share `smk.client.Smarkets` or `smk.session.Session`
+objects between threads. Only a single thread should call the
+`Smarkets.flush()` method (or others which trigger a send) at a
+time. Similarly, a single thread should call `Smarkets.read()` at a
+time. See the `ThreadingTestCase` in `tests/threading_tests.py` for an
+example on appropriate multi-threaded usage.
+
