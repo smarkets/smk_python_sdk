@@ -39,7 +39,7 @@ clean:
 README: README.md
 	pandoc -s README.md -w rst -o README
 
-release:
+release: all
 	-find . -name "*.pyc" | xargs rm
 	-find . -name "*.orig" | xargs rm
 	-rm -rf smk/.cache
@@ -48,7 +48,8 @@ release:
 	-rm dist/$(NAME)-$(VERSION).tar.gz
 	-rm dist/$(NAME)-$(VERSION).zip
 	-mkdir dist/$(NAME)-$(VERSION)
+	python setup.py build
 	cp -r smk seto eto tests $(DST)
-	cp setup.py README README.md MANIFEST CHANGELOG run_tests $(DST)
+	cp setup.py README README.md MANIFEST.in CHANGELOG run_tests $(DST)
 	cd dist && tar -czv -f $(NAME)-$(VERSION).tar.gz $(NAME)-$(VERSION)
 	cd dist && zip $(NAME)-$(VERSION).zip -r $(NAME)-$(VERSION)
