@@ -2,7 +2,7 @@ NAME = smk_python_sdk
 VERSION = $(shell python setup.py --version)
 DST = dist/$(NAME)-$(VERSION)
 
-all: seto.piqi.proto README.rst
+all: seto.piqi.proto README
 
 build/pb:
 	mkdir -p build/pb
@@ -36,8 +36,8 @@ seto.piqi.proto: eto.piqi.proto seto.piqi
 clean:
 	rm -rf eto.piqi seto.piqi seto.piqi.proto eto.piqi.proto eto seto smk/*.pyc build
 
-README.rst: README.md
-	pandoc -s README.md -w rst -o README.rst
+README: README.md
+	pandoc -s README.md -w rst -o README
 
 release:
 	-find . -name "*.pyc" | xargs rm
@@ -49,6 +49,6 @@ release:
 	-rm dist/$(NAME)-$(VERSION).zip
 	-mkdir dist/$(NAME)-$(VERSION)
 	cp -r smk seto eto tests $(DST)
-	cp setup.py README.rst README.md MANIFEST CHANGELOG run_tests $(DST)
+	cp setup.py README README.md MANIFEST CHANGELOG run_tests $(DST)
 	cd dist && tar -czv -f $(NAME)-$(VERSION).tar.gz $(NAME)-$(VERSION)
 	cd dist && zip $(NAME)-$(VERSION).zip -r $(NAME)-$(VERSION)
