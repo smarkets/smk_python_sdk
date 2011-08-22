@@ -8,3 +8,4 @@ dist/
 *.egg-info/
 seto/
 eto/
+README.rst

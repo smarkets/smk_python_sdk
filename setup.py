@@ -61,7 +61,7 @@ class SmarketsProtocolClean(clean.clean):
         clean.clean.run(self)
 
 
-f = open(os.path.join(os.path.dirname(__file__), 'README.md'))
+f = open(os.path.join(os.path.dirname(__file__), 'README.rst'))
 long_description = f.read()
 f.close()
 
