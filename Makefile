@@ -2,7 +2,7 @@ NAME = smk_python_sdk
 VERSION = $(shell python setup.py --version)
 DST = dist/$(NAME)-$(VERSION)
 
-all: seto.piqi.proto README
+all: smk.seto.piqi.proto README
 
 build/pb:
 	mkdir -p build/pb
@@ -17,11 +17,14 @@ eto.piqi: build/pb
 seto.piqi: build/pb
 	cp build/pb/smk_api_common/seto.piqi .
 
-eto.piqi.proto: eto.piqi
-	piqi to-proto eto.piqi -o eto.piqi.proto
+smk.eto.piqi.proto: eto.piqi
+	piqi to-proto eto.piqi -o smk.eto.piqi.proto
 
-seto.piqi.proto: eto.piqi.proto seto.piqi
-	piqi to-proto seto.piqi -o seto.piqi.proto
+smk.seto.piqi.proto: smk.eto.piqi.proto seto.piqi
+	piqi to-proto seto.piqi -o smk.seto.piqi.proto
+	sed -i.bak 's/import "eto\.piqi\.proto"/import "smk.eto.piqi.proto"/g' \
+		smk.seto.piqi.proto
+	rm -f smk.seto.piqi.proto.bak
 
 # seto/piqi_pb2.py: seto.piqi.proto
 # 	mkdir -p smk/seto
@@ -34,7 +37,7 @@ seto.piqi.proto: eto.piqi.proto seto.piqi
 # 	protoc --python_out=. eto.piqi.proto
 
 clean:
-	rm -rf eto.piqi seto.piqi seto.piqi.proto eto.piqi.proto eto seto smk/*.pyc build
+	rm -rf eto.piqi seto.piqi smk.seto.piqi.proto smk.eto.piqi.proto smk/eto smk/seto smk/*.pyc build
 
 README: README.md
 	pandoc -s README.md -w rst -o README

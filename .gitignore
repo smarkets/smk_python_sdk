@@ -1,11 +1,11 @@
 *.pyc
 eto.piqi
 seto.piqi
-eto.piqi.proto
-seto.piqi.proto
+smk.eto.piqi.proto
+smk.seto.piqi.proto
 build/
 dist/
 *.egg-info/
-seto/
-eto/
+smk/seto/
+smk/eto/
 README

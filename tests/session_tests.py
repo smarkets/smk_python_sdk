@@ -1,8 +1,8 @@
 import datetime
 import unittest
 
-import eto.piqi_pb2 as eto
-import seto.piqi_pb2 as seto
+import smk.eto.piqi_pb2 as eto
+import smk.seto.piqi_pb2 as seto
 import smk
 
 

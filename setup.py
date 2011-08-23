@@ -37,7 +37,7 @@ class SmarketsProtocolBuild(build.build):
 
         for pkg_dir in ('eto', 'seto'):
             init_file = os.path.join(
-                os.path.dirname(__file__), pkg_dir, '__init__.py')
+                os.path.dirname(__file__), 'smk', pkg_dir, '__init__.py')
             open(init_file, 'w').close()
 
         build.build.run(self)
@@ -50,12 +50,12 @@ class SmarketsProtocolClean(clean.clean):
 
     def run(self):
         """Do the clean up"""
-        for source in glob.glob("eto/*.py"):
+        for source in glob.glob("smk/eto/*.py"):
             os.unlink(source)
-        for source in glob.glob("seto/*.py"):
+        for source in glob.glob("smk/seto/*.py"):
             os.unlink(source)
-        os.unlink('eto')
-        os.unlink('seto')
+        os.unlink('smk/eto')
+        os.unlink('smk/seto')
 
         # Call the parent class clean command
         clean.clean.run(self)
@@ -81,7 +81,7 @@ sdict = {
     'maintainer_email' : 'support@smarkets.com',
     'keywords' : ['Smarkets', 'betting exchange'],
     'license' : 'MIT',
-    'packages' : ['smk', 'eto', 'seto'],
+    'packages' : ['smk', 'smk.eto', 'smk.seto'],
     'test_suite' : 'tests.all_tests',
     'classifiers' : [
         'Development Status :: 3 - Alpha',
