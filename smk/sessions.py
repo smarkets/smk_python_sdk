@@ -280,7 +280,7 @@ class SessionSocket(object):
             self.logger.debug("receiving %d bytes", bytes_needed)
             inbytes = self._sock.recv(bytes_needed, socket.MSG_WAITALL)
             if len(inbytes) != bytes_needed:
-                self.logger.warning(
+                self.logger.info(
                     "socket disconnected while receiving, got %r", inbytes)
                 raise SocketDisconnected()
             self._buffer += inbytes
