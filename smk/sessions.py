@@ -16,7 +16,7 @@ class Session(object):
     logger = logging.getLogger('smk.session')
 
     def __init__(self, username, password, host='localhost', port=3701,
-                 session=None, inseq=1, outseq=1, socket_timeout=None):
+                 session=None, inseq=1, outseq=1, socket_timeout=30):
         self.username = username
         self.password = password
         self.socket = SessionSocket(host, port, socket_timeout)
