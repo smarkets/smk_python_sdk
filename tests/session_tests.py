@@ -81,6 +81,7 @@ class SessionTestCase(unittest.TestCase):
         self.assertTrue(self.client.session.session is None)
         # Send login message and immediately read response; this
         # blocks until the login_response message is received
+        time.sleep(1)
         self.client.login()
         self.assertFalse(self.client.session.session is None)
         self.assertEquals(
