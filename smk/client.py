@@ -147,6 +147,13 @@ class Smarkets(object):
         msg.market_unsubscription.market.CopyFrom(market)
         self._send()
 
+    def request_events(self, request):
+        "Send a structured events request"
+        msg = self.session.out_payload
+        msg.Clear()
+        request.copy_to(msg)
+        self._send()
+
     def add_handler(self, name, callback):
         "Add a callback handler"
         if not hasattr(callback, '__call__'):

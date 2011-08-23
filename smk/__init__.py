@@ -6,6 +6,17 @@
 import inspect
 
 from smk.client import Smarkets
+from smk.event import (
+    EventsRequest,
+    Politics,
+    CurrentAffairs,
+    TvAndEntertainment,
+    SportByDate,
+    FootballByDate,
+    HorseRacingByDate,
+    TennisByDate,
+    SportOther,
+    )
 from smk.exceptions import (
     SmkError,
     ConnectionError,
