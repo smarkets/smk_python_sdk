@@ -18,7 +18,7 @@ from smk.events import (
     SportOther,
     )
 from smk.exceptions import (
-    SmkError,
+    Error,
     ConnectionError,
     DecodeError,
     ParseError,

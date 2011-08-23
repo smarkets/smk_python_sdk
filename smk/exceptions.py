@@ -1,31 +1,31 @@
 "Core Smarkets API exceptions"
 
 
-class SmkError(Exception):
+class Error(Exception):
     "General Smarkets API error"
     pass
 
 
-class ConnectionError(SmkError):
+class ConnectionError(Error):
     "TCP connection-related error"
     pass
 
 
-class DecodeError(SmkError):
+class DecodeError(Error):
     "Header decoding error"
     pass
 
 
-class ParseError(SmkError):
+class ParseError(Error):
     "Error parsing a message or frame"
     pass
 
 
-class SocketDisconnected(SmkError):
+class SocketDisconnected(Error):
     "Socket was disconnected while reading"
     pass
 
 
-class InvalidCallbackError(SmkError):
+class InvalidCallbackError(Error):
     "Invalid callback was specified"
     pass
