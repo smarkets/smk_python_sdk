@@ -29,3 +29,13 @@ class SocketDisconnected(Error):
 class InvalidCallbackError(Error):
     "Invalid callback was specified"
     pass
+
+
+class InvalidUrlError(Error):
+    "Raised when a URL is invalid"
+    pass
+
+
+class DownloadError(Error):
+    "Raised when a URL could not be fetched"
+    pass

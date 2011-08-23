@@ -8,6 +8,7 @@ class EventsRequest(object):
     __slots__ = ('_payload',)
     _payload = seto.Payload()
     _payload.type = seto.PAYLOAD_EVENTS_REQUEST
+    _payload.events_request.content_type = seto.CONTENT_TYPE_PROTOBUF
 
     def copy_to(self, dest_payload):
         "Copy the event request to the destination payload"

@@ -190,3 +190,17 @@ class SessionTestCase(unittest.TestCase):
         self.assertEquals(
             order_cancelled_msg.order_cancelled.order.low, 
             order_accepted_msg.order_accepted.order.low)
+
+    def test_events(self):
+        self._do_login()
+        event_request = smk.SportOther()
+        http_found_msg = self._simple_cb('seto.http_found')
+        self.client.request_events(event_request)
+        self.assertEquals(self.client.session.outseq, 3)
+        self.client.read() # should be accepted
+        self.assertEquals(self.client.session.inseq, 3)
+        self.assertEquals(http_found_msg.type, seto.PAYLOAD_HTTP_FOUND)
+        self.assertTrue(http_found_msg.http_found.url is not None)
+        self.assertEquals(http_found_msg.http_found.seq, 2)
+        listing = self.client.fetch_http_found(http_found_msg)
+        self.assertTrue(listing is not None)

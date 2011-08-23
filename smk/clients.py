@@ -6,6 +6,8 @@ from itertools import chain
 import eto.piqi_pb2 as eto
 import seto.piqi_pb2 as seto
 
+from smk.urls import fetch
+
 from exceptions import InvalidCallbackError
 
 
@@ -153,6 +155,15 @@ class Smarkets(object):
         msg.Clear()
         request.copy_to(msg)
         self._send()
+
+    def fetch_http_found(self, payload, incoming_payload=None):
+        "Fetch the URL specified by a http found payload"
+        content_type, result = fetch(payload.http_found.url)
+        if content_type == 'application/x-protobuf':
+            if incoming_payload is None:
+                incoming_payload = seto.Events()
+            incoming_payload.ParseFromString(result)
+            return incoming_payload
 
     def add_handler(self, name, callback):
         "Add a callback handler"
