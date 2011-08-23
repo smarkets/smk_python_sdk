@@ -1,3 +1,4 @@
+import datetime
 import unittest
 
 import eto.piqi_pb2 as eto
@@ -189,9 +190,8 @@ class SessionTestCase(unittest.TestCase):
             order_cancelled_msg.order_cancelled.order.low, 
             order_accepted_msg.order_accepted.order.low)
 
-    def test_events(self):
+    def _event_found_request(self, event_request):
         self._do_login()
-        event_request = smk.SportOther()
         http_found_msg = self._simple_cb('seto.http_found')
         self.client.request_events(event_request)
         self.assertEquals(self.client.session.outseq, 3)
@@ -202,3 +202,41 @@ class SessionTestCase(unittest.TestCase):
         self.assertEquals(http_found_msg.http_found.seq, 2)
         listing = self.client.fetch_http_found(http_found_msg)
         self.assertTrue(listing is not None)
+
+    def _event_not_found_request(self, event_request):
+        self._do_login()
+        invalid_request_msg = self._simple_cb('seto.invalid_request')
+        self.client.request_events(event_request)
+        self.assertEquals(self.client.session.outseq, 3)
+        self.client.read() # should be accepted
+        self.assertEquals(self.client.session.inseq, 3)
+        self.assertEquals(
+            invalid_request_msg.type, seto.PAYLOAD_INVALID_REQUEST)
+        self.assertEquals(invalid_request_msg.invalid_request.seq, 2)
+        self.assertEquals(
+            invalid_request_msg.invalid_request.type,
+            seto.INVALID_REQUEST_DATE_OUT_OF_RANGE)
+
+    def test_current_affairs(self):
+        self._event_found_request(smk.CurrentAffairs())
+
+    def test_tv_and_entertainment(self):
+        self._event_found_request(smk.TvAndEntertainment())
+
+    def test_politics(self):
+        self._event_found_request(smk.Politics())
+
+    def test_sport_other(self):
+        self._event_found_request(smk.SportOther())
+
+    def test_football_by_date(self):
+        self._event_not_found_request(
+            smk.FootballByDate(datetime.date(2010, 8, 20)))
+
+    def test_horse_racing_by_date(self):
+        self._event_not_found_request(
+            smk.HorseRacingByDate(datetime.date(2010, 8, 20)))
+
+    def test_tennis_by_date(self):
+        self._event_not_found_request(
+            smk.TennisByDate(datetime.date(2010, 8, 20)))
