@@ -5,8 +5,8 @@
 # http://www.opensource.org/licenses/mit-license.php
 import inspect
 
-from smk.client import Smarkets
-from smk.event import (
+from smk.clients import Smarkets
+from smk.events import (
     EventsRequest,
     Politics,
     CurrentAffairs,
@@ -25,7 +25,7 @@ from smk.exceptions import (
     SocketDisconnected,
     InvalidCallbackError,
     )
-from smk.session import Session
+from smk.sessions import Session
 
 
 __version__ = '0.1.0'
