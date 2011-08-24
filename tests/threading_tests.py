@@ -1,8 +1,9 @@
 import logging
-import Queue
 import time
 import threading
 import unittest
+
+from Queue import Queue, Empty
 
 import smarkets.eto.piqi_pb2 as eto
 import smarkets.seto.piqi_pb2 as seto
@@ -97,7 +98,7 @@ class SendingThread(threading.Thread):
         self.client = client
         self.running = True
         self.daemon = True
-        self.queue = Queue.Queue()
+        self.queue = Queue()
         self.name = 'session sender'
         self.login_complete = threading.Event()
 
@@ -122,7 +123,7 @@ class SendingThread(threading.Thread):
             self.logger.debug('[%s] getting a WorkItem', _cthrd())
             try:
                 item = self.queue.get(timeout=1)
-            except Queue.Empty:
+            except Empty:
                 self.logger.debug('[%s] nothing in queue')
                 continue
             self.logger.debug('[%s] got a WorkItem, calling it', _cthrd())
@@ -145,7 +146,7 @@ class ReceivingThread(threading.Thread):
         self.client = client
         self.daemon = True
         self.running = True
-        self.queue = Queue.Queue()
+        self.queue = Queue()
         self.name = 'session receiver'
 
     def stop(self):
