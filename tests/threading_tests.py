@@ -91,7 +91,7 @@ class WorkItem(object):
 
 class SendingThread(threading.Thread):
     "Thread used for all sending payloads"
-    logger = logging.getLogger('smk.test.sender')
+    logger = logging.getLogger('smarkets.test.sender')
     def __init__(self, client):
         super(SendingThread, self).__init__()
         self.client = client
@@ -137,7 +137,7 @@ class SendingThread(threading.Thread):
 
 class ReceivingThread(threading.Thread):
     "Thread used for receiving payloads from the socket"
-    logger = logging.getLogger('smk.test.receiver')
+    logger = logging.getLogger('smarkets.test.receiver')
     queue_timeout = 1 # 1 second max wait
 
     def __init__(self, client):
