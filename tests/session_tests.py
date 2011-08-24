@@ -191,6 +191,38 @@ class SessionTestCase(unittest.TestCase):
             order_cancelled_msg.order_cancelled.order.low, 
             order_accepted_msg.order_accepted.order.low)
 
+    def test_order_cancel_many(self):
+        self._do_login()
+        order_accepted_msg = self._simple_cb('seto.order_accepted')
+        order_cancelled_msg = self._simple_cb('seto.order_cancelled')
+        to_cancel = []
+        # Place 100 orders then cancel them
+        for _ in xrange(1, 100):
+            self.client.order(
+                self.quantity / 100,
+                self.price,
+                self.side,
+                self.market_id,
+                self.contract_id)
+            self.client.read() # should be accepted
+            self.assertEquals(
+                order_accepted_msg.type,
+                seto.PAYLOAD_ORDER_ACCEPTED)
+            order_id = seto.Uuid128()
+            order_id.CopyFrom(order_accepted_msg.order_accepted.order)
+            to_cancel.append(order_id)
+            order_accepted_msg.Clear()
+        for order_id in to_cancel:
+            # Send a cancel
+            self.client.order_cancel(order_id)
+            self.client.read() # should be cancelled
+            self.assertEquals(
+                order_cancelled_msg.type,
+                seto.PAYLOAD_ORDER_CANCELLED)
+            self.assertEquals(
+                order_cancelled_msg.order_cancelled.order, order_id)
+            order_cancelled_msg.Clear()
+
     def _event_found_request(self, event_request):
         self._do_login()
         http_found_msg = self._simple_cb('seto.http_found')
