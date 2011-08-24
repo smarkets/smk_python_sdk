@@ -51,6 +51,7 @@ class SessionTestCase(unittest.TestCase):
         msg = seto.Payload()
         def _inner_cb(recv_msg):
             # Copy message in callback to the outer context
+            msg.Clear()
             msg.CopyFrom(recv_msg)
         self.client.add_handler(name, _inner_cb)
         # Should be an empty message
