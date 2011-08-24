@@ -16,7 +16,7 @@ class ThreadingTestCase(unittest.TestCase):
     def get_session(self, cls=None):
         if cls is None:
             cls = smk.Session
-        return cls(self.username, self.password, socket_timeout=15)
+        return cls(self.username, self.password)
 
     def get_client(self, cls=None, session=None, session_cls=None):
         if cls is None:
@@ -38,9 +38,9 @@ class ThreadingTestCase(unittest.TestCase):
         # Start the sender thread first
         self.sender.login()
         self.sender.start()
-        # Wait for 5 seconds until connected and login is sent before
-        # starting receiver
-        self.assertTrue(self.sender.login_complete.wait(5))
+        # Wait for 30 seconds (default socket timeout) until connected
+        # and login is sent before starting receiver
+        self.assertTrue(self.sender.login_complete.wait(30))
         self.receiver.start()
         name, response = self.receiver.get()
         self.assertEquals(name, 'eto.login_response')
