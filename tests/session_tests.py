@@ -1,9 +1,9 @@
 import datetime
 import unittest
 
-import smk.eto.piqi_pb2 as eto
-import smk.seto.piqi_pb2 as seto
-import smk
+import smarkets.eto.piqi_pb2 as eto
+import smarkets.seto.piqi_pb2 as seto
+import smarkets as smk
 
 
 class SessionTestCase(unittest.TestCase):

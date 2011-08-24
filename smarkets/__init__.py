@@ -5,8 +5,8 @@
 # http://www.opensource.org/licenses/mit-license.php
 import inspect
 
-from smk.clients import Smarkets
-from smk.events import (
+from smarkets.clients import Smarkets
+from smarkets.events import (
     EventsRequest,
     Politics,
     CurrentAffairs,
@@ -17,7 +17,7 @@ from smk.events import (
     TennisByDate,
     SportOther,
     )
-from smk.exceptions import (
+from smarkets.exceptions import (
     Error,
     ConnectionError,
     DecodeError,
@@ -25,7 +25,7 @@ from smk.exceptions import (
     SocketDisconnected,
     InvalidCallbackError,
     )
-from smk.sessions import Session
+from smarkets.sessions import Session
 
 
 __version__ = '0.1.0'

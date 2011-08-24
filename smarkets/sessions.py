@@ -5,15 +5,15 @@ import socket
 
 from google.protobuf import text_format
 
-import smk.eto.piqi_pb2 as eto
-import smk.seto.piqi_pb2 as seto
+import smarkets.eto.piqi_pb2 as eto
+import smarkets.seto.piqi_pb2 as seto
 
-from smk.exceptions import ConnectionError, SocketDisconnected
+from smarkets.exceptions import ConnectionError, SocketDisconnected
 
 
 class Session(object):
     "Manages TCP communication via Smarkets streaming API"
-    logger = logging.getLogger('smk.session')
+    logger = logging.getLogger('smarkets.session')
 
     def __init__(self, username, password, host='localhost', port=3701,
                  session=None, inseq=1, outseq=1, socket_timeout=30):
@@ -151,8 +151,8 @@ class Session(object):
 
 class SessionSocket(object):
     "Wraps a socket with basic framing/deframing"
-    logger = logging.getLogger('smk.session.socket')
-    wire_logger = logging.getLogger('smk.session.wire')
+    logger = logging.getLogger('smarkets.session.socket')
+    wire_logger = logging.getLogger('smarkets.session.wire')
     # Most message are quite small, so this won't come into
     # effect. For larger messages, it needs some performance testing
     # to determine whether a single large recv() system call is worse

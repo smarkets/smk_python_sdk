@@ -80,14 +80,14 @@ class SmarketsProtocolBuild(build.build):
             shutil.copy(seto_piqi_src, seto_piqi)
 
         eto_proto = os.path.join(
-            os.path.dirname(__file__), 'smk.eto.piqi.proto')
+            os.path.dirname(__file__), 'smarkets.eto.piqi.proto')
         if not os.path.exists(eto_proto):
             args = (self.piqi, 'to-proto', eto_piqi, '-o', eto_proto)
             if subprocess.call(args) != 0:
                 sys.exit(-1)
 
         seto_proto = os.path.join(
-            os.path.dirname(__file__), 'smk.seto.piqi.proto')
+            os.path.dirname(__file__), 'smarkets.seto.piqi.proto')
         if not os.path.exists(seto_proto):
             args = (self.piqi, 'to-proto', seto_piqi, '-o', seto_proto)
             if subprocess.call(args) != 0:
@@ -101,7 +101,7 @@ class SmarketsProtocolBuild(build.build):
 
         for pkg_dir in ('eto', 'seto'):
             init_file = os.path.join(
-                os.path.dirname(__file__), 'smk', pkg_dir, '__init__.py')
+                os.path.dirname(__file__), 'smarkets', pkg_dir, '__init__.py')
             open(init_file, 'w').close()
 
         build.build.run(self)
@@ -117,10 +117,10 @@ class SmarketsProtocolBuild(build.build):
 
     @staticmethod
     def fix_import(line):
-        "Fix the import line in smk.seto.piqi.proto"
+        "Fix the import line in smarkets.seto.piqi.proto"
         return re.sub(
             r'import "eto\.piqi\.proto"',
-            'import "smk.eto.piqi.proto"',
+            'import "smarkets.eto.piqi.proto"',
             line)
 
 
@@ -133,8 +133,8 @@ class SmarketsProtocolClean(clean.clean):
         """Do the clean up"""
         for src_dir in [
             os.path.join(os.path.dirname(__file__), 'build', 'pb'),
-            os.path.join(os.path.dirname(__file__), 'smk', 'eto'),
-            os.path.join(os.path.dirname(__file__), 'smk', 'seto'),
+            os.path.join(os.path.dirname(__file__), 'smarkets', 'eto'),
+            os.path.join(os.path.dirname(__file__), 'smarkets', 'seto'),
             ]:
             if os.path.exists(src_dir):
                 shutil.rmtree(src_dir)
@@ -174,14 +174,14 @@ sdict = {
     'description' : 'Python client for Smarkets streaming API',
     'long_description' : long_description,
     'url': 'https://github.com/smarkets/smk_python_sdk',
-    'download_url' : 'https://github.com/smarkets/smk_python_sdk/downloads/smk_python_sdk-%s.tar.gz' % __version__,
+    'download_url' : 'https://github.com/smarkets/smk_python_sdk/downloads/smk-%s.tar.gz' % __version__,
     'author' : 'Smarkets Limited',
     'author_email' : 'support@smarkets.com',
     'maintainer' : 'Smarkets Limited',
     'maintainer_email' : 'support@smarkets.com',
     'keywords' : ['Smarkets', 'betting exchange'],
     'license' : 'MIT',
-    'packages' : ['smk', 'smk.eto', 'smk.seto'],
+    'packages' : ['smarkets', 'smarkets.eto', 'smarkets.seto'],
     'test_suite' : 'tests.all_tests',
     'classifiers' : [
         'Development Status :: 3 - Alpha',

@@ -2,7 +2,7 @@
 import logging
 import urllib2
 
-import seto.piqi_pb2 as seto
+import smarkets.seto.piqi_pb2 as seto
 
 from exceptions import InvalidUrlError, DownloadError
 

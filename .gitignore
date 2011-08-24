@@ -1,11 +1,9 @@
 *.pyc
-eto.piqi
-seto.piqi
-smk.eto.piqi.proto
-smk.seto.piqi.proto
+*.piqi
+*.proto
+smarkets/seto/
+smarkets/eto/
 build/
 dist/
 *.egg-info/
-smk/seto/
-smk/eto/
 README

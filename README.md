@@ -1,6 +1,10 @@
-# smk
+# smarkets
 
 Python API client for Smarkets.
+
+## Getting the code
+
+* https://github.com/smarkets/smk_python_sdk/
 
 ## Requirements
 
@@ -10,23 +14,31 @@ Python API client for Smarkets.
 
 ## Installation
 
-    $ make
-    $ sudo python setup.py install
+To install:
 
+    $ pip install smk
+
+or if that doesn't work:
+
+    $ easy_install smk
+
+or if you want to build it yourself:
+
+    $ sudo python setup.py build install
 
 ## Getting Started
 
     >>> import logging
     >>> logging.basicConfig(level=logging.DEBUG)
-    >>> import smk
-    >>> import eto.piqi_pb2 as eto
-    >>> import seto.piqi_pb2 as seto
+    >>> import smarkets
+    >>> import smarkets.eto.piqi_pb2 as eto
+    >>> import smarkets.seto.piqi_pb2 as seto
     >>> username = 'username'
     >>> password = 'password'
     >>> host = 'api.smarkets.com'
     >>> port = 3701
-    >>> session = smk.Session(username, password, host, port)
-    >>> client = smk.Smarkets(session)
+    >>> session = smarkets.Session(username, password, host, port)
+    >>> client = smarkets.Smarkets(session)
     >>> client.login()
     >>> client.ping()
     >>> client.flush()
@@ -59,9 +71,9 @@ the example above they will now both be 5.
     >>> session_id = 'session-id'
     >>> inseq = 5
     >>> outseq = 5
-    >>> session = smk.Session(
+    >>> session = smarkets.Session(
     >>>     username, password, host, port, session_id, inseq, outseq)
-    >>> client = smk.Smarkets(session)
+    >>> client = smarkets.Smarkets(session)
     >>> client.login()
     >>> client.read()
 
@@ -79,7 +91,7 @@ the example above they will now both be 5.
 
 ## Connections
 
-The `smk.session.SessionSocket` class wraps the vanilla Python
+The `smarkets.session.SessionSocket` class wraps the vanilla Python
 `socket.socket` class, providing the basic framing and padding
 functionality. It opens a single TCP connection and keeps it open for
 the duration of the session.
@@ -87,7 +99,7 @@ the duration of the session.
 
 ## Thread Safety
 
-It is not safe to share `smk.client.Smarkets` or `smk.session.Session`
+It is not safe to share `smarkets.client.Smarkets` or `smarkets.session.Session`
 objects between threads. Only a single thread should call the
 `Smarkets.flush()` method (or others which trigger a send) at a
 time. Similarly, a single thread should call `Smarkets.read()` at a

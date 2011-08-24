@@ -1,6 +1,6 @@
 "Smarkets event request helper classes"
-import eto.piqi_pb2 as eto
-import seto.piqi_pb2 as seto
+import smarkets.eto.piqi_pb2 as eto
+import smarkets.seto.piqi_pb2 as seto
 
 
 class EventsRequest(object):

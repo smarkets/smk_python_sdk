@@ -3,10 +3,10 @@ import logging
 
 from itertools import chain
 
-import smk.eto.piqi_pb2 as eto
-import smk.seto.piqi_pb2 as seto
+import smarkets.eto.piqi_pb2 as eto
+import smarkets.seto.piqi_pb2 as seto
 
-from smk.urls import fetch
+from smarkets.urls import fetch
 
 from exceptions import InvalidCallbackError
 
@@ -69,7 +69,7 @@ class Smarkets(object):
                 _ETO_PAYLOAD_TYPES.itervalues(),
                 _SETO_PAYLOAD_TYPES.itervalues())))
 
-    logger = logging.getLogger('smk.smarkets')
+    logger = logging.getLogger('smarkets.smarkets')
 
     def __init__(self, session, auto_flush=True):
         self.session = session
