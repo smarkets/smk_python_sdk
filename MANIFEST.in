@@ -5,6 +5,6 @@ include INSTALL
 include run_tests
 include eto.piqi
 include seto.piqi
-include eto.piqi.proto
-include seto.piqi.proto
+include smarkets.eto.piqi.proto
+include smarkets.seto.piqi.proto
 recursive-include tests *.py
