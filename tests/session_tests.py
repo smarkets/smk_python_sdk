@@ -168,9 +168,7 @@ class SessionTestCase(unittest.TestCase):
             market_quotes_msg.type,
             seto.PAYLOAD_MARKET_QUOTES)
         self.assertEquals(
-            market_quotes_msg.market_quotes.market.low, self.market_id.low)
-        self.assertEquals(
-            market_quotes_msg.market_quotes.market.high, self.market_id.high)
+            market_quotes_msg.market_quotes.market, self.market_id)
 
     def test_market_unsubscription(self):
         self._do_login()
@@ -206,11 +204,8 @@ class SessionTestCase(unittest.TestCase):
             order_cancelled_msg.type,
             seto.PAYLOAD_ORDER_CANCELLED)
         self.assertEquals(
-            order_cancelled_msg.order_cancelled.order.high,
-            order_accepted_msg.order_accepted.order.high)
-        self.assertEquals(
-            order_cancelled_msg.order_cancelled.order.low, 
-            order_accepted_msg.order_accepted.order.low)
+            order_cancelled_msg.order_cancelled.order,
+            order_accepted_msg.order_accepted.order)
 
     def test_order_cancel_many(self):
         self._do_login()
