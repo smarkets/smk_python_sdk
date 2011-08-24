@@ -87,11 +87,12 @@ class Smarkets(object):
         "Disconnect. TODO: send logout message before"
         self.session.disconnect()
 
-    def read(self):
-        "Receive the next payload and block"
-        frame = self.session.next_frame()
-        if frame:
-            self._dispatch(frame)
+    def read(self, num=1):
+        "Receive the next `num` payloads and block"
+        for _ in xrange(0, num):
+            frame = self.session.next_frame()
+            if frame:
+                self._dispatch(frame)
 
     def flush(self):
         "Flush the send buffer"
