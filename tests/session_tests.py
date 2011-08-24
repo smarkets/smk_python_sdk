@@ -136,6 +136,27 @@ class SessionTestCase(unittest.TestCase):
         self.assertEquals(order_accepted_msg.order_accepted.order.high, 0)
         self.assertTrue(order_accepted_msg.order_accepted.order.low > 0)
 
+    def test_order_rejected(self):
+        self._do_login()
+        order_rejected_msg = self._simple_cb('seto.order_rejected')
+        self.client.order(
+            self.quantity * 10000, # should be insufficient funds
+            self.price,
+            self.side,
+            self.market_id,
+            self.contract_id)
+        self.assertEquals(self.client.session.outseq, 3)
+        self.client.read() # should be rejected
+        self.assertEquals(self.client.session.inseq, 3)
+        self.assertEquals(
+            order_rejected_msg.type,
+            seto.PAYLOAD_ORDER_REJECTED)
+        # Order create message was #2
+        self.assertEquals(order_rejected_msg.order_rejected.seq, 2)
+        self.assertEquals(
+            order_rejected_msg.order_rejected.reason,
+            seto.ORDER_REJECTED_INSUFFICIENT_FUNDS)
+
     def test_market_subscription(self):
         self._do_login()
         market_quotes_msg = self._simple_cb('seto.market_quotes')
