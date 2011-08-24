@@ -41,7 +41,8 @@ class ThreadingTestCase(unittest.TestCase):
         self.sender.start()
         # Wait for 30 seconds (default socket timeout) until connected
         # and login is sent before starting receiver
-        self.assertTrue(self.sender.login_complete.wait(30))
+        self.sender.login_complete.wait(30)
+        self.assertTrue(self.sender.login_complete.isSet())
         self.receiver.start()
         name, response = self.receiver.get()
         self.assertEquals(name, 'eto.login_response')
