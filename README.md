@@ -91,7 +91,7 @@ the example above they will now both be 5.
 
 ## Connections
 
-The `smarkets.session.SessionSocket` class wraps the vanilla Python
+The `smarkets.sessions.SessionSocket` class wraps the vanilla Python
 `socket.socket` class, providing the basic framing and padding
 functionality. It opens a single TCP connection and keeps it open for
 the duration of the session.
@@ -99,10 +99,10 @@ the duration of the session.
 
 ## Thread Safety
 
-It is not safe to share `smarkets.client.Smarkets` or `smarkets.session.Session`
-objects between threads. Only a single thread should call the
-`Smarkets.flush()` method (or others which trigger a send) at a
-time. Similarly, a single thread should call `Smarkets.read()` at a
-time. See the `ThreadingTestCase` in `tests/threading_tests.py` for an
-example on appropriate multi-threaded usage.
-
+It is not safe to share `smarkets.clients.Smarkets` or
+`smarkets.sessions.Session` objects between threads. Only a single
+thread should call the `Smarkets.flush()` method (or others which
+trigger a send) at a time. Similarly, a single thread should call
+`Smarkets.read()` at a time. See the `ThreadingTestCase` in
+`tests/threading_tests.py` for an example on appropriate
+multi-threaded usage.
