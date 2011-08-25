@@ -7,6 +7,7 @@ import smarkets as smk
 
 
 class SessionTestCase(unittest.TestCase):
+    "Base class for session tests"
     ping_total = 1000
     ping_each = 100
     market_id = smk.Smarkets.str_to_uuid128('1dc91c024')
@@ -59,6 +60,9 @@ class SessionTestCase(unittest.TestCase):
         # Return message for comparison
         return msg
 
+
+class BasicTestCase(SessionTestCase):
+    "Test basic session functionality"
     def test_invalid_callback(self):
         # Trying to add a non-existent callback will punish you with a
         # InvalidCallbackError
@@ -116,6 +120,9 @@ class SessionTestCase(unittest.TestCase):
                 self.client.read()
                 self.assertEquals(self.client.session.inseq, seq + offset)
 
+
+class OrderTestCase(SessionTestCase):
+    "Test simple order placement and cancellation"
     def test_order_accepted(self):
         self._do_login()
         order_accepted_msg = self._simple_cb('seto.order_accepted')
@@ -156,24 +163,6 @@ class SessionTestCase(unittest.TestCase):
         self.assertEquals(
             order_rejected_msg.order_rejected.reason,
             seto.ORDER_REJECTED_INSUFFICIENT_FUNDS)
-
-    def test_market_subscription(self):
-        self._do_login()
-        market_quotes_msg = self._simple_cb('seto.market_quotes')
-        self.client.subscribe(self.market_id)
-        self.assertEquals(self.client.session.outseq, 3)
-        self.client.read() # should be market quotes
-        self.assertEquals(self.client.session.inseq, 3)
-        self.assertEquals(
-            market_quotes_msg.type,
-            seto.PAYLOAD_MARKET_QUOTES)
-        self.assertEquals(
-            market_quotes_msg.market_quotes.market, self.market_id)
-
-    def test_market_unsubscription(self):
-        self._do_login()
-        self.client.unsubscribe(self.market_id)
-        self.assertEquals(self.client.session.outseq, 3)
 
     def test_order_cancel(self):
         self._do_login()
@@ -239,6 +228,75 @@ class SessionTestCase(unittest.TestCase):
                 order_cancelled_msg.order_cancelled.order, order_id)
             order_cancelled_msg.Clear()
 
+
+class QuoteTestCase(SessionTestCase):
+    "Test market data requests"
+    def test_market_subscription(self):
+        self._do_login()
+        market_quotes_msg = self._simple_cb('seto.market_quotes')
+        self.client.subscribe(self.market_id)
+        self.assertEquals(self.client.session.outseq, 3)
+        self.client.read() # should be market quotes
+        self.assertEquals(self.client.session.inseq, 3)
+        self.assertEquals(
+            market_quotes_msg.type,
+            seto.PAYLOAD_MARKET_QUOTES)
+        self.assertEquals(
+            market_quotes_msg.market_quotes.market, self.market_id)
+
+    def test_market_unsubscription(self):
+        self._do_login()
+        self.client.unsubscribe(self.market_id)
+        self.assertEquals(self.client.session.outseq, 3)
+
+    def test_quote1(self):
+        self._do_login()
+        order_accepted_msg = self._simple_cb('seto.order_accepted')
+        order_cancelled_msg = self._simple_cb('seto.order_cancelled')
+        market_quotes_msg = self._simple_cb('seto.market_quotes')
+        contract_quotes_msg = self._simple_cb('seto.contract_quotes')
+        self.client.subscribe(self.market_id)
+        self.client.read() # read the market quotes
+        self.assertEquals(
+            market_quotes_msg.type,
+            seto.PAYLOAD_MARKET_QUOTES)
+        start_qty = 0
+        for contract_quotes in market_quotes_msg.market_quotes.contract_quotes:
+            if contract_quotes.contract == self.contract_id:
+                start_qty = contract_quotes.buys[0].quantity
+        order_qty = 100000
+        self.client.order(
+            order_qty,
+            self.price,
+            self.side,
+            self.market_id,
+            self.contract_id)
+        self.client.read(2) # could be accepted or market quotes
+        self.assertEquals(
+            order_accepted_msg.type,
+            seto.PAYLOAD_ORDER_ACCEPTED)
+        self.assertEquals(
+            contract_quotes_msg.type,
+            seto.PAYLOAD_CONTRACT_QUOTES)
+        self.assertEquals(
+            contract_quotes_msg.contract_quotes.buys[0].quantity,
+            start_qty + order_qty)
+        contract_quotes_msg.Clear()
+        self.client.order_cancel(order_accepted_msg.order_accepted.order)
+        self.client.read(2) # could be accepted or market quotes
+        self.assertEquals(
+            order_cancelled_msg.type,
+            seto.PAYLOAD_ORDER_CANCELLED)
+        self.assertEquals(
+            order_cancelled_msg.order_cancelled.order,
+            order_accepted_msg.order_accepted.order)
+        self.assertEquals(
+            contract_quotes_msg.contract_quotes.buys[0].quantity,
+            start_qty)
+
+
+class EventTestCase(SessionTestCase):
+    "Test various event requests"
     def _event_found_request(self, event_request):
         self._do_login()
         http_found_msg = self._simple_cb('seto.http_found')
