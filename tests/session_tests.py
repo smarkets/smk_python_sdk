@@ -1,5 +1,8 @@
 import datetime
+import random
 import unittest
+
+from collections import defaultdict
 
 import smarkets.eto.piqi_pb2 as eto
 import smarkets.seto.piqi_pb2 as seto
@@ -10,28 +13,43 @@ class SessionTestCase(unittest.TestCase):
     "Base class for session tests"
     ping_total = 1000
     ping_each = 100
-    market_id = smk.Smarkets.str_to_uuid128('1dc91c024')
-    contract_id = smk.Smarkets.str_to_uuid128('2ab9acccc')
-    price = 2500 # 25.00%
-    quantity = 400000 # 40GBP
-    side = seto.SIDE_BUY
-    username = 'hunter.morris@smarkets.com'
-    password = 'abc,123'
+    markets = None
+    passwords = None
 
-    def get_session(self, cls=None):
+    def get_session(self, user_index, cls=None):
         if cls is None:
             cls = smk.Session
-        return cls(self.username, self.password)
+        username = 'none@domain.invalid'
+        password = 'none'
+        if self.passwords:
+            username, password = self.passwords[user_index]
+        return cls(username, password)
 
-    def get_client(self, cls=None, session=None, session_cls=None):
+    def get_client(
+        self, cls=None, session=None, session_cls=None, user_index=0):
         if cls is None:
             cls = smk.Smarkets
         if session is None:
-            session = self.get_session(cls=session_cls)
+            session = self.get_session(user_index, cls=session_cls)
         return cls(session)
+
+    def get_market(self, index=None):
+        if index is None:
+            index = random.randint(0, len(self.market_list) - 1)
+        return self.market_list[index]
 
     def setUp(self):
         self.client = self.get_client()
+        market_dict = defaultdict(list)
+        if self.markets:
+            for market, contract in self.markets:
+                market_dict[market].append(contract)
+        market_list = []
+        for market, contracts in market_dict.iteritems():
+            market_list.append(
+                (smk.Smarkets.str_to_uuid128(market),
+                 [smk.Smarkets.str_to_uuid128(x) for x in contracts]))
+        self.market_list = market_list
         self.assertFalse(self.client.session.connected)
         self.assertTrue(self.client.session.session is None)
 
@@ -78,6 +96,9 @@ class BasicTestCase(SessionTestCase):
         # ValueError
         self.assertRaises(ValueError, self.client.add_global_handler, None)
 
+
+class LoginTestCase(SessionTestCase):
+    "Test basic login/login response"
     def test_login(self):
         login_response_msg = self._simple_cb('eto.login_response')
         self.assertEquals(self.client.session.outseq, 1)
@@ -126,12 +147,14 @@ class OrderTestCase(SessionTestCase):
     def test_order_accepted(self):
         self._do_login()
         order_accepted_msg = self._simple_cb('seto.order_accepted')
+        market_id, contract_ids = self.get_market(0)
+        contract_id = contract_ids[0]
         self.client.order(
-            self.quantity,
-            self.price,
-            self.side,
-            self.market_id,
-            self.contract_id)
+            400000,
+            2500,
+            seto.SIDE_BUY,
+            market_id,
+            contract_id)
         self.assertEquals(self.client.session.outseq, 3)
         self.client.read() # should be accepted
         self.assertEquals(self.client.session.inseq, 3)
@@ -140,18 +163,20 @@ class OrderTestCase(SessionTestCase):
             seto.PAYLOAD_ORDER_ACCEPTED)
         # Order create message was #2
         self.assertEquals(order_accepted_msg.order_accepted.seq, 2)
-        self.assertEquals(order_accepted_msg.order_accepted.order.high, 0)
+        self.assertTrue(order_accepted_msg.order_accepted.order.high >= 0)
         self.assertTrue(order_accepted_msg.order_accepted.order.low > 0)
 
     def test_order_rejected(self):
         self._do_login()
         order_rejected_msg = self._simple_cb('seto.order_rejected')
+        market_id, contract_ids = self.get_market(0)
+        contract_id = contract_ids[0]
         self.client.order(
-            self.quantity * 10000, # should be insufficient funds
-            self.price,
-            self.side,
-            self.market_id,
-            self.contract_id)
+            4000000000, # should be insufficient funds
+            2500,
+            seto.SIDE_BUY,
+            market_id,
+            contract_id)
         self.assertEquals(self.client.session.outseq, 3)
         self.client.read() # should be rejected
         self.assertEquals(self.client.session.inseq, 3)
@@ -168,12 +193,14 @@ class OrderTestCase(SessionTestCase):
         self._do_login()
         order_accepted_msg = self._simple_cb('seto.order_accepted')
         order_cancelled_msg = self._simple_cb('seto.order_cancelled')
+        market_id, contract_ids = self.get_market(0)
+        contract_id = contract_ids[0]
         self.client.order(
-            self.quantity,
-            self.price,
-            self.side,
-            self.market_id,
-            self.contract_id)
+            400000,
+            2500,
+            seto.SIDE_BUY,
+            market_id,
+            contract_id)
         self.assertEquals(self.client.session.outseq, 3)
         self.client.read() # should be accepted
         self.assertEquals(self.client.session.inseq, 3)
@@ -201,14 +228,16 @@ class OrderTestCase(SessionTestCase):
         order_accepted_msg = self._simple_cb('seto.order_accepted')
         order_cancelled_msg = self._simple_cb('seto.order_cancelled')
         to_cancel = []
+        market_id, contract_ids = self.get_market(0)
+        contract_id = contract_ids[0]
         # Place 100 orders then cancel them
         for _ in xrange(1, 100):
             self.client.order(
-                self.quantity / 100,
-                self.price,
-                self.side,
-                self.market_id,
-                self.contract_id)
+                4000,
+                2500,
+                seto.SIDE_BUY,
+                market_id,
+                contract_id)
             self.client.read() # should be accepted
             self.assertEquals(
                 order_accepted_msg.type,
@@ -234,7 +263,8 @@ class QuoteTestCase(SessionTestCase):
     def test_market_subscription(self):
         self._do_login()
         market_quotes_msg = self._simple_cb('seto.market_quotes')
-        self.client.subscribe(self.market_id)
+        market_id, _ = self.get_market(0)
+        self.client.subscribe(market_id)
         self.assertEquals(self.client.session.outseq, 3)
         self.client.read() # should be market quotes
         self.assertEquals(self.client.session.inseq, 3)
@@ -242,11 +272,12 @@ class QuoteTestCase(SessionTestCase):
             market_quotes_msg.type,
             seto.PAYLOAD_MARKET_QUOTES)
         self.assertEquals(
-            market_quotes_msg.market_quotes.market, self.market_id)
+            market_quotes_msg.market_quotes.market, market_id)
 
     def test_market_unsubscription(self):
         self._do_login()
-        self.client.unsubscribe(self.market_id)
+        market_id, _ = self.get_market(0)
+        self.client.unsubscribe(market_id)
         self.assertEquals(self.client.session.outseq, 3)
 
     def test_quote1(self):
@@ -255,22 +286,24 @@ class QuoteTestCase(SessionTestCase):
         order_cancelled_msg = self._simple_cb('seto.order_cancelled')
         market_quotes_msg = self._simple_cb('seto.market_quotes')
         contract_quotes_msg = self._simple_cb('seto.contract_quotes')
-        self.client.subscribe(self.market_id)
+        market_id, contract_ids = self.get_market(0)
+        contract_id = contract_ids[0]
+        self.client.subscribe(market_id)
         self.client.read() # read the market quotes
         self.assertEquals(
             market_quotes_msg.type,
             seto.PAYLOAD_MARKET_QUOTES)
         start_qty = 0
         for contract_quotes in market_quotes_msg.market_quotes.contract_quotes:
-            if contract_quotes.contract == self.contract_id:
+            if contract_quotes.contract == contract_id:
                 start_qty = contract_quotes.buys[0].quantity
         order_qty = 100000
         self.client.order(
             order_qty,
-            self.price,
-            self.side,
-            self.market_id,
-            self.contract_id)
+            2500,
+            seto.SIDE_BUY,
+            market_id,
+            contract_id)
         self.client.read(2) # could be accepted or market quotes
         self.assertEquals(
             order_accepted_msg.type,

@@ -11,19 +11,22 @@ import smarkets as smk
 
 
 class ThreadingTestCase(unittest.TestCase):
-    username = 'hunter.morris@smarkets.com'
-    password = 'abc,123'
-
-    def get_session(self, cls=None):
+    "Test using separate reader and writer threads"
+    def get_session(self, user_index, cls=None):
         if cls is None:
             cls = smk.Session
-        return cls(self.username, self.password)
+        username = 'none@domain.invalid'
+        password = 'none'
+        if self.passwords:
+            username, password = self.passwords[user_index]
+        return cls(username, password)
 
-    def get_client(self, cls=None, session=None, session_cls=None):
+    def get_client(
+        self, cls=None, session=None, session_cls=None, user_index=0):
         if cls is None:
             cls = smk.Smarkets
         if session is None:
-            session = self.get_session(cls=session_cls)
+            session = self.get_session(user_index, cls=session_cls)
         return cls(session)
 
     def setUp(self):
