@@ -8,6 +8,7 @@ import smarkets.eto.piqi_pb2 as eto
 import smarkets.seto.piqi_pb2 as seto
 
 from smarkets.clients import Callback, Smarkets
+from smarkets.exceptions import InvalidCallbackError
 
 
 class CallbackTestCase(unittest.TestCase):
@@ -213,6 +214,23 @@ class SmarketsTestCase(unittest.TestCase):
         payload.http_found.seq = 2
         self.assertEqual(expected, self.client.fetch_http_found(payload))
         mock_fetch.assert_called_once_with(payload.http_found.url)
+
+    def test_add_bad_handler(self):
+        "Test trying to add a bad handler either as a global or normal"
+        for bad_handler in (
+            50, 'foo', False, True, u'foo', 1.2, 1L):
+            self.assertRaises(
+                ValueError, self.client.add_handler, 'eto.pong', bad_handler)
+            self.assertRaises(
+                ValueError, self.client.add_global_handler, bad_handler)
+
+    def test_add_unknown_handler(self):
+        "Test trying to add a handler for an unknown callback name"
+        handler = lambda: None
+        self.assertRaises(
+            InvalidCallbackError, self.client.add_handler, 'foo', handler)
+        self.assertRaises(
+            InvalidCallbackError, self.client.del_handler, 'foo', handler)
 
     @contextmanager
     def _clear_send(self):
