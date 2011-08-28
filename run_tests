@@ -4,8 +4,16 @@ import optparse
 import sys
 import unittest
 
+try:
+    import mock
+except ImportError:
+    sys.stderr.write(
+        "*** Cannot find mock; please make sure it is in the Python path "
+        "or install it (pip install mock)\n")
+    sys.exit(-1)
+
 from smarkets import __version__
-from tests import all_tests
+from tests import unit_tests, integration_tests
 
 
 if __name__ == '__main__':
@@ -16,38 +24,42 @@ if __name__ == '__main__':
         default=False, help="turn on DEBUG logging level")
     parser.add_option(
         '-f', '--file', dest='password_filename',
-        help="read usernames and passwords from FILE",
+        help="read usernames and passwords from FILE (integration only)",
         metavar='FILE')
     parser.add_option(
         '-m', '--markets', dest='market_filename',
-        help="read markets from FILE",
+        help="read markets from FILE (integration only)",
         metavar='FILE')
     parser.add_option(
         '-s', '--server', dest='server',
-        help="server host to connect to",
+        help="server host to connect to (integration only)",
         metavar='SERVER')
     parser.add_option(
         '-p', '--port', dest='port',
-        help="server port to connect to",
+        help="server port to connect to (integration only)",
         metavar='PORT')
     parser.add_option(
-        '-k', '--skip-online', dest='skip_online', action='store_true',
-        default=False, help="skip online tests")
+        '-i', '--run-integration', dest='run_integration', action='store_true',
+        default=False,
+        help="run integration tests (only possible if you have a 'test' "
+        "API service available)")
     options, args = parser.parse_args()
     level = logging.WARNING
     if options.verbose:
         level = logging.DEBUG
     logging.basicConfig(level=level)
+    suite = unittest.TestSuite()
+    unit_tests(suite)
     kwargs = {}
-    for name in (
-        'password_filename',
-        'market_filename',
-        'server',
-        'port',
-        'skip_online',
-        ):
-        val = getattr(options, name)
-        if val:
-            kwargs[name] = val
-    tests = all_tests(**kwargs)
-    results = unittest.TextTestRunner().run(tests)
+    if options.run_integration:
+        for name in (
+            'password_filename',
+            'market_filename',
+            'server',
+            'port',
+            ):
+            val = getattr(options, name)
+            if val:
+                kwargs[name] = val
+        integration_tests(suite, **kwargs)
+    results = unittest.TextTestRunner().run(suite)

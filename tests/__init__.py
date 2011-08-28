@@ -11,39 +11,45 @@ from session_tests import (
 )
 from threading_tests import ThreadingTestCase
 
+from unit_tests import (
+    CallbackTestCase,
+)
 
-def all_tests(
+
+def unit_tests(suite):
+    "Add tests to a `unittest.TestSuite` containing only unit tests"
+    suite.addTest(unittest.makeSuite(CallbackTestCase))
+
+
+def integration_tests(
+    suite,
     password_filename=None,
     market_filename=None,
     server='127.0.0.1',
-    port=3701,
-    skip_online=False):
-    "Return a unittest.TestSuite containing runnable tests"
-    suite = unittest.TestSuite()
+    port=3701):
+    "Add tests to a `unittest.TestSuite` containing integration tests"
     suite.addTest(unittest.makeSuite(BasicTestCase))
-    if not skip_online:
-        # Use defaults from our test data
-        if password_filename is None:
-            password_filename = os.path.join(
-                os.path.dirname(__file__), '..', '..', '..',
-                'test-data', 'test_usernames.txt')
-        if market_filename is None:
-            market_filename = os.path.join(
-                os.path.dirname(__file__), '..', '..', '..',
-                'test-data', 'test_markets.txt')
+    # Use defaults from our test data
+    if password_filename is None:
+        password_filename = os.path.join(
+            os.path.dirname(__file__), '..', '..', '..',
+            'test-data', 'test_usernames.txt')
+    if market_filename is None:
+        market_filename = os.path.join(
+            os.path.dirname(__file__), '..', '..', '..',
+            'test-data', 'test_markets.txt')
     passwords = list(read_pair_file(password_filename))
     markets = list(read_pair_file(market_filename))
-    if not skip_online:
-        for case_class in (
-            LoginTestCase,
-            OrderTestCase,
-            QuoteTestCase,
-            EventTestCase,
-            ThreadingTestCase,
-            ):
-            case_class.passwords = passwords
-            case_class.markets = markets
-            suite.addTest(unittest.makeSuite(case_class))
+    for case_class in (
+        LoginTestCase,
+        OrderTestCase,
+        QuoteTestCase,
+        EventTestCase,
+        ThreadingTestCase,
+        ):
+        case_class.passwords = passwords
+        case_class.markets = markets
+        suite.addTest(unittest.makeSuite(case_class))
     return suite
 
 
