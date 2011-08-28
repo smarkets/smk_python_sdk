@@ -76,6 +76,7 @@ class Smarkets(object):
         self.auto_flush = auto_flush
         self.callbacks = self.__class__.CALLBACKS.copy()
         self.global_callback = Callback()
+        self.fetch = fetch
 
     def login(self, receive=True):
         "Connect and ensure the session is active"
@@ -159,7 +160,7 @@ class Smarkets(object):
 
     def fetch_http_found(self, payload, incoming_payload=None):
         "Fetch the URL specified by a http found payload"
-        content_type, result = fetch(payload.http_found.url)
+        content_type, result = self.fetch(payload.http_found.url)
         if content_type == 'application/x-protobuf':
             if incoming_payload is None:
                 incoming_payload = seto.Events()
