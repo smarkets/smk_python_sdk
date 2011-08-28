@@ -1,5 +1,6 @@
 import unittest
 
+from contextlib import contextmanager
 from itertools import chain
 from mock import Mock, patch
 
@@ -150,8 +151,69 @@ class SmarketsTestCase(unittest.TestCase):
         self.assertEquals(1, self.mock_session.next_frame.call_count)
         response.assert_called_once_with(payload)
 
+    def test_logout(self):
+        "Test the `Smarkets.logout` method"
+        self.client.logout()
+        self.assertEquals(1, self.mock_session.disconnect.call_count)
+
+    def test_flush(self):
+        "Test the `Smarkets.flush` method"
+        self.client.flush()
+        self.assertEquals(1, self.mock_session.flush.call_count)
+
+    def test_order(self):
+        "Test the `Smarkets.order` method"
+        market_id = self.client.str_to_uuid128('1c024')
+        contract_id = self.client.str_to_uuid128('1cccc')
+        with self._clear_send():
+            self.client.order(10000, 2500, seto.SIDE_BUY, market_id, contract_id)
+
+    def test_order_cancel(self):
+        "Test the `Smarkets.order_cancel` method"
+        order_id = self.client.str_to_uuid128('1fff0')
+        with self._clear_send():
+            self.client.order_cancel(order_id)
+
+    def test_ping(self):
+        "Test the `Smarkets.ping` method"
+        with self._clear_send():
+            self.client.ping()
+
+    def test_subscribe(self):
+        "Test the `Smarkets.subscribe` method"
+        market_id = self.client.str_to_uuid128('1c024')
+        with self._clear_send():
+            self.client.subscribe(market_id)
+
+    def test_unsubscribe(self):
+        "Test the `Smarkets.unsubscribe` method"
+        market_id = self.client.str_to_uuid128('1c024')
+        with self._clear_send():
+            self.client.unsubscribe(market_id)
+
+    def test_request_events(self):
+        "Test the `Smarkets.request_events` method"
+        with patch('smarkets.events.Politics') as mock_politics:
+            request = mock_politics.return_value
+            with self._clear_send():
+                self.client.request_events(request)
+            request.copy_to.assert_called_once_with(
+                self.mock_session.out_payload)
+
+    @contextmanager
+    def _clear_send(self):
+        """
+        Shortcut for asserting that the outgoing payload is cleared
+        and sent via the session
+        """
+        self.mock_session.out_payload.Clear = Mock()
+        yield
+        self.mock_session.send.assert_called_once_with(True)
+        self.assertEquals(1, self.mock_session.out_payload.Clear.call_count)
+
     @staticmethod
     def _login_response():
+        "Create a dummy login response payload"
         payload = seto.Payload()
         payload.eto_payload.seq = 1
         payload.eto_payload.type = eto.PAYLOAD_LOGIN_RESPONSE
