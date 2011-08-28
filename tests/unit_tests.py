@@ -80,3 +80,27 @@ class CallbackTestCase(unittest.TestCase):
             self.assertFalse(handler.called)
         for handler in real_handlers:
             handler.assert_called_once_with('foo')
+
+    def test_handle_exception(self):
+        "Test that an exception is raised by the callback method"
+        handler = Mock(side_effect=self._always_raise)
+        self.callback += handler
+        self.assertRaises(Exception, self.callback, 'foo')
+
+    def test_2_handle_exception(self):
+        "Test that an exception is raised by the callback method"
+        handler1 = Mock(side_effect=self._always_raise)
+        handler2 = Mock()
+        self.callback += handler1
+        self.callback += handler2
+        self.assertRaises(Exception, self.callback, 'foo')
+        # Because the collection of handlers in the `Callback` is a
+        # `set` the 'firing' order is undefined. However, if handler2
+        # is called, we assert that it is called correctly here.
+        if handler2.called:
+            handler2.assert_called_once_with('foo')
+
+    @staticmethod
+    def _always_raise(*args, **kwargs):
+        "Always raise `Exception` with no arguments"
+        raise Exception()
