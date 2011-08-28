@@ -13,12 +13,14 @@ from threading_tests import ThreadingTestCase
 
 from unit_tests import (
     CallbackTestCase,
+    SmarketsTestCase,
 )
 
 
 def unit_tests(suite):
     "Add tests to a `unittest.TestSuite` containing only unit tests"
     suite.addTest(unittest.makeSuite(CallbackTestCase))
+    suite.addTest(unittest.makeSuite(SmarketsTestCase))
 
 
 def integration_tests(

@@ -1,9 +1,12 @@
 import unittest
 
 from itertools import chain
-from mock import Mock
+from mock import Mock, patch
 
-from smarkets.clients import Callback
+import smarkets.eto.piqi_pb2 as eto
+import smarkets.seto.piqi_pb2 as seto
+
+from smarkets.clients import Callback, Smarkets
 
 
 class CallbackTestCase(unittest.TestCase):
@@ -104,3 +107,54 @@ class CallbackTestCase(unittest.TestCase):
     def _always_raise(*args, **kwargs):
         "Always raise `Exception` with no arguments"
         raise Exception()
+
+
+class SmarketsTestCase(unittest.TestCase):
+    "Tests for the `smarkets.Smarkets` client object"
+    def setUp(self):
+        "Patch the `Session` object for mock use"
+        self.session_patcher = patch('smarkets.sessions.Session')
+        self.mock_session_cls = self.session_patcher.start()
+        self.mock_session = self.mock_session_cls.return_value
+        self.client = Smarkets(self.mock_session)
+
+    def tearDown(self):
+        "Stop the patcher"
+        self.session_patcher.stop()
+        self.mock_session_cls = None
+        self.mock_session = None
+        self.client = None
+
+    def test_login(self):
+        "Test the `Smarkets.login` method"
+        payload = self._login_response()
+        self.mock_session.next_frame.return_value = payload
+        response = Mock()
+        self.client.add_handler('eto.login_response', response)
+        self.client.login()
+        self.assertEquals(1, self.mock_session.connect.call_count)
+        self.assertEquals(1, self.mock_session.next_frame.call_count)
+        response.assert_called_once_with(payload)
+
+    def test_login_norecv(self):
+        "Test the `Smarkets.login` method"
+        payload = self._login_response()
+        self.mock_session.next_frame.return_value = payload
+        response = Mock()
+        self.client.add_handler('eto.login_response', response)
+        self.client.login(False)
+        self.assertEquals(1, self.mock_session.connect.call_count)
+        self.assertFalse(self.mock_session.next_frame.called)
+        self.assertFalse(response.called)
+        self.client.read()
+        self.assertEquals(1, self.mock_session.next_frame.call_count)
+        response.assert_called_once_with(payload)
+
+    @staticmethod
+    def _login_response():
+        payload = seto.Payload()
+        payload.eto_payload.seq = 1
+        payload.eto_payload.type = eto.PAYLOAD_LOGIN_RESPONSE
+        payload.eto_payload.login_response.session = 'session'
+        payload.eto_payload.login_response.reset = 2
+        return payload
