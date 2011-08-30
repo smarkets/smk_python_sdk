@@ -23,5 +23,6 @@ test: deps
 	nosetests --with-xunit --quiet --xunit-file=build/test/nosetests.xml tests/unit_tests.py
 
 check:
-	mkdir -p build/pylint
-	pylint --ignore=piqi_pb2.py -f parseable smarkets > build/pylint/pylint.out
+	mkdir -p build/pylint build/pep8
+	-pylint --ignore=piqi_pb2.py -f parseable smarkets > build/pylint/pylint.out
+	pep8 --exclude=piqi_pb2.py smarkets > build/pep8/pep8.out
