@@ -43,6 +43,7 @@ class SportByDate(EventsRequest):
     _payload.events_request.type = seto.EVENTS_REQUEST_SPORT_BY_DATE
 
     def __init__(self, date):
+        super(SportByDate, self).__init__()
         self.date = date
         self.payload = seto.Payload()
         self.payload.CopyFrom(self._payload)

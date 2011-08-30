@@ -2,7 +2,7 @@
 import logging
 import urllib2
 
-from exceptions import InvalidUrlError, DownloadError
+from smarkets.exceptions import InvalidUrlError, DownloadError
 
 
 def fetch(url):

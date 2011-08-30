@@ -6,9 +6,8 @@ from itertools import chain
 import smarkets.eto.piqi_pb2 as eto
 import smarkets.seto.piqi_pb2 as seto
 
+from smarkets.exceptions import InvalidCallbackError
 from smarkets.urls import fetch
-
-from exceptions import InvalidCallbackError
 
 
 _ETO_PAYLOAD_TYPES = dict((
