@@ -19,4 +19,5 @@ release: deps
 	python setup.py sdist --format=gztar,zip
 
 test: deps
-	./run_tests
+	mkdir -p build/test
+	nosetests --with-xunit --quiet --xunit-file=build/test/nosetests.xml tests/unit_tests.py
