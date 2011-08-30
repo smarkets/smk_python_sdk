@@ -103,7 +103,7 @@ class SmarketsProtocolBuild(build.build):
             init_file = os.path.join(
                 os.path.dirname(__file__), 'smarkets', pkg_dir, '__init__.py')
             initf = open(init_file, 'w')
-            initf.write('"Protocol-buffers generated package"')
+            initf.write('"Protocol-buffers generated package"\n')
             initf.close()
 
         build.build.run(self)
@@ -187,7 +187,7 @@ sdict = {
     'test_suite' : 'tests.all_tests',
     'classifiers' : [
         'Development Status :: 3 - Alpha',
-        'Environment :: Console',
+p        'Environment :: Console',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
