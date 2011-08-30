@@ -21,3 +21,7 @@ release: deps
 test: deps
 	mkdir -p build/test
 	nosetests --with-xunit --quiet --xunit-file=build/test/nosetests.xml tests/unit_tests.py
+
+check:
+	mkdir -p build/pylint
+	pylint --ignore=piqi_pb2.py -f parseable smarkets > build/pylint/pylint.out
