@@ -103,7 +103,6 @@ class Smarkets(object):
         "Create a new order"
         msg = self.session.out_payload
         msg.Clear()
-        # pylint: disable-msg=E1101
         msg.type = seto.PAYLOAD_ORDER_CREATE
         msg.order_create.type = seto.ORDER_CREATE_LIMIT
         msg.order_create.market.CopyFrom(market)
@@ -119,7 +118,6 @@ class Smarkets(object):
         "Cancel an existing order"
         msg = self.session.out_payload
         msg.Clear()
-        # pylint: disable-msg=E1101
         msg.type = seto.PAYLOAD_ORDER_CANCEL
         msg.order_cancel.order.CopyFrom(order)
         self._send()
@@ -128,7 +126,6 @@ class Smarkets(object):
         "Ping the service"
         msg = self.session.out_payload
         msg.Clear()
-        # pylint: disable-msg=E1101
         msg.type = seto.PAYLOAD_ETO
         msg.eto_payload.type = eto.PAYLOAD_PING
         self._send()
@@ -137,7 +134,6 @@ class Smarkets(object):
         "Subscribe to a market"
         msg = self.session.out_payload
         msg.Clear()
-        # pylint: disable-msg=E1101
         msg.type = seto.PAYLOAD_MARKET_SUBSCRIPTION
         msg.market_subscription.market.CopyFrom(market)
         self._send()
@@ -146,7 +142,6 @@ class Smarkets(object):
         "Unsubscribe from a market"
         msg = self.session.out_payload
         msg.Clear()
-        # pylint: disable-msg=E1101
         msg.type = seto.PAYLOAD_MARKET_UNSUBSCRIPTION
         msg.market_unsubscription.market.CopyFrom(market)
         self._send()

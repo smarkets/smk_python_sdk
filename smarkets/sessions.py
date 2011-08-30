@@ -44,7 +44,6 @@ class Session(object):
             self.buf_outseq = self.outseq
             login = self.out_payload
             login.Clear()
-            # pylint: disable-msg=E1101
             login.type = seto.PAYLOAD_LOGIN
             login.eto_payload.type = eto.PAYLOAD_LOGIN
             login.login.username = self.username
@@ -66,7 +65,6 @@ class Session(object):
         self.logger.debug(
             "buffering payload with outgoing sequence %d: %s",
             self.outseq, text_format.MessageToString(self.out_payload))
-        # pylint: disable-msg=E1101
         self.out_payload.eto_payload.seq = self.buf_outseq
         self.send_buffer.put_nowait(self.out_payload.SerializeToString())
         self.buf_outseq += 1
@@ -90,7 +88,6 @@ class Session(object):
         self.in_payload.Clear()
         self.in_payload.ParseFromString(msg_bytes)
         self._handle_in_payload()
-        # pylint: disable-msg=E1101
         if self.in_payload.eto_payload.seq == self.inseq:
             # Go ahead
             self.logger.debug("received sequence %d", self.inseq)
@@ -110,7 +107,6 @@ class Session(object):
                 self.inseq)
             replay = self.out_payload
             replay.Clear()
-            # pylint: disable-msg=E1101
             replay.type = seto.PAYLOAD_ETO
             replay.eto_payload.type = eto.PAYLOAD_REPLAY
             replay.eto_payload.replay.seq = self.inseq
@@ -123,7 +119,6 @@ class Session(object):
 
     def _handle_in_payload(self):
         "Pre-consume the login response message"
-        # pylint: disable-msg=E1101
         msg = self.in_payload
         self.logger.debug(
             "received message to dispatch: %s",

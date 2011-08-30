@@ -102,7 +102,9 @@ class SmarketsProtocolBuild(build.build):
         for pkg_dir in ('eto', 'seto'):
             init_file = os.path.join(
                 os.path.dirname(__file__), 'smarkets', pkg_dir, '__init__.py')
-            open(init_file, 'w').close()
+            initf = open(init_file, 'w')
+            initf.write('"Protocol-buffers generated package"')
+            initf.close()
 
         build.build.run(self)
 
