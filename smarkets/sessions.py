@@ -157,7 +157,7 @@ class SessionSocket(object):
     # effect. For larger messages, it needs some performance testing
     # to determine whether a single large recv() system call is worse
     # than many smaller ones.
-    default_read_chunksize = 65536 # 64k
+    default_read_chunksize = 65536  # 64k
 
     def __init__(self, host, port, socket_timeout=None, read_chunksize=None):
         self.host = host
