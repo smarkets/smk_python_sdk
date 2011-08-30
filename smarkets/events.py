@@ -1,5 +1,4 @@
 "Smarkets event request helper classes"
-import smarkets.eto.piqi_pb2 as eto
 import smarkets.seto.piqi_pb2 as seto
 
 
@@ -60,21 +59,24 @@ class FootballByDate(SportByDate):
     "Request for football by date"
     def __init__(self, date):
         super(FootballByDate, self).__init__(date)
-        self.payload.events_request.sport_by_date.type = seto.SPORT_BY_DATE_FOOTBALL
+        self.payload.events_request.sport_by_date.type = \
+            seto.SPORT_BY_DATE_FOOTBALL
 
 
 class HorseRacingByDate(SportByDate):
     "Request for horse racing by date"
     def __init__(self, date):
         super(HorseRacingByDate, self).__init__(date)
-        self.payload.events_request.sport_by_date.type = seto.SPORT_BY_DATE_HORSE_RACING
+        self.payload.events_request.sport_by_date.type = \
+            seto.SPORT_BY_DATE_HORSE_RACING
 
 
 class TennisByDate(SportByDate):
     "Request for football by date"
     def __init__(self, date):
         super(TennisByDate, self).__init__(date)
-        self.payload.events_request.sport_by_date.type = seto.SPORT_BY_DATE_TENNIS
+        self.payload.events_request.sport_by_date.type = \
+            seto.SPORT_BY_DATE_TENNIS
 
 
 class SportOther(EventsRequest):

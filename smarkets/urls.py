@@ -2,8 +2,6 @@
 import logging
 import urllib2
 
-import smarkets.seto.piqi_pb2 as seto
-
 from exceptions import InvalidUrlError, DownloadError
 
 
@@ -21,8 +19,8 @@ def fetch(url):
                 content_type, len(entity_body))
             return content_type, entity_body
         raise DownloadError('http status code was not 200: %d', result.code)
-    except urllib2.URLError as e:
-        if e.args and isinstance(e.args[0], str):
-            raise InvalidUrlError(e.args[0])
+    except urllib2.URLError as exc:
+        if exc.args and isinstance(exc.args[0], str):
+            raise InvalidUrlError(exc.args[0])
         else:
-            raise DownloadError(e.reason)
+            raise DownloadError(exc.reason)
