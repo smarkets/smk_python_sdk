@@ -187,7 +187,7 @@ sdict = {
     'test_suite' : 'tests.all_tests',
     'classifiers' : [
         'Development Status :: 3 - Alpha',
-p        'Environment :: Console',
+        'Environment :: Console',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
