@@ -287,6 +287,27 @@ class OrderTestCase(SessionTestCase):
         self.assertEquals(
             order_cancel_rejected_msg.order_cancel_rejected.seq, 2)
 
+    def test_multiple_order_cancel_rejected(self):
+        self._do_login(0)
+        order_cancel_rejected_msg = self._simple_cb(
+            self.clients[0], 'seto.order_cancel_rejected')
+        # Send a cancel
+        order_id = self.clients[0].str_to_uuid128('1fff0')
+        for i in xrange(3, 10):
+            self.clients[0].order_cancel(order_id)
+            self.assertEquals(self.clients[0].session.outseq, i)
+        for i in xrange(3, 10):
+            self.clients[0].read()
+            self.assertEquals(self.clients[0].session.inseq, i)
+            self.assertEquals(
+                order_cancel_rejected_msg.type,
+                seto.PAYLOAD_ORDER_CANCEL_REJECTED)
+            self.assertEquals(
+                order_cancel_rejected_msg.order_cancel_rejected.reason,
+                seto.ORDER_CANCEL_REJECTED_NOT_FOUND)
+            self.assertEquals(
+                order_cancel_rejected_msg.order_cancel_rejected.seq, i - 1)
+
 
 class QuoteTestCase(SessionTestCase):
     "Test market data requests"
