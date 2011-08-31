@@ -33,9 +33,10 @@ or if you want to build it yourself:
     >>> import smarkets
     >>> username = 'username'
     >>> password = 'password'
-    >>> host = 'api.smarkets.com'
-    >>> port = 3701
-    >>> session = smarkets.Session(username, password, host, port)
+    >>> settings = smarkets.SessionSettings(username, password)
+    >>> settings.host = 'api.smarkets.com'
+    >>> settings.port = 3701
+    >>> session = smarkets.Session(settings)
     >>> client = smarkets.Smarkets(session)
     >>> client.login()
     >>> client.ping()
@@ -65,13 +66,13 @@ the example above they will now both be 5.
 
     >>> username = 'username'
     >>> password = 'password'
-    >>> host = 'api.smarkets.com'
-    >>> port = 3701
+    >>> settings = smarkets.SessionSettings(username, password)
+    >>> settings.host = 'api.smarkets.com'
+    >>> settings.port = 3701
     >>> session_id = 'session-id'
     >>> inseq = 5
     >>> outseq = 5
-    >>> session = smarkets.Session(
-    >>>     username, password, host, port, session_id, inseq, outseq)
+    >>> session = smarkets.Session(settings, session_id, inseq, outseq)
     >>> client = smarkets.Smarkets(session)
     >>> client.login()
     >>> client.read()
