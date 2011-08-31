@@ -341,9 +341,11 @@ class OrderTestCase(SessionTestCase):
         self.assertEquals(
             order_cancelled_msg.order_cancelled.order,
             order_accepted_msg.order_accepted.order)
-        # Send another cancel to be rejected
+        # Send two cancels to be rejected
         self.clients[0].order_cancel(order_accepted_msg.order_accepted.order)
         self.assertEquals(self.clients[0].session.outseq, 5)
+        self.clients[0].order_cancel(order_accepted_msg.order_accepted.order)
+        self.assertEquals(self.clients[0].session.outseq, 6)
         self.clients[0].read() # should be cancel rejected -- order not live
         self.assertEquals(self.clients[0].session.inseq, 5)
         self.assertEquals(
@@ -354,6 +356,16 @@ class OrderTestCase(SessionTestCase):
             seto.ORDER_CANCEL_REJECTED_NOT_LIVE)
         self.assertEquals(
             order_cancel_rejected_msg.order_cancel_rejected.seq, 4)
+        self.clients[0].read() # should be 2nd cancel rejected -- order not live
+        self.assertEquals(self.clients[0].session.inseq, 6)
+        self.assertEquals(
+            order_cancel_rejected_msg.type,
+            seto.PAYLOAD_ORDER_CANCEL_REJECTED)
+        self.assertEquals(
+            order_cancel_rejected_msg.order_cancel_rejected.reason,
+            seto.ORDER_CANCEL_REJECTED_NOT_LIVE)
+        self.assertEquals(
+            order_cancel_rejected_msg.order_cancel_rejected.seq, 5)
 
 
 class QuoteTestCase(SessionTestCase):
