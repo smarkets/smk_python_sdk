@@ -27,7 +27,8 @@ class SessionTestCase(unittest.TestCase):
         password = 'none'
         if self.passwords:
             username, password = self.passwords[user_index]
-        return cls(username, password)
+        settings = smk.SessionSettings(username, password)
+        return cls(settings)
 
     def get_client(
         self, cls=None, session=None, session_cls=None, user_index=0):
@@ -61,21 +62,18 @@ class SessionTestCase(unittest.TestCase):
                 (smk.Smarkets.str_to_uuid128(market),
                  [smk.Smarkets.str_to_uuid128(x) for x in contracts]))
         self.market_list = market_list
+        for client in self.clients:
+            self.assertEquals(client.session.outseq, 1)
+            self.assertEquals(client.session.inseq, 1)
+            client.login()
+            # Should only have login, then login_response
+            self.assertEquals(client.session.outseq, 2)
+            self.assertEquals(client.session.inseq, 2)
 
     def tearDown(self):
         for client in self.clients:
             client.logout()
         self.clients = []
-
-    def _do_login(self, index=0):
-        # We must start with a clean seq #1
-        client = self.clients[index]
-        self.assertEquals(client.session.outseq, 1)
-        self.assertEquals(client.session.inseq, 1)
-        client.login()
-        # Should only have login, then login_response
-        self.assertEquals(client.session.outseq, 2)
-        self.assertEquals(client.session.inseq, 2)
 
     def _simple_cb(self, client, name):
         msg = seto.Payload()
@@ -90,49 +88,43 @@ class SessionTestCase(unittest.TestCase):
         return msg
 
 
-class BasicTestCase(SessionTestCase):
-    "Test basic session functionality"
-    def test_invalid_callback(self):
-        # Trying to add a non-existent callback will punish you with a
-        # InvalidCallbackError
-        self.assertRaises(
-            smk.InvalidCallbackError,
-            self.clients[0].add_handler, 'baz', lambda _: None)
-        self.assertRaises(
-            ValueError,
-            self.clients[0].add_handler, 'eto.login', None)
-
-    def test_invalid_global_callback(self):
-        # Trying to add a 'None' callback will punish you with a
-        # ValueError
-        self.assertRaises(ValueError, self.clients[0].add_global_handler, None)
-
-
 class LoginTestCase(SessionTestCase):
     "Test basic login/login response"
-    ping_total = 1000
-    ping_each = 100
+    def setUp(self):
+        # Skip defaults
+        pass
+
+    def tearDown(self):
+        # Skip defaults
+        pass
 
     def test_login(self):
-        login_response_msg = self._simple_cb(self.clients[0], 'eto.login_response')
-        self.assertEquals(self.clients[0].session.outseq, 1)
-        self.assertEquals(self.clients[0].session.inseq, 1)
-        self.assertTrue(self.clients[0].session.session is None)
+        client = self.get_client()
+        login_response_msg = self._simple_cb(client, 'eto.login_response')
+        self.assertEquals(client.session.outseq, 1)
+        self.assertEquals(client.session.inseq, 1)
+        self.assertTrue(client.session.session is None)
         # Send login message and immediately read response; this
         # blocks until the login_response message is received
-        self.clients[0].login()
-        self.assertFalse(self.clients[0].session.session is None)
+        client.login()
+        self.assertFalse(client.session.session is None)
         self.assertEquals(
             login_response_msg.type,
             seto.PAYLOAD_ETO)
         self.assertEquals(
             login_response_msg.eto_payload.type,
             eto.PAYLOAD_LOGIN_RESPONSE)
-        self.assertEquals(self.clients[0].session.outseq, 2)
-        self.assertEquals(self.clients[0].session.inseq, 2)
+        self.assertEquals(client.session.outseq, 2)
+        self.assertEquals(client.session.inseq, 2)
+        client.logout()
+
+
+class PingTestCase(SessionTestCase):
+    "Test ping/pong"
+    ping_total = 1000
+    ping_each = 100
 
     def test_ping(self):
-        self._do_login(0)
         pong_msg = self._simple_cb(self.clients[0], 'eto.pong')
         self.clients[0].ping()
         self.assertEquals(self.clients[0].session.outseq, 3)
@@ -146,7 +138,6 @@ class LoginTestCase(SessionTestCase):
             eto.PAYLOAD_PONG)
 
     def test_ping_many(self):
-        self._do_login(0)
         for seq in xrange(3, self.ping_total + 3, self.ping_each):
             for offset in xrange(0, self.ping_each):
                 self.clients[0].ping()
@@ -172,7 +163,6 @@ class OrderTestCase(SessionTestCase):
         return order
 
     def test_order_accepted(self):
-        self._do_login(0)
         order_accepted_msg = self._simple_cb(
             self.clients[0], 'seto.order_accepted')
         self.clients[0].order(self._test_order())
@@ -188,7 +178,6 @@ class OrderTestCase(SessionTestCase):
         self.assertTrue(order_accepted_msg.order_accepted.order.low > 0)
 
     def test_order_rejected(self):
-        self._do_login(0)
         order_rejected_msg = self._simple_cb(
             self.clients[0], 'seto.order_rejected')
         order = self._test_order()
@@ -208,7 +197,6 @@ class OrderTestCase(SessionTestCase):
             seto.ORDER_REJECTED_INSUFFICIENT_FUNDS)
 
     def test_order_cancel(self):
-        self._do_login(0)
         order_accepted_msg = self._simple_cb(
             self.clients[0], 'seto.order_accepted')
         order_cancelled_msg = self._simple_cb(
@@ -237,7 +225,6 @@ class OrderTestCase(SessionTestCase):
             order_accepted_msg.order_accepted.order)
 
     def test_order_cancel_many(self):
-        self._do_login(0)
         order_accepted_msg = self._simple_cb(
             self.clients[0], 'seto.order_accepted')
         order_cancelled_msg = self._simple_cb(
@@ -271,7 +258,6 @@ class OrderTestCase(SessionTestCase):
             order_cancelled_msg.Clear()
 
     def test_order_cancel_rejected(self):
-        self._do_login(0)
         order_cancel_rejected_msg = self._simple_cb(
             self.clients[0], 'seto.order_cancel_rejected')
         # Send a cancel
@@ -289,7 +275,6 @@ class OrderTestCase(SessionTestCase):
             order_cancel_rejected_msg.order_cancel_rejected.seq, 2)
 
     def test_multiple_order_cancel_rejected(self):
-        self._do_login(0)
         order_cancel_rejected_msg = self._simple_cb(
             self.clients[0], 'seto.order_cancel_rejected')
         # Send a cancel
@@ -310,7 +295,6 @@ class OrderTestCase(SessionTestCase):
                 order_cancel_rejected_msg.order_cancel_rejected.seq, i - 1)
 
     def test_order_not_live_cancel_rejected(self):
-        self._do_login(0)
         order_accepted_msg = self._simple_cb(
             self.clients[0], 'seto.order_accepted')
         order_cancelled_msg = self._simple_cb(
@@ -371,7 +355,6 @@ class OrderTestCase(SessionTestCase):
 class QuoteTestCase(SessionTestCase):
     "Test market data requests"
     def test_market_subscription(self):
-        self._do_login(0)
         market_quotes_msg = self._simple_cb(self.clients[0], 'seto.market_quotes')
         market_id, _ = self.get_market(0)
         self.clients[0].subscribe(market_id)
@@ -385,13 +368,11 @@ class QuoteTestCase(SessionTestCase):
             market_quotes_msg.market_quotes.market, market_id)
 
     def test_market_unsubscription(self):
-        self._do_login(0)
         market_id, _ = self.get_market(0)
         self.clients[0].unsubscribe(market_id)
         self.assertEquals(self.clients[0].session.outseq, 3)
 
     def test_quote1(self):
-        self._do_login(0)
         order_accepted_msg = self._simple_cb(
             self.clients[0], 'seto.order_accepted')
         order_cancelled_msg = self._simple_cb(
@@ -446,7 +427,6 @@ class QuoteTestCase(SessionTestCase):
 class EventTestCase(SessionTestCase):
     "Test various event requests"
     def _event_found_request(self, event_request):
-        self._do_login(0)
         http_found_msg = self._simple_cb(self.clients[0], 'seto.http_found')
         self.clients[0].request_events(event_request)
         self.assertEquals(self.clients[0].session.outseq, 3)
@@ -459,7 +439,6 @@ class EventTestCase(SessionTestCase):
         self.assertTrue(listing is not None)
 
     def _event_not_found_request(self, event_request):
-        self._do_login(0)
         invalid_request_msg = self._simple_cb(self.clients[0], 'seto.invalid_request')
         self.clients[0].request_events(event_request)
         self.assertEquals(self.clients[0].session.outseq, 3)

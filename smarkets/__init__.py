@@ -25,7 +25,8 @@ from smarkets.exceptions import (
     SocketDisconnected,
     InvalidCallbackError,
     )
-from smarkets.sessions import Session
+from smarkets.orders import Order
+from smarkets.sessions import Session, SessionSettings
 
 
 __version__ = '0.1.0'

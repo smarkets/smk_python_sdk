@@ -3,8 +3,8 @@ import os
 import unittest
 
 from session_tests import (
-    BasicTestCase,
     LoginTestCase,
+    PingTestCase,
     OrderTestCase,
     QuoteTestCase,
     EventTestCase,
@@ -30,7 +30,6 @@ def integration_tests(
     server='127.0.0.1',
     port=3701):
     "Add tests to a `unittest.TestSuite` containing integration tests"
-    suite.addTest(unittest.makeSuite(BasicTestCase))
     # Use defaults from our test data
     if password_filename is None:
         password_filename = os.path.join(
@@ -44,6 +43,7 @@ def integration_tests(
     markets = list(read_pair_file(market_filename))
     for case_class in (
         LoginTestCase,
+        PingTestCase,
         OrderTestCase,
         QuoteTestCase,
         EventTestCase,

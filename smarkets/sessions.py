@@ -2,6 +2,7 @@
 import logging
 import Queue
 import socket
+import types
 
 from google.protobuf import text_format
 
@@ -11,15 +12,46 @@ import smarkets.seto.piqi_pb2 as seto
 from smarkets.exceptions import ConnectionError, SocketDisconnected
 
 
+class SessionSettings(object):
+    "Encapsulate settings necessary to create a new session"
+    def __init__(self, username, password):
+        if username is None:
+            raise ValueError("username cannot be None")
+        if password is None:
+            raise ValueError("password cannot be None")
+        self.username = username
+        self.password = password
+        self.host = 'localhost'
+        self.port = 3701
+        self.socket_timeout = 30
+        # Most message are quite small, so this won't come into
+        # effect. For larger messages, it needs some performance
+        # testing to determine whether a single large recv() system
+        # call is worse than many smaller ones.
+        self.read_chunksize = 65536  # 64k
+
+    def validate(self):
+        "Do basic validation on the settings"
+        if not isinstance(self.socket_timeout, (types.NoneType, int)):
+            raise ValueError("socket_timeout must be an integer or None")
+        if self.socket_timeout is not None and self.socket_timeout <= 0:
+            raise ValueError("socket_timeout must be positive")
+        if not isinstance(self.read_chunksize, (types.NoneType, int, long)):
+            raise ValueError("read_chunksize must be an integer or None")
+        if self.read_chunksize is not None and self.read_chunksize <= 0:
+            raise ValueError("read_chunksize must be positive")
+
+
 class Session(object):
     "Manages TCP communication via Smarkets streaming API"
     logger = logging.getLogger('smarkets.session')
 
-    def __init__(self, username, password, host='localhost', port=3701,
-                 session=None, inseq=1, outseq=1, socket_timeout=30):
-        self.username = username
-        self.password = password
-        self.socket = SessionSocket(host, port, socket_timeout)
+    def __init__(self, settings, session=None, inseq=1, outseq=1):
+        if not isinstance(settings, SessionSettings):
+            raise ValueError("settings is not a SessionSettings")
+        settings.validate()
+        self.settings = settings
+        self.socket = SessionSocket(settings)
         self.session = session
         self.inseq = inseq
         # Outgoing socket sequence number
@@ -46,8 +78,8 @@ class Session(object):
             login.Clear()
             login.type = seto.PAYLOAD_LOGIN
             login.eto_payload.type = eto.PAYLOAD_LOGIN
-            login.login.username = self.username
-            login.login.password = self.password
+            login.login.username = self.settings.username
+            login.login.password = self.settings.password
             self.logger.info("sending login payload")
             if self.session is not None:
                 self.logger.info(
@@ -158,19 +190,11 @@ class SessionSocket(object):
     "Wraps a socket with basic framing/deframing"
     logger = logging.getLogger('smarkets.session.socket')
     wire_logger = logging.getLogger('smarkets.session.wire')
-    # Most message are quite small, so this won't come into
-    # effect. For larger messages, it needs some performance testing
-    # to determine whether a single large recv() system call is worse
-    # than many smaller ones.
-    default_read_chunksize = 65536  # 64k
 
-    def __init__(self, host, port, socket_timeout=None, read_chunksize=None):
-        self.host = host
-        self.port = port
-        self.socket_timeout = socket_timeout
-        if read_chunksize is None:
-            read_chunksize = self.default_read_chunksize
-        self.read_chunksize = read_chunksize
+    def __init__(self, settings):
+        if not isinstance(settings, SessionSettings):
+            raise ValueError("settings is not a SessionSettings")
+        self.settings = settings
         self._buffer = ''
         self._sock = None
 
@@ -190,11 +214,12 @@ class SessionSocket(object):
             return False
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            if self.socket_timeout is not None:
-                sock.settimeout(self.socket_timeout)
+            if self.settings.socket_timeout is not None:
+                sock.settimeout(self.settings.socket_timeout)
             self.logger.info(
-                "connecting with new socket to %s:%s", self.host, self.port)
-            sock.connect((self.host, self.port))
+                "connecting with new socket to %s:%s",
+                self.settings.host, self.settings.port)
+            sock.connect((self.settings.host, self.settings.port))
         except socket.error as exc:
             raise ConnectionError(self._error_message(exc))
 
@@ -261,10 +286,10 @@ class SessionSocket(object):
                 self.logger.debug("next message is %d bytes long", to_read)
                 if to_read:
                     # Read the actual message if necessary
-                    while to_read > self.read_chunksize:
+                    while to_read > self.settings.read_chunksize:
                         self._fill_buffer(
-                            self.read_chunksize + len(self._buffer))
-                        to_read -= self.read_chunksize
+                            self.settings.read_chunksize + len(self._buffer))
+                        to_read -= self.settings.read_chunksize
                     if to_read > 0:
                         self._fill_buffer(to_read + len(self._buffer))
                 msg_bytes = self._buffer[:result]
@@ -296,10 +321,10 @@ class SessionSocket(object):
         # or just "message"
         if len(exception.args) == 1:
             return "Error connecting to %s:%s. %s." % (
-                self.host, self.port, exception.args[0])
+                self.settings.host, self.settings.port, exception.args[0])
         else:
             return "Error %s connecting %s:%s. %s." % (
-                exception.args[0], self.host, self.port,
+                exception.args[0], self.settings.host, self.settings.port,
                 exception.args[1])
 
 

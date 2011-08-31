@@ -19,7 +19,8 @@ class ThreadingTestCase(unittest.TestCase):
         password = 'none'
         if self.passwords:
             username, password = self.passwords[user_index]
-        return cls(username, password)
+        settings = smk.SessionSettings(username, password)
+        return cls(settings)
 
     def get_client(
         self, cls=None, session=None, session_cls=None, user_index=0):
