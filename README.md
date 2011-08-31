@@ -31,8 +31,6 @@ or if you want to build it yourself:
     >>> import logging
     >>> logging.basicConfig(level=logging.DEBUG)
     >>> import smarkets
-    >>> import smarkets.eto.piqi_pb2 as eto
-    >>> import smarkets.seto.piqi_pb2 as seto
     >>> username = 'username'
     >>> password = 'password'
     >>> host = 'api.smarkets.com'
@@ -43,19 +41,20 @@ or if you want to build it yourself:
     >>> client.ping()
     >>> client.flush()
     >>> client.read()
-    >>> market_id = seto.Uuid128()
-    >>> market_id.low = 1234
+    >>> market_id = client.str_to_uuid128('fc024')
     >>> client.subscribe(market_id) # subscribe to a market
     >>> client.flush()
     >>> client.read()
-    >>> quantity = 400000 # £40 payout
-    >>> price = 2500 # 25.00%
-    >>> side = seto.SIDE_BUY
-    >>> contract_id = seto.Uuid128()
-    >>> contract_id.low = 5678
-    >>> client.order(quantity, price, side, market_id, contract_id)
+    >>> order = smarkets.Order()
+    >>> order.quantity = 400000 # £40 payout
+    >>> order.price = 2500 # 25.00%
+    >>> order.side = smarkets.Order.BUY
+    >>> order.market = market_id
+    >>> order.contract = client.str_to_uuid128('fcccc')
+    >>> client.order(order)
     >>> client.flush()
     >>> client.read()
+    >>> client.logout()
 
 
 ### Resuming a session
