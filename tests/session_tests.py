@@ -284,7 +284,8 @@ class OrderTestCase(SessionTestCase):
         self.assertEquals(
             order_cancel_rejected_msg.order_cancel_rejected.reason,
             seto.ORDER_CANCEL_REJECTED_NOT_FOUND)
-        self.assertEquals(order_cancelled_msg.order_cancel_rejected.seq, 2)
+        self.assertEquals(
+            order_cancel_rejected_msg.order_cancel_rejected.seq, 2)
 
 
 class QuoteTestCase(SessionTestCase):
