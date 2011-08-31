@@ -308,6 +308,57 @@ class OrderTestCase(SessionTestCase):
             self.assertEquals(
                 order_cancel_rejected_msg.order_cancel_rejected.seq, i - 1)
 
+    def test_order_not_live_cancel_rejected(self):
+        self._do_login(0)
+        order_accepted_msg = self._simple_cb(
+            self.clients[0], 'seto.order_accepted')
+        order_cancelled_msg = self._simple_cb(
+            self.clients[0], 'seto.order_cancelled')
+        order_cancel_rejected_msg = self._simple_cb(
+            self.clients[0], 'seto.order_cancel_rejected')
+        market_id, contract_ids = self.get_market(0)
+        contract_id = contract_ids[0]
+        self.clients[0].order(
+            400000,
+            2500,
+            seto.SIDE_BUY,
+            market_id,
+            contract_id)
+        self.assertEquals(self.clients[0].session.outseq, 3)
+        self.clients[0].read() # should be accepted
+        self.assertEquals(self.clients[0].session.inseq, 3)
+        self.assertEquals(
+            order_accepted_msg.type,
+            seto.PAYLOAD_ORDER_ACCEPTED)
+        # Order create message was #2
+        self.assertEquals(order_accepted_msg.order_accepted.seq, 2)
+        self.assertTrue(order_accepted_msg.order_accepted.order.high >= 0)
+        self.assertTrue(order_accepted_msg.order_accepted.order.low > 0)
+        # Send a cancel
+        self.clients[0].order_cancel(order_accepted_msg.order_accepted.order)
+        self.assertEquals(self.clients[0].session.outseq, 4)
+        self.clients[0].read() # should be cancelled
+        self.assertEquals(self.clients[0].session.inseq, 4)
+        self.assertEquals(
+            order_cancelled_msg.type,
+            seto.PAYLOAD_ORDER_CANCELLED)
+        self.assertEquals(
+            order_cancelled_msg.order_cancelled.order,
+            order_accepted_msg.order_accepted.order)
+        # Send another cancel to be rejected
+        self.clients[0].order_cancel(order_accepted_msg.order_accepted.order)
+        self.assertEquals(self.clients[0].session.outseq, 5)
+        self.clients[0].read() # should be cancel rejected -- order not live
+        self.assertEquals(self.clients[0].session.inseq, 5)
+        self.assertEquals(
+            order_cancel_rejected_msg.type,
+            seto.PAYLOAD_ORDER_CANCEL_REJECTED)
+        self.assertEquals(
+            order_cancel_rejected_msg.order_cancel_rejected.reason,
+            seto.ORDER_CANCEL_REJECTED_NOT_LIVE)
+        self.assertEquals(
+            order_cancel_rejected_msg.order_cancel_rejected.seq, 4)
+
 
 class QuoteTestCase(SessionTestCase):
     "Test market data requests"
