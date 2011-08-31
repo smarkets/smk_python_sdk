@@ -98,19 +98,10 @@ class Smarkets(object):
         "Flush the send buffer"
         self.session.flush()
 
-    def order(self, qty, price, side, market, contract):
+    def order(self, order):
         "Create a new order"
         msg = self.session.out_payload
-        msg.Clear()
-        msg.type = seto.PAYLOAD_ORDER_CREATE
-        msg.order_create.type = seto.ORDER_CREATE_LIMIT
-        msg.order_create.market.CopyFrom(market)
-        msg.order_create.contract.CopyFrom(contract)
-        msg.order_create.side = side
-        msg.order_create.quantity_type = seto.QUANTITY_PAYOFF_CURRENCY
-        msg.order_create.quantity = qty
-        msg.order_create.price_type = seto.PRICE_PERCENT_ODDS
-        msg.order_create.price = price
+        order.copy_to(msg, clear=True)
         self._send()
 
     def order_cancel(self, order):

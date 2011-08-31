@@ -9,6 +9,7 @@ import smarkets.seto.piqi_pb2 as seto
 
 from smarkets.clients import Callback, Smarkets
 from smarkets.exceptions import InvalidCallbackError
+from smarkets.orders import Order
 
 
 class CallbackTestCase(unittest.TestCase):
@@ -167,7 +168,14 @@ class SmarketsTestCase(unittest.TestCase):
         market_id = self.client.str_to_uuid128('1c024')
         contract_id = self.client.str_to_uuid128('1cccc')
         with self._clear_send():
-            self.client.order(10000, 2500, seto.SIDE_BUY, market_id, contract_id)
+            order = Order()
+            order.price = 2500
+            order.quantity = 10000
+            order.side = Order.BUY
+            order.market = market_id
+            order.contract = contract_id
+            order.validate_new()
+            self.client.order(order)
 
     def test_order_cancel(self):
         "Test the `Smarkets.order_cancel` method"
