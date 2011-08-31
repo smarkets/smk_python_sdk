@@ -2,7 +2,7 @@ import unittest
 
 from contextlib import contextmanager
 from itertools import chain
-from mock import Mock, patch
+from mock import Mock, patch, sentinel
 
 import smarkets.eto.piqi_pb2 as eto
 import smarkets.seto.piqi_pb2 as seto
@@ -28,8 +28,8 @@ class CallbackTestCase(unittest.TestCase):
         self.callback += handler
         self.assertFalse(handler.called)
         self.assertEquals(1, len(self.callback))
-        self.callback('foo')
-        handler.assert_called_once_with('foo')
+        self.callback(sentinel.message)
+        handler.assert_called_once_with(sentinel.message)
         self.assertEquals(1, len(self.callback))
 
     def test_unhandle(self):
@@ -40,7 +40,7 @@ class CallbackTestCase(unittest.TestCase):
         self.assertEquals(1, len(self.callback))
         self.callback -= handler
         self.assertEquals(0, len(self.callback))
-        self.callback('foo')
+        self.callback(sentinel.message)
         self.assertFalse(handler.called)
 
     def test_2_handlers(self):
@@ -52,9 +52,9 @@ class CallbackTestCase(unittest.TestCase):
         self.assertFalse(handler1.called)
         self.assertFalse(handler2.called)
         self.assertEquals(2, len(self.callback))
-        self.callback('foo')
-        handler1.assert_called_once_with('foo')
-        handler2.assert_called_once_with('foo')
+        self.callback(sentinel.message)
+        handler1.assert_called_once_with(sentinel.message)
+        handler2.assert_called_once_with(sentinel.message)
         self.assertEquals(2, len(self.callback))
 
     def test_many_handlers(self):
@@ -65,9 +65,9 @@ class CallbackTestCase(unittest.TestCase):
         self.assertEquals(len(handlers), len(self.callback))
         for handler in handlers:
             self.assertFalse(handler.called)
-        self.callback('foo')
+        self.callback(sentinel.message)
         for handler in handlers:
-            handler.assert_called_once_with('foo')
+            handler.assert_called_once_with(sentinel.message)
         self.assertEquals(len(handlers), len(self.callback))
 
     def test_many_unhandle(self):
@@ -81,17 +81,17 @@ class CallbackTestCase(unittest.TestCase):
         for handler in to_unhandle:
             self.callback -= handler
         self.assertEquals(len(real_handlers), len(self.callback))
-        self.callback('foo')
+        self.callback(sentinel.message)
         for handler in to_unhandle:
             self.assertFalse(handler.called)
         for handler in real_handlers:
-            handler.assert_called_once_with('foo')
+            handler.assert_called_once_with(sentinel.message)
 
     def test_handle_exception(self):
         "Test that an exception is raised by the callback method"
         handler = Mock(side_effect=self._always_raise)
         self.callback += handler
-        self.assertRaises(Exception, self.callback, 'foo')
+        self.assertRaises(Exception, self.callback, sentinel.message)
 
     def test_2_handle_exception(self):
         "Test that an exception is raised by the callback method"
@@ -99,12 +99,12 @@ class CallbackTestCase(unittest.TestCase):
         handler2 = Mock()
         self.callback += handler1
         self.callback += handler2
-        self.assertRaises(Exception, self.callback, 'foo')
+        self.assertRaises(Exception, self.callback, sentinel.message)
         # Because the collection of handlers in the `Callback` is a
         # `set` the 'firing' order is undefined. However, if handler2
         # is called, we assert that it is called correctly here.
         if handler2.called:
-            handler2.assert_called_once_with('foo')
+            handler2.assert_called_once_with(sentinel.message)
 
     @staticmethod
     def _always_raise(*args, **kwargs):
