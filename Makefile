@@ -24,5 +24,12 @@ test: deps
 
 check:
 	mkdir -p build/pylint build/pep8
-	-pylint --ignore=piqi_pb2.py -f parseable smarkets > build/pylint/pylint.out
+	-pylint --ignore=piqi_pb2.py -f parseable smarkets \
+		| grep -v "Instance of 'Payload' has no 'events_request' member" \
+		| grep -v "Instance of 'Payload' has no 'eto_payload' member" \
+		| grep -v "Instance of 'Payload' has no 'Clear' member" \
+		| grep -v "Instance of 'Payload' has no 'CopyFrom' member" \
+		| grep -v "Instance of 'Payload' has no 'ParseFromString' member" \
+		| grep -v "Instance of 'Payload' has no 'login' member" \
+		> build/pylint/pylint.out
 	pep8 --exclude=piqi_pb2.py smarkets > build/pep8/pep8.out
