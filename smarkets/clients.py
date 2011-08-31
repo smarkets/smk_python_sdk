@@ -83,8 +83,14 @@ class Smarkets(object):
         if receive:
             self.read()
 
-    def logout(self):
-        "Disconnect. TODO: send logout message before"
+    def logout(self, receive=True):
+        """
+        Disconnect and send logout message, optionally waiting for
+        confirmation.
+        """
+        self.session.logout()
+        if receive:
+            self.read()
         self.session.disconnect()
 
     def read(self, num=1):

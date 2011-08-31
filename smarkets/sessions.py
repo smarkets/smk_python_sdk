@@ -56,6 +56,16 @@ class Session(object):
             # Always flush outgoing login message
             self.send(True)
 
+    def logout(self):
+        "Disconnects from the API"
+        logout = self.out_payload
+        logout.Clear()
+        logout.type = seto.PAYLOAD_ETO
+        logout.eto_payload.type = eto.PAYLOAD_LOGOUT
+        logout.eto_payload.logout.reason = eto.LOGOUT_NONE
+        self.logger.info("sending logout payload")
+        self.send(True)
+
     def disconnect(self):
         "Disconnects from the API"
         self.socket.disconnect()
