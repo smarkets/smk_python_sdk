@@ -156,7 +156,16 @@ class SmarketsTestCase(unittest.TestCase):
     def test_logout(self):
         "Test the `Smarkets.logout` method"
         self.client.logout()
+        self.assertEquals(1, self.mock_session.logout.call_count)
+        self.assertEquals(1, self.mock_session.next_frame.call_count)
         self.assertEquals(1, self.mock_session.disconnect.call_count)
+
+    def test_logout_norecv(self):
+        "Test the `Smarkets.logout` method"
+        self.client.logout(False)
+        self.assertEquals(1, self.mock_session.logout.call_count)
+        self.assertEquals(1, self.mock_session.disconnect.call_count)
+        self.assertEquals(0, self.mock_session.next_frame.call_count)
 
     def test_flush(self):
         "Test the `Smarkets.flush` method"
