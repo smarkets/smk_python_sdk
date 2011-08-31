@@ -135,8 +135,9 @@ class SmarketsTestCase(unittest.TestCase):
         response = Mock()
         self.client.add_handler('eto.login_response', response)
         self.client.login()
-        self.assertEquals(1, self.mock_session.connect.call_count)
-        self.assertEquals(1, self.mock_session.next_frame.call_count)
+        self.assertEquals(
+            self.mock_session.method_calls,
+            [('connect', (), {}), ('next_frame', (), {})])
         response.assert_called_once_with(payload)
 
     def test_login_norecv(self):
@@ -146,31 +147,40 @@ class SmarketsTestCase(unittest.TestCase):
         response = Mock()
         self.client.add_handler('eto.login_response', response)
         self.client.login(False)
-        self.assertEquals(1, self.mock_session.connect.call_count)
-        self.assertFalse(self.mock_session.next_frame.called)
+        self.assertEquals(
+            self.mock_session.method_calls,
+            [('connect', (), {})])
         self.assertFalse(response.called)
+        self.mock_session.reset_mock()
         self.client.read()
-        self.assertEquals(1, self.mock_session.next_frame.call_count)
+        self.assertEquals(
+            self.mock_session.method_calls,
+            [('next_frame', (), {})])
         response.assert_called_once_with(payload)
 
     def test_logout(self):
         "Test the `Smarkets.logout` method"
         self.client.logout()
-        self.assertEquals(1, self.mock_session.logout.call_count)
-        self.assertEquals(1, self.mock_session.next_frame.call_count)
-        self.assertEquals(1, self.mock_session.disconnect.call_count)
+        self.assertEquals(
+            self.mock_session.method_calls,
+            [('logout', (), {}),
+             ('next_frame', (), {}),
+             ('disconnect', (), {})])
 
     def test_logout_norecv(self):
         "Test the `Smarkets.logout` method"
         self.client.logout(False)
-        self.assertEquals(1, self.mock_session.logout.call_count)
-        self.assertEquals(1, self.mock_session.disconnect.call_count)
-        self.assertEquals(0, self.mock_session.next_frame.call_count)
+        self.assertEquals(
+            self.mock_session.method_calls,
+            [('logout', (), {}),
+             ('disconnect', (), {})])
 
     def test_flush(self):
         "Test the `Smarkets.flush` method"
         self.client.flush()
-        self.assertEquals(1, self.mock_session.flush.call_count)
+        self.assertEquals(
+            self.mock_session.method_calls,
+            [('flush', (), {})])
 
     def test_order(self):
         "Test the `Smarkets.order` method"
