@@ -13,6 +13,12 @@ class EventsRequest(object):
         "Copy the event request to the destination payload"
         dest_payload.MergeFrom(self._payload)
 
+    def copy(self):
+        "Copy the payload to a new one"
+        payload = seto.Payload()
+        self.copy_to(payload)
+        return payload
+
 
 class Politics(EventsRequest):
     "Request for politics events"
