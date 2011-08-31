@@ -24,7 +24,7 @@ test: deps
 
 check:
 	mkdir -p build/pylint build/pep8
-	-pylint --ignore=piqi_pb2.py -f parseable smarkets \
+	-PYLINTRC=./.pylintrc pylint --ignore=piqi_pb2.py -f parseable smarkets \
 		| grep -v "Instance of 'Payload' has no 'events_request' member" \
 		| grep -v "Instance of 'Payload' has no 'eto_payload' member" \
 		| grep -v "Instance of 'Payload' has no 'Clear' member" \
