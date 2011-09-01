@@ -11,6 +11,12 @@ Python API client for Smarkets.
 * Python >= 2.5
 * Google protocol buffers compiler and libraries
 
+### For building the code, running tests and generating documentation
+
+* curl
+* Piqi
+* mock
+* sphinx
 
 ## Installation
 
@@ -82,7 +88,7 @@ the example above they will now both be 5.
 
     >>> from google.protobuf import text_format
     >>> def login_response(msg):
-    >>>     print "seto.login_response", text_format.MessageToString(msg)
+    >>>     print "eto.login_response", text_format.MessageToString(msg)
     >>> def global_callback(name, msg):
     >>>     print name, text_format.MessageToString(msg)
     >>> client.add_handler('eto.login_response', login_response)
