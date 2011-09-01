@@ -391,7 +391,7 @@ class QuoteTestCase(SessionTestCase):
         start_qty = 0
         for contract_quotes in market_quotes_msg.market_quotes.contract_quotes:
             if contract_quotes.contract == contract_id:
-                start_qty = contract_quotes.buys[0].quantity
+                start_qty = contract_quotes.bids[0].quantity
         order = Order()
         order.quantity = 100000
         order.price = 2500
@@ -408,7 +408,7 @@ class QuoteTestCase(SessionTestCase):
             contract_quotes_msg.type,
             seto.PAYLOAD_CONTRACT_QUOTES)
         self.assertEquals(
-            contract_quotes_msg.contract_quotes.buys[0].quantity,
+            contract_quotes_msg.contract_quotes.bids[0].quantity,
             start_qty + order.quantity)
         contract_quotes_msg.Clear()
         self.clients[0].order_cancel(order_accepted_msg.order_accepted.order)
@@ -420,7 +420,7 @@ class QuoteTestCase(SessionTestCase):
             order_cancelled_msg.order_cancelled.order,
             order_accepted_msg.order_accepted.order)
         self.assertEquals(
-            contract_quotes_msg.contract_quotes.buys[0].quantity,
+            contract_quotes_msg.contract_quotes.bids[0].quantity,
             start_qty)
 
 
