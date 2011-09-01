@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+# Copyright (C) 2011 Smarkets Limited <support@smarkets.com>
+#
+# This module is released under the MIT License:
+# http://www.opensource.org/licenses/mit-license.php
 import glob
 import os
 import re
@@ -93,7 +97,13 @@ class SmarketsProtocolBuild(build.build):
             init_file = os.path.join(
                 os.path.dirname(__file__), 'smarkets', pkg_dir, '__init__.py')
             initf = open(init_file, 'w')
-            initf.write('"Protocol-buffers generated package"\n')
+            initf.write(
+""""Protocol-buffers generated package"
+# Copyright (C) 2011 Smarkets Limited <support@smarkets.com>
+#
+# This module is released under the MIT License:
+# http://www.opensource.org/licenses/mit-license.php
+""")
             initf.close()
 
         build.build.run(self)

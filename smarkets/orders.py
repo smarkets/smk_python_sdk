@@ -1,4 +1,8 @@
 "Smarkets API client order objects"
+# Copyright (C) 2011 Smarkets Limited <support@smarkets.com>
+#
+# This module is released under the MIT License:
+# http://www.opensource.org/licenses/mit-license.php
 
 import smarkets.seto.piqi_pb2 as seto
 
