@@ -161,12 +161,12 @@ f.close()
 __version__ = '0.1.0'
 
 sdict = {
-    'name' : 'smk',
+    'name' : 'smk_python_sdk',
     'version' : __version__,
     'description' : 'Python client for Smarkets streaming API',
     'long_description' : long_description,
     'url': 'https://github.com/smarkets/smk_python_sdk',
-    'download_url' : 'https://github.com/smarkets/smk_python_sdk/downloads/smk-%s.tar.gz' % __version__,
+    'download_url' : 'https://github.com/smarkets/smk_python_sdk/downloads/smk_python_sdk-%s.tar.gz' % __version__,
     'author' : 'Smarkets Limited',
     'author_email' : 'support@smarkets.com',
     'maintainer' : 'Smarkets Limited',
