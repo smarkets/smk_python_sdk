@@ -1,11 +1,3 @@
-# lint Python modules using external checkers.
-# 
-# This is the main checker controlling the other ones and the reports
-# generation. It is itself both a raw checker and an astng checker in order
-# to:
-# * handle message activation / deactivation at the module level
-# * handle some basic but necessary stats'data (number of classes, methods...)
-# 
 [MASTER]
 
 # Specify a configuration file.
@@ -25,9 +17,6 @@ ignore=CVS
 # Pickle collected data for later comparisons.
 persistent=yes
 
-# Set the cache size for astng objects.
-cache-size=500
-
 # List of plugins (as comma separated values of python modules names) to load,
 # usually to register additional checkers.
 load-plugins=
@@ -35,22 +24,10 @@ load-plugins=
 
 [MESSAGES CONTROL]
 
-# Enable only checker(s) with the given id(s). This option conflicts with the
-# disable-checker option
-#enable-checker=
-
-# Enable all checker(s) except those with the given id(s). This option
-# conflicts with the enable-checker option
-#disable-checker=
-
-# Enable all messages in the listed categories (IRCWEF).
-#enable-msg-cat=
-
-# Disable all messages in the listed categories (IRCWEF).
-disable-msg-cat=I
-
-# Enable the message(s) with the given id(s).
-#enable-msg=
+# Enable the message, report, category or checker with the given id(s). You can
+# either give multiple identifier separated by comma (,) or put this option
+# multiple time.
+#enable=
 
 # Some messages we may wish to disable (recommended by
 # http://stackoverflow.com/questions/35470/are-there-any-static-analysis-tools-for-python/35476#35476)
@@ -80,8 +57,14 @@ disable-msg-cat=I
 # Sometimes disabled depending on how bad a module is
 #   C0111 = Missing docstring
 
-# Disable the message(s) with the given id(s).
-disable-msg=W0704,W0142,R0903,R0913,R0914
+# Disable the message(s) with the given id(s). (old rcfile)
+disable-msg=W0704,W0142,R0903,R0902,R0913,R0914
+
+# Disable the message, report, category or checker with the given id(s). You
+# can either give multiple identifier separated by comma (,) or put this option
+# multiple time (only on the command line, not in the configuration file where
+# it should appear only once).
+disable=W0704,W0142,R0903,R0902,R0913,R0914
 
 
 [REPORTS]
@@ -105,38 +88,54 @@ reports=yes
 # note). You have access to the variables errors warning, statement which
 # respectively contain the number of errors / warnings messages and the total
 # number of statements analyzed. This is used by the global evaluation report
-# (R0004).
+# (RP0004).
 evaluation=10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10)
 
 # Add a comment according to your evaluation note. This is used by the global
-# evaluation report (R0004).
+# evaluation report (RP0004).
 comment=no
 
-# Enable the report(s) with the given id(s).
-#enable-report=
 
-# Disable the report(s) with the given id(s).
-#disable-report=
+[VARIABLES]
+
+# Tells whether we should check for unused import in __init__ files.
+init-import=no
+
+# A regular expression matching the beginning of the name of dummy variables
+# (i.e. not used).
+dummy-variables-rgx=_|dummy
+
+# List of additional names supposed to be defined in builtins. Remember that
+# you should avoid to define new builtins when possible.
+additional-builtins=
 
 
-# checks for :
-# * doc strings
-# * modules / classes / functions / methods / arguments / variables name
-# * number of arguments, local variables, branches, returns and statements in
-# functions, methods
-# * required module attributes
-# * dangerous default values as arguments
-# * redefinition of function / method / class
-# * uses of the global statement
-# 
+[MISCELLANEOUS]
+
+# List of note tags to take in consideration, separated by a comma.
+notes=FIXME,XXX,TODO
+
+
+[FORMAT]
+
+# Maximum number of characters on a single line.
+max-line-length=80
+
+# Maximum number of lines in a module
+max-module-lines=1000
+
+# String used as indentation unit. This is usually " " (4 spaces) or "\t" (1
+# tab).
+indent-string='    '
+
+
 [BASIC]
 
 # Required attributes for module, separated by a comma
 required-attributes=
 
-# Regular expression which should only match functions or classes name which do
-# not require a docstring
-no-docstring-rgx=__.*__
+# List of builtins function names that should not be used, separated by a comma
+bad-functions=map,filter,apply,input
 
 # Regular expression which should only match correct module names
 module-rgx=(([a-z_][a-z0-9_]*)|([A-Z][a-zA-Z0-9]+))$
@@ -172,31 +171,11 @@ good-names=i,j,k,ex,Run,_
 # Bad variable names which should always be refused, separated by a comma
 bad-names=foo,bar,baz,toto,tutu,tata
 
-# List of builtins function names that should not be used, separated by a comma
-bad-functions=map,filter,apply,input
+# Regular expression which should only match functions or classes name which do
+# not require a docstring
+no-docstring-rgx=__.*__
 
 
-# checks for
-# * unused variables / imports
-# * undefined variables
-# * redefinition of variable from builtins or from an outer scope
-# * use of variable before assignment
-# 
-[VARIABLES]
-
-# Tells whether we should check for unused import in __init__ files.
-init-import=no
-
-# A regular expression matching names used for dummy variables (i.e. not used).
-dummy-variables-rgx=_|dummy
-
-# List of additional names supposed to be defined in builtins. Remember that
-# you should avoid to define new builtins when possible.
-additional-builtins=
-
-
-# try to find bugs in the code using type inference
-# 
 [TYPECHECK]
 
 # Tells whether missing members accessed in mixin class should be ignored. A
@@ -216,14 +195,18 @@ zope=no
 generated-members=REQUEST,acl_users,aq_parent
 
 
-# checks for :
-# * methods without self as first argument
-# * overridden methods signature
-# * access only to existent members via self
-# * attributes not defined in the __init__ method
-# * supported interfaces implementation
-# * unreachable code
-# 
+[SIMILARITIES]
+
+# Minimum lines number of a similarity.
+min-similarity-lines=4
+
+# Ignore comments when computing similarities.
+ignore-comments=yes
+
+# Ignore docstrings when computing similarities.
+ignore-docstrings=yes
+
+
 [CLASSES]
 
 # List of interface methods to ignore, separated by a comma. This is used for
@@ -234,38 +217,14 @@ ignore-iface-methods=isImplementedBy,deferred,extends,names,namesAndDescriptions
 defining-attr-methods=__init__,__new__,setUp
 
 
-# checks for
-# * external modules dependencies
-# * relative / wildcard imports
-# * cyclic imports
-# * uses of deprecated modules
-# 
-[IMPORTS]
-
-# Deprecated modules which should not be used, separated by a comma
-deprecated-modules=regsub,string,TERMIOS,Bastion,rexec
-
-# Create a graph of every (i.e. internal and external) dependencies in the
-# given file (report R0402 must not be disabled)
-import-graph=
-
-# Create a graph of external dependencies in the given file (report R0402 must
-# not be disabled)
-ext-import-graph=
-
-# Create a graph of internal dependencies in the given file (report R0402 must
-# not be disabled)
-int-import-graph=
-
-
-# checks for sign of poor/misdesign:
-# * number of methods, attributes, local variables...
-# * size, complexity of functions, methods
-# 
 [DESIGN]
 
 # Maximum number of arguments for function / method
 max-args=5
+
+# Argument names that match this expression will be ignored. Default to name
+# with leading underscore
+ignored-argument-names=_.*
 
 # Maximum number of locals for function / method body
 max-locals=15
@@ -292,46 +251,19 @@ min-public-methods=2
 max-public-methods=20
 
 
-# checks for:
-# * warning notes in the code like FIXME, XXX
-# * PEP 263: source code with non ascii character but no encoding declaration
-# 
-[MISCELLANEOUS]
+[IMPORTS]
 
-# List of note tags to take in consideration, separated by a comma.
-notes=FIXME,XXX,TODO
+# Deprecated modules which should not be used, separated by a comma
+deprecated-modules=regsub,string,TERMIOS,Bastion,rexec
 
+# Create a graph of every (i.e. internal and external) dependencies in the
+# given file (report RP0402 must not be disabled)
+import-graph=
 
-# checks for similarities and duplicated code. This computation may be
-# memory / CPU intensive, so you should disable it if you experiments some
-# problems.
-# 
-[SIMILARITIES]
+# Create a graph of external dependencies in the given file (report RP0402 must
+# not be disabled)
+ext-import-graph=
 
-# Minimum lines number of a similarity.
-min-similarity-lines=4
-
-# Ignore comments when computing similarities.
-ignore-comments=yes
-
-# Ignore docstrings when computing similarities.
-ignore-docstrings=yes
-
-
-# checks for :
-# * unauthorized constructions
-# * strict indentation
-# * line length
-# * use of <> instead of !=
-# 
-[FORMAT]
-
-# Maximum number of characters on a single line.
-max-line-length=110
-
-# Maximum number of lines in a module
-max-module-lines=1000
-
-# String used as indentation unit. This is usually " " (4 spaces) or "\t" (1
-# tab).
-indent-string='    '
+# Create a graph of internal dependencies in the given file (report RP0402 must
+# not be disabled)
+int-import-graph=
