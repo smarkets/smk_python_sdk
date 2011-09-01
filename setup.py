@@ -18,7 +18,8 @@ from distutils.command import clean, build
 from itertools import chain
 
 
-COMMON_GIT_REPO = 'git://git.corp.smarkets.com/smk_api_common.git'
+ETO_PIQI_URL = 'http://git.corp.smarkets.com/?p=eto_common.git;a=blob_plain;f=eto.piqi;hb=HEAD'
+SETO_PIQI_URL = 'http://git.corp.smarkets.com/?p=smk_api_common.git;a=blob_plain;f=seto.piqi;hb=HEAD'
 
 
 def _safe_glob(pathname):
@@ -35,9 +36,9 @@ class SmarketsProtocolBuild(build.build):
 
     def check_executables(self):
         "Check that various executables are available"
-        self.git = find_executable("git")
-        if self.git is None:
-            sys.stderr.write("*** Cannot find git; is it installed?\n")
+        self.curl = find_executable("curl")
+        if self.curl is None:
+            sys.stderr.write("*** Cannot find curl; is it installed?\n")
             sys.exit(-1)
 
         self.protoc = find_executable("protoc")
@@ -55,29 +56,18 @@ class SmarketsProtocolBuild(build.build):
     def run(self):
         "Get the .piqi definitions and run the 'protoc' compiler command"
         self.check_executables()
-        pb_build_dir = os.path.join(
-            os.path.dirname(__file__), 'build', 'pb')
-        api_dir = os.path.join(pb_build_dir, 'smk_api_common')
-        if not os.path.exists(pb_build_dir):
-            # Get build
-            os.makedirs(pb_build_dir)
-            args = (self.git, 'clone', COMMON_GIT_REPO)
-            if subprocess.call(args, cwd=pb_build_dir) != 0:
-                sys.exit(-1)
-            args = ('./rebar', 'get-deps')
-            if subprocess.call(args, cwd=api_dir) != 0:
-                sys.exit(-1)
 
         eto_piqi = os.path.join(os.path.dirname(__file__), 'eto.piqi')
         if not os.path.exists(eto_piqi):
-            eto_piqi_src = os.path.join(
-                api_dir, 'deps', 'eto_common', 'eto.piqi')
-            shutil.copy(eto_piqi_src, eto_piqi)
+            args = (self.curl, '-o', eto_piqi, ETO_PIQI_URL)
+            if subprocess.call(args) != 0:
+                sys.exit(-1)
 
         seto_piqi = os.path.join(os.path.dirname(__file__), 'seto.piqi')
         if not os.path.exists(seto_piqi):
-            seto_piqi_src = os.path.join(api_dir, 'seto.piqi')
-            shutil.copy(seto_piqi_src, seto_piqi)
+            args = (self.curl, '-o', seto_piqi, SETO_PIQI_URL)
+            if subprocess.call(args) != 0:
+                sys.exit(-1)
 
         eto_proto = os.path.join(
             os.path.dirname(__file__), 'smarkets.eto.piqi.proto')
