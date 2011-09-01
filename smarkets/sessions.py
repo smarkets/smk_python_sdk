@@ -1,25 +1,61 @@
 "Smarkets TCP-based session management"
+# Copyright (C) 2011 Smarkets Limited <support@smarkets.com>
+#
+# This module is released under the MIT License:
+# http://www.opensource.org/licenses/mit-license.php
 import logging
 import Queue
 import socket
+import types
 
 from google.protobuf import text_format
 
-import eto.piqi_pb2 as eto
-import seto.piqi_pb2 as seto
+import smarkets.eto.piqi_pb2 as eto
+import smarkets.seto.piqi_pb2 as seto
 
-from smk.exceptions import ConnectionError, SocketDisconnected
+from smarkets.exceptions import ConnectionError, SocketDisconnected
+
+
+class SessionSettings(object):
+    "Encapsulate settings necessary to create a new session"
+    def __init__(self, username, password):
+        if username is None:
+            raise ValueError("username cannot be None")
+        if password is None:
+            raise ValueError("password cannot be None")
+        self.username = username
+        self.password = password
+        self.host = 'localhost'
+        self.port = 3701
+        self.socket_timeout = 30
+        # Most message are quite small, so this won't come into
+        # effect. For larger messages, it needs some performance
+        # testing to determine whether a single large recv() system
+        # call is worse than many smaller ones.
+        self.read_chunksize = 65536  # 64k
+
+    def validate(self):
+        "Do basic validation on the settings"
+        if not isinstance(self.socket_timeout, (types.NoneType, int)):
+            raise ValueError("socket_timeout must be an integer or None")
+        if self.socket_timeout is not None and self.socket_timeout <= 0:
+            raise ValueError("socket_timeout must be positive")
+        if not isinstance(self.read_chunksize, (types.NoneType, int, long)):
+            raise ValueError("read_chunksize must be an integer or None")
+        if self.read_chunksize is not None and self.read_chunksize <= 0:
+            raise ValueError("read_chunksize must be positive")
 
 
 class Session(object):
     "Manages TCP communication via Smarkets streaming API"
-    logger = logging.getLogger('smk.session')
+    logger = logging.getLogger('smarkets.session')
 
-    def __init__(self, username, password, host='localhost', port=3701,
-                 session=None, inseq=1, outseq=1, socket_timeout=None):
-        self.username = username
-        self.password = password
-        self.socket = SessionSocket(host, port, socket_timeout)
+    def __init__(self, settings, session=None, inseq=1, outseq=1):
+        if not isinstance(settings, SessionSettings):
+            raise ValueError("settings is not a SessionSettings")
+        settings.validate()
+        self.settings = settings
+        self.socket = SessionSocket(settings)
         self.session = session
         self.inseq = inseq
         # Outgoing socket sequence number
@@ -44,11 +80,10 @@ class Session(object):
             self.buf_outseq = self.outseq
             login = self.out_payload
             login.Clear()
-            # pylint: disable-msg=E1101
             login.type = seto.PAYLOAD_LOGIN
             login.eto_payload.type = eto.PAYLOAD_LOGIN
-            login.login.username = self.username
-            login.login.password = self.password
+            login.login.username = self.settings.username
+            login.login.password = self.settings.password
             self.logger.info("sending login payload")
             if self.session is not None:
                 self.logger.info(
@@ -56,6 +91,16 @@ class Session(object):
                 login.eto_payload.login.session = self.session
             # Always flush outgoing login message
             self.send(True)
+
+    def logout(self):
+        "Disconnects from the API"
+        logout = self.out_payload
+        logout.Clear()
+        logout.type = seto.PAYLOAD_ETO
+        logout.eto_payload.type = eto.PAYLOAD_LOGOUT
+        logout.eto_payload.logout.reason = eto.LOGOUT_NONE
+        self.logger.info("sending logout payload")
+        self.send(True)
 
     def disconnect(self):
         "Disconnects from the API"
@@ -66,7 +111,6 @@ class Session(object):
         self.logger.debug(
             "buffering payload with outgoing sequence %d: %s",
             self.outseq, text_format.MessageToString(self.out_payload))
-        # pylint: disable-msg=E1101
         self.out_payload.eto_payload.seq = self.buf_outseq
         self.send_buffer.put_nowait(self.out_payload.SerializeToString())
         self.buf_outseq += 1
@@ -90,7 +134,6 @@ class Session(object):
         self.in_payload.Clear()
         self.in_payload.ParseFromString(msg_bytes)
         self._handle_in_payload()
-        # pylint: disable-msg=E1101
         if self.in_payload.eto_payload.seq == self.inseq:
             # Go ahead
             self.logger.debug("received sequence %d", self.inseq)
@@ -110,7 +153,6 @@ class Session(object):
                 self.inseq)
             replay = self.out_payload
             replay.Clear()
-            # pylint: disable-msg=E1101
             replay.type = seto.PAYLOAD_ETO
             replay.eto_payload.type = eto.PAYLOAD_REPLAY
             replay.eto_payload.replay.seq = self.inseq
@@ -123,7 +165,6 @@ class Session(object):
 
     def _handle_in_payload(self):
         "Pre-consume the login response message"
-        # pylint: disable-msg=E1101
         msg = self.in_payload
         self.logger.debug(
             "received message to dispatch: %s",
@@ -151,21 +192,13 @@ class Session(object):
 
 class SessionSocket(object):
     "Wraps a socket with basic framing/deframing"
-    logger = logging.getLogger('smk.session.socket')
-    wire_logger = logging.getLogger('smk.session.wire')
-    # Most message are quite small, so this won't come into
-    # effect. For larger messages, it needs some performance testing
-    # to determine whether a single large recv() system call is worse
-    # than many smaller ones.
-    default_read_chunksize = 65536 # 64k
+    logger = logging.getLogger('smarkets.session.socket')
+    wire_logger = logging.getLogger('smarkets.session.wire')
 
-    def __init__(self, host, port, socket_timeout=None, read_chunksize=None):
-        self.host = host
-        self.port = port
-        self.socket_timeout = socket_timeout
-        if read_chunksize is None:
-            read_chunksize = self.default_read_chunksize
-        self.read_chunksize = read_chunksize
+    def __init__(self, settings):
+        if not isinstance(settings, SessionSettings):
+            raise ValueError("settings is not a SessionSettings")
+        self.settings = settings
         self._buffer = ''
         self._sock = None
 
@@ -185,11 +218,12 @@ class SessionSocket(object):
             return False
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            if self.socket_timeout is not None:
-                sock.settimeout(self.socket_timeout)
+            if self.settings.socket_timeout is not None:
+                sock.settimeout(self.settings.socket_timeout)
             self.logger.info(
-                "connecting with new socket to %s:%s", self.host, self.port)
-            sock.connect((self.host, self.port))
+                "connecting with new socket to %s:%s",
+                self.settings.host, self.settings.port)
+            sock.connect((self.settings.host, self.settings.port))
         except socket.error as exc:
             raise ConnectionError(self._error_message(exc))
 
@@ -256,10 +290,10 @@ class SessionSocket(object):
                 self.logger.debug("next message is %d bytes long", to_read)
                 if to_read:
                     # Read the actual message if necessary
-                    while to_read > self.read_chunksize:
+                    while to_read > self.settings.read_chunksize:
                         self._fill_buffer(
-                            self.read_chunksize + len(self._buffer))
-                        to_read -= self.read_chunksize
+                            self.settings.read_chunksize + len(self._buffer))
+                        to_read -= self.settings.read_chunksize
                     if to_read > 0:
                         self._fill_buffer(to_read + len(self._buffer))
                 msg_bytes = self._buffer[:result]
@@ -280,7 +314,7 @@ class SessionSocket(object):
             self.logger.debug("receiving %d bytes", bytes_needed)
             inbytes = self._sock.recv(bytes_needed, socket.MSG_WAITALL)
             if len(inbytes) != bytes_needed:
-                self.logger.warning(
+                self.logger.info(
                     "socket disconnected while receiving, got %r", inbytes)
                 raise SocketDisconnected()
             self._buffer += inbytes
@@ -291,10 +325,10 @@ class SessionSocket(object):
         # or just "message"
         if len(exception.args) == 1:
             return "Error connecting to %s:%s. %s." % (
-                self.host, self.port, exception.args[0])
+                self.settings.host, self.settings.port, exception.args[0])
         else:
             return "Error %s connecting %s:%s. %s." % (
-                exception.args[0], self.host, self.port,
+                exception.args[0], self.settings.host, self.settings.port,
                 exception.args[1])
 
 

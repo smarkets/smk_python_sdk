@@ -1,28 +1,33 @@
 import logging
-import Queue
 import time
 import threading
 import unittest
 
-import eto.piqi_pb2 as eto
-import seto.piqi_pb2 as seto
-import smk
+from Queue import Queue, Empty
+
+import smarkets.eto.piqi_pb2 as eto
+import smarkets.seto.piqi_pb2 as seto
+import smarkets as smk
 
 
 class ThreadingTestCase(unittest.TestCase):
-    username = 'hunter.morris@smarkets.com'
-    password = 'abc,123'
-
-    def get_session(self, cls=None):
+    "Test using separate reader and writer threads"
+    def get_session(self, user_index, cls=None):
         if cls is None:
             cls = smk.Session
-        return cls(self.username, self.password, socket_timeout=15)
+        username = 'none@domain.invalid'
+        password = 'none'
+        if self.passwords:
+            username, password = self.passwords[user_index]
+        settings = smk.SessionSettings(username, password)
+        return cls(settings)
 
-    def get_client(self, cls=None, session=None, session_cls=None):
+    def get_client(
+        self, cls=None, session=None, session_cls=None, user_index=0):
         if cls is None:
             cls = smk.Smarkets
         if session is None:
-            session = self.get_session(cls=session_cls)
+            session = self.get_session(user_index, cls=session_cls)
         return cls(session)
 
     def setUp(self):
@@ -38,9 +43,10 @@ class ThreadingTestCase(unittest.TestCase):
         # Start the sender thread first
         self.sender.login()
         self.sender.start()
-        # Wait for 5 seconds until connected and login is sent before
-        # starting receiver
-        self.assertTrue(self.sender.login_complete.wait(5))
+        # Wait for 30 seconds (default socket timeout) until connected
+        # and login is sent before starting receiver
+        self.sender.login_complete.wait(30)
+        self.assertTrue(self.sender.login_complete.isSet())
         self.receiver.start()
         name, response = self.receiver.get()
         self.assertEquals(name, 'eto.login_response')
@@ -91,13 +97,13 @@ class WorkItem(object):
 
 class SendingThread(threading.Thread):
     "Thread used for all sending payloads"
-    logger = logging.getLogger('smk.test.sender')
+    logger = logging.getLogger('smarkets.test.sender')
     def __init__(self, client):
         super(SendingThread, self).__init__()
         self.client = client
         self.running = True
         self.daemon = True
-        self.queue = Queue.Queue()
+        self.queue = Queue()
         self.name = 'session sender'
         self.login_complete = threading.Event()
 
@@ -122,7 +128,7 @@ class SendingThread(threading.Thread):
             self.logger.debug('[%s] getting a WorkItem', _cthrd())
             try:
                 item = self.queue.get(timeout=1)
-            except Queue.Empty:
+            except Empty:
                 self.logger.debug('[%s] nothing in queue')
                 continue
             self.logger.debug('[%s] got a WorkItem, calling it', _cthrd())
@@ -137,7 +143,7 @@ class SendingThread(threading.Thread):
 
 class ReceivingThread(threading.Thread):
     "Thread used for receiving payloads from the socket"
-    logger = logging.getLogger('smk.test.receiver')
+    logger = logging.getLogger('smarkets.test.receiver')
     queue_timeout = 1 # 1 second max wait
 
     def __init__(self, client):
@@ -145,7 +151,7 @@ class ReceivingThread(threading.Thread):
         self.client = client
         self.daemon = True
         self.running = True
-        self.queue = Queue.Queue()
+        self.queue = Queue()
         self.name = 'session receiver'
 
     def stop(self):

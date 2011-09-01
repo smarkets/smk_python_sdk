@@ -1,54 +1,53 @@
-NAME = smk_python_sdk
-VERSION = $(shell python setup.py --version)
-DST = dist/$(NAME)-$(VERSION)
+all: deps
 
-all: seto.piqi.proto README
-
-build/pb:
-	mkdir -p build/pb
-	(cd build/pb && \
-		git clone https://github.com/smarkets/smk_api_common.git && \
-		cd smk_api_common && \
-		./rebar get-deps)
-
-eto.piqi: build/pb
-	cp build/pb/smk_api_common/deps/eto_common/eto.piqi .
-
-seto.piqi: build/pb
-	cp build/pb/smk_api_common/seto.piqi .
-
-eto.piqi.proto: eto.piqi
-	piqi to-proto eto.piqi -o eto.piqi.proto
-
-seto.piqi.proto: eto.piqi.proto seto.piqi
-	piqi to-proto seto.piqi -o seto.piqi.proto
-
-# seto/piqi_pb2.py: seto.piqi.proto
-# 	mkdir -p smk/seto
-# 	touch smk/seto/__init__.py
-# 	protoc --python_out=. seto.piqi.proto
-
-# eto/piqi_pb2.py: eto.piqi.proto
-# 	mkdir -p smk/eto
-# 	touch smk/eto/__init__.py
-# 	protoc --python_out=. eto.piqi.proto
+deps:
+	python setup.py build
 
 clean:
-	rm -rf eto.piqi seto.piqi seto.piqi.proto eto.piqi.proto eto seto smk/*.pyc build
+	python setup.py clean
 
-README: README.md
-	pandoc -s README.md -w rst -o README
-
-release:
+distclean: clean
+	-rm -rf dist
+	-rm -rf build
+	-rm -rf smk.egg-info
+	-rm -rf smarkets/eto
+	-rm -rf smarkets/seto
 	-find . -name "*.pyc" | xargs rm
-	-find . -name "*.orig" | xargs rm
-	-rm -rf smk/.cache
-	-mkdir dist
-	-rm -rf dist/$(NAME)-$(VERSION)
-	-rm dist/$(NAME)-$(VERSION).tar.gz
-	-rm dist/$(NAME)-$(VERSION).zip
-	-mkdir dist/$(NAME)-$(VERSION)
-	cp -r smk seto eto tests $(DST)
-	cp setup.py README README.md MANIFEST CHANGELOG run_tests $(DST)
-	cd dist && tar -czv -f $(NAME)-$(VERSION).tar.gz $(NAME)-$(VERSION)
-	cd dist && zip $(NAME)-$(VERSION).zip -r $(NAME)-$(VERSION)
+	-rm README
+
+release: deps
+	python setup.py sdist --format=gztar,zip
+
+test: deps
+	mkdir -p build/test
+	nosetests --with-xunit --quiet --xunit-file=build/test/nosetests.xml tests/unit_tests.py
+
+check:
+	mkdir -p build/pylint build/pep8
+	-pylint --rcfile=./.pylintrc --ignore=piqi_pb2.py -f parseable -r n smarkets \
+		| grep -v "Instance of 'Payload' has no 'events_request' member" \
+		| grep -v "Instance of 'Payload' has no 'eto_payload' member" \
+		| grep -v "Instance of 'Payload' has no 'Clear' member" \
+		| grep -v "Instance of 'Uuid128' has no 'Clear' member" \
+		| grep -v "Instance of 'Payload' has no 'CopyFrom' member" \
+		| grep -v "Instance of 'Payload' has no 'ParseFromString' member" \
+		| grep -v "Instance of 'Payload' has no 'SerializeToString' member" \
+		| grep -v "Instance of 'Payload' has no 'login' member" \
+		| grep -v "Instance of 'Events' has no 'ParseFromString' member" \
+		> build/pylint/pylint.out
+	pep8 --exclude=piqi_pb2.py smarkets > build/pep8/pep8.out
+
+docs:
+	$(MAKE) -C docs html
+
+github:
+	git push origin github-master
+	git push github github-master:master
+	git tag v$(VSN)
+	git push origin refs/tags/v$(VSN):refs/tags/v$(VSN)
+	git push github refs/tags/v$(VSN):refs/tags/v$(VSN)
+
+delvsn:
+	git tag -d v$(VSN)
+	git push origin :refs/tags/v$(VSN)
+	git push github :refs/tags/v$(VSN)

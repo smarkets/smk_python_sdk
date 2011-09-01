@@ -1,3 +1,11 @@
+0.2.0
+
+    Update to latest eto and seto definitions
+    Add additional integration tests
+    Add unit tests
+    Add first pass at documentation
+
+
 0.1.0
     
     Initial Release

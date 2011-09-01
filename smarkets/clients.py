@@ -1,12 +1,17 @@
 "Smarkets API client"
+# Copyright (C) 2011 Smarkets Limited <support@smarkets.com>
+#
+# This module is released under the MIT License:
+# http://www.opensource.org/licenses/mit-license.php
 import logging
 
 from itertools import chain
 
-import eto.piqi_pb2 as eto
-import seto.piqi_pb2 as seto
+import smarkets.eto.piqi_pb2 as eto
+import smarkets.seto.piqi_pb2 as seto
 
-from exceptions import InvalidCallbackError
+from smarkets.exceptions import InvalidCallbackError
+from smarkets.urls import fetch
 
 
 _ETO_PAYLOAD_TYPES = dict((
@@ -67,13 +72,14 @@ class Smarkets(object):
                 _ETO_PAYLOAD_TYPES.itervalues(),
                 _SETO_PAYLOAD_TYPES.itervalues())))
 
-    logger = logging.getLogger('smk.smarkets')
+    logger = logging.getLogger('smarkets.smarkets')
 
     def __init__(self, session, auto_flush=True):
         self.session = session
         self.auto_flush = auto_flush
         self.callbacks = self.__class__.CALLBACKS.copy()
         self.global_callback = Callback()
+        self.fetch = fetch
 
     def login(self, receive=True):
         "Connect and ensure the session is active"
@@ -81,41 +87,37 @@ class Smarkets(object):
         if receive:
             self.read()
 
-    def logout(self):
-        "Disconnect. TODO: send logout message before"
+    def logout(self, receive=True):
+        """
+        Disconnect and send logout message, optionally waiting for
+        confirmation.
+        """
+        self.session.logout()
+        if receive:
+            self.read()
         self.session.disconnect()
 
-    def read(self):
-        "Receive the next payload and block"
-        frame = self.session.next_frame()
-        if frame:
-            self._dispatch(frame)
+    def read(self, num=1):
+        "Receive the next `num` payloads and block"
+        for _ in xrange(0, num):
+            frame = self.session.next_frame()
+            if frame:
+                self._dispatch(frame)
 
     def flush(self):
         "Flush the send buffer"
         self.session.flush()
 
-    def order(self, qty, price, side, market, contract):
+    def order(self, order):
         "Create a new order"
         msg = self.session.out_payload
-        msg.Clear()
-        # pylint: disable-msg=E1101
-        msg.type = seto.PAYLOAD_ORDER_CREATE
-        msg.order_create.type = seto.ORDER_CREATE_LIMIT
-        msg.order_create.market.CopyFrom(market)
-        msg.order_create.contract.CopyFrom(contract)
-        msg.order_create.side = side
-        msg.order_create.quantity_type = seto.QUANTITY_PAYOFF_CURRENCY
-        msg.order_create.quantity = qty
-        msg.order_create.price_type = seto.PRICE_PERCENT_ODDS
-        msg.order_create.price = price
+        order.copy_to(msg, clear=True)
         self._send()
 
     def order_cancel(self, order):
         "Cancel an existing order"
         msg = self.session.out_payload
         msg.Clear()
-        # pylint: disable-msg=E1101
         msg.type = seto.PAYLOAD_ORDER_CANCEL
         msg.order_cancel.order.CopyFrom(order)
         self._send()
@@ -124,7 +126,6 @@ class Smarkets(object):
         "Ping the service"
         msg = self.session.out_payload
         msg.Clear()
-        # pylint: disable-msg=E1101
         msg.type = seto.PAYLOAD_ETO
         msg.eto_payload.type = eto.PAYLOAD_PING
         self._send()
@@ -133,7 +134,6 @@ class Smarkets(object):
         "Subscribe to a market"
         msg = self.session.out_payload
         msg.Clear()
-        # pylint: disable-msg=E1101
         msg.type = seto.PAYLOAD_MARKET_SUBSCRIPTION
         msg.market_subscription.market.CopyFrom(market)
         self._send()
@@ -142,10 +142,25 @@ class Smarkets(object):
         "Unsubscribe from a market"
         msg = self.session.out_payload
         msg.Clear()
-        # pylint: disable-msg=E1101
         msg.type = seto.PAYLOAD_MARKET_UNSUBSCRIPTION
         msg.market_unsubscription.market.CopyFrom(market)
         self._send()
+
+    def request_events(self, request):
+        "Send a structured events request"
+        msg = self.session.out_payload
+        msg.Clear()
+        request.copy_to(msg)
+        self._send()
+
+    def fetch_http_found(self, payload, incoming_payload=None):
+        "Fetch the URL specified by a http found payload"
+        content_type, result = self.fetch(payload.http_found.url)
+        if content_type == 'application/x-protobuf':
+            if incoming_payload is None:
+                incoming_payload = seto.Events()
+            incoming_payload.ParseFromString(result)
+            return incoming_payload
 
     def add_handler(self, name, callback):
         "Add a callback handler"
