@@ -36,3 +36,6 @@ check:
 		| grep -v "Instance of 'Events' has no 'ParseFromString' member" \
 		> build/pylint/pylint.out
 	pep8 --exclude=piqi_pb2.py smarkets > build/pep8/pep8.out
+
+docs:
+	$(MAKE) -C docs html
