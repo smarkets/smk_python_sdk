@@ -22,11 +22,11 @@ Python API client for Smarkets.
 
 To install:
 
-    $ pip install smk
+    $ pip install smk_python_sdk
 
 or if that doesn't work:
 
-    $ easy_install smk
+    $ easy_install smk_python_sdk
 
 or if you want to build it yourself:
 
