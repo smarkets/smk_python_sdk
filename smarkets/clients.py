@@ -46,13 +46,10 @@ class Callback(object):
                 "so it cannot unhandle it")
         return self
 
-    def fire(self, msg, name=None):
+    def fire(self, *args, **kwargs):
         "Raise the signal to the handlers"
         for handler in self._handlers:
-            if name is None:
-                handler(msg)
-            else:
-                handler(name, msg)
+            handler(*args, **kwargs)
 
     def __len__(self):
         return len(self._handlers)
@@ -214,18 +211,18 @@ class Smarkets(object):
         "Send a payload via the session"
         self.session.send(self.auto_flush)
 
-    def _dispatch(self, msg):
+    def _dispatch(self, message):
         "Dispatch a frame to the callbacks"
-        name = _SETO_PAYLOAD_TYPES.get(msg.type)
+        name = _SETO_PAYLOAD_TYPES.get(message.type)
         if name == 'seto.eto':
-            name = _ETO_PAYLOAD_TYPES.get(msg.eto_payload.type)
+            name = _ETO_PAYLOAD_TYPES.get(message.eto_payload.type)
         if name in self.callbacks:
             self.logger.info("dispatching callback %s", name)
             callback = self.callbacks.get(name)
             if callback is not None:
-                callback(msg)
+                callback(message)
             else:
                 self.logger.error("no callback %s", name)
         else:
             self.logger.info("ignoring unknown message: %s", name)
-        self.global_callback(msg, name=name)
+        self.global_callback(name, message)
