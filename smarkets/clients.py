@@ -131,16 +131,16 @@ class Smarkets(object):
         "Subscribe to a market"
         msg = self.session.out_payload
         msg.Clear()
-        msg.type = seto.PAYLOAD_MARKET_SUBSCRIPTION
-        msg.market_subscription.market.CopyFrom(market)
+        msg.type = seto.PAYLOAD_MARKET_SUBSCRIBE
+        msg.market_subscribe.market.CopyFrom(market)
         self._send()
 
     def unsubscribe(self, market):
         "Unsubscribe from a market"
         msg = self.session.out_payload
         msg.Clear()
-        msg.type = seto.PAYLOAD_MARKET_UNSUBSCRIPTION
-        msg.market_unsubscription.market.CopyFrom(market)
+        msg.type = seto.PAYLOAD_MARKET_UNSUBSCRIBE
+        msg.market_unsubscribe.market.CopyFrom(market)
         self._send()
 
     def request_events(self, request):
