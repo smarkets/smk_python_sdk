@@ -15,6 +15,8 @@ class SessionTestCase(unittest.TestCase):
     "Base class for session tests"
     markets = None
     passwords = None
+    host = None
+    port = None
 
     def __init__(self, *args, **kwargs):
         self.clients = []
@@ -28,6 +30,10 @@ class SessionTestCase(unittest.TestCase):
         if self.passwords:
             username, password = self.passwords[user_index]
         settings = smk.SessionSettings(username, password)
+        if self.host is not None:
+            settings.host = self.host
+        if self.port is not None:
+            settings.port = self.port
         return cls(settings)
 
     def get_client(

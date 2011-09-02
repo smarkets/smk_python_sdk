@@ -12,6 +12,8 @@ import smarkets as smk
 
 class ThreadingTestCase(unittest.TestCase):
     "Test using separate reader and writer threads"
+    host = None
+    port = None
     def get_session(self, user_index, cls=None):
         if cls is None:
             cls = smk.Session
@@ -20,6 +22,10 @@ class ThreadingTestCase(unittest.TestCase):
         if self.passwords:
             username, password = self.passwords[user_index]
         settings = smk.SessionSettings(username, password)
+        if self.host is not None:
+            settings.host = self.host
+        if self.port is not None:
+            settings.port = self.port
         return cls(settings)
 
     def get_client(

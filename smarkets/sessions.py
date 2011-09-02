@@ -25,7 +25,7 @@ class SessionSettings(object):
             raise ValueError("password cannot be None")
         self.username = username
         self.password = password
-        self.host = 'localhost'
+        self.host = 'api-sandbox.smarkets.com'
         self.port = 3701
         self.socket_timeout = 30
         # Most message are quite small, so this won't come into
