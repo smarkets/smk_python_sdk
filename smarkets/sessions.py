@@ -333,6 +333,7 @@ class SessionSocket(object):
             self.logger.info(
                 "socket disconnected while receiving, got %r", inbytes)
             raise SocketDisconnected()
+        return inbytes
 
     def _recv_msg_ssl(self, bytes_needed):
         "Wrap reading from an SSL socket where we can't pass options to recv"
