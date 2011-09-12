@@ -7,6 +7,7 @@ import logging
 import Queue
 import socket
 import types
+import ssl
 
 from google.protobuf import text_format
 
@@ -28,6 +29,8 @@ class SessionSettings(object):
         self.host = 'api-sandbox.smarkets.com'
         self.port = 3701
         self.socket_timeout = 30
+        self.ssl = False
+        self.ssl_kwargs = {}
         # Most message are quite small, so this won't come into
         # effect. For larger messages, it needs some performance
         # testing to determine whether a single large recv() system
@@ -44,7 +47,10 @@ class SessionSettings(object):
             raise ValueError("read_chunksize must be an integer or None")
         if self.read_chunksize is not None and self.read_chunksize <= 0:
             raise ValueError("read_chunksize must be positive")
-
+        if not isinstance(self.ssl, (bool)):
+            raise ValueError("ssl must ba a bool")
+        if not isinstance(self.ssl_kwargs, (dict)):
+            raise ValueError("ssl_kwargs must be a dict")
 
 class Session(object):
     "Manages TCP communication via Smarkets streaming API"
@@ -218,6 +224,8 @@ class SessionSocket(object):
             return False
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            if self.settings.ssl:
+                sock = ssl.wrap_socket(sock, **self.settings.ssl_kwargs)
             if self.settings.socket_timeout is not None:
                 sock.settimeout(self.settings.socket_timeout)
             self.logger.info(
@@ -280,7 +288,7 @@ class SessionSocket(object):
             if pos > len(self._buffer) - 1:
                 pos = 0
                 # Empty buffer and read another 4 bytes
-                self._fill_buffer(4, socket.MSG_WAITALL)
+                self._fill_buffer(4, True)
             cbit = ord(self._buffer[pos])
             result |= ((cbit & 0x7f) << shift)
             pos += 1
@@ -312,12 +320,33 @@ class SessionSocket(object):
         while len(self._buffer) < min_size:
             bytes_needed = min_size - len(self._buffer)
             self.logger.debug("receiving %d bytes", bytes_needed)
-            inbytes = self._sock.recv(bytes_needed, socket.MSG_WAITALL)
-            if len(inbytes) != bytes_needed:
-                self.logger.info(
-                    "socket disconnected while receiving, got %r", inbytes)
-                raise SocketDisconnected()
+            if self.settings.ssl:
+                inbytes = self._recv_msg_ssl(bytes_needed)
+            else:
+                inbytes = self._recv_msg_sock(bytes_needed)
             self._buffer += inbytes
+
+    def _recv_msg_sock(self, bytes_needed):
+        "Wrap reading from a plain socket"
+        inbytes = self._sock.recv(bytes_needed, socket.MSG_WAITALL)
+        if len(inbytes) != bytes_needed:
+            self.logger.info(
+                "socket disconnected while receiving, got %r", inbytes)
+            raise SocketDisconnected()
+
+    def _recv_msg_ssl(self, bytes_needed):
+        "Wrap reading from an SSL socket where we can't pass options to recv"
+        msglen = 0
+        msglist = []
+        while msglen < bytes_needed:
+            chunk=self._sock.recv(
+                min(self.settings.read_chunksize, bytes_needed - msglen))
+            if not chunk:
+                self.logger.info("socket disconnected while receiving")
+                raise SocketDisconnected()
+            msglist.append(chunk)
+            msglen += len(chunk)
+        return ''.join(msglist)
 
     def _error_message(self, exception):
         "Stringify a socket exception"
