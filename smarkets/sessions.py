@@ -29,7 +29,7 @@ class SessionSettings(object):
         self.host = 'api-sandbox.smarkets.com'
         self.port = 3701
         self.socket_timeout = 30
-        self.ssl = False
+        self.ssl = True
         self.ssl_kwargs = {}
         # Most message are quite small, so this won't come into
         # effect. For larger messages, it needs some performance

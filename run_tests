@@ -44,9 +44,9 @@ if __name__ == '__main__':
         help="run integration tests (only possible if you have a 'test' "
         "API service available)")
     parser.add_option(
-        '-t', '--enable-ssl', dest='ssl', action='store_true',
-        default=False,
-        help="enable ssl (only possible if configured on 'test' API service)")
+        '-t', '--disable-ssl', dest='ssl', action='store_false',
+        default=True,
+        help="disable ssl (only possible if configured on 'test' API service)")
     options, args = parser.parse_args()
     level = logging.WARNING
     if options.verbose:
