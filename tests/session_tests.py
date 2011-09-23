@@ -34,6 +34,8 @@ class SessionTestCase(unittest.TestCase):
             settings.host = self.host
         if self.port is not None:
             settings.port = self.port
+        if self.ssl is not None:
+            settings.ssl = self.ssl
         return cls(settings)
 
     def get_client(
