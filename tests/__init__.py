@@ -28,7 +28,8 @@ def integration_tests(
     password_filename=None,
     market_filename=None,
     server=None,
-    port=None):
+    port=None,
+    ssl=None):
     "Add tests to a `unittest.TestSuite` containing integration tests"
     # Use defaults from our test data
     if password_filename is None:
@@ -53,6 +54,7 @@ def integration_tests(
         case_class.markets = markets
         case_class.host = server
         case_class.port = port
+        case_class.ssl = ssl
         suite.addTest(unittest.makeSuite(case_class))
     return suite
 
