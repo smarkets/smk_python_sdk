@@ -17,7 +17,7 @@ distclean: clean
 	-find . -name "*.pyc" | xargs rm
 	-rm README
 
-dist: deps
+release: deps
 	python setup.py sdist --format=gztar,zip
 
 test: deps
