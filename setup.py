@@ -23,8 +23,7 @@ from itertools import chain
 
 
 ETO_PIQI_URL = 'https://raw.github.com/smarkets/eto_common/v0.2.1/eto.piqi'
-SETO_PIQI_URL = 'https://raw.github.com/smarkets/smk_api_common/v0.3.1/seto.piqi'
-
+SETO_PIQI_URL = 'https://raw.github.com/smarkets/smk_api_common/v0.3.0/seto.piqi'
 
 def _safe_glob(pathname):
     "Do a safe version of glob which copes with win32"
@@ -168,7 +167,7 @@ long_description = f.read()
 f.close()
 
 
-__version__ = '0.3.0'  # This is ugly, we should be able to import it
+__version__ = '0.3.1'  # This is ugly, we should be able to import it
 
 sdict = {
     'name' : 'smk_python_sdk',

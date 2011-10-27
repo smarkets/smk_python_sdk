@@ -135,6 +135,28 @@ class Smarkets(object):
         msg.market_subscribe.market.CopyFrom(market)
         self._send()
 
+    def request_account_state(self):
+        "Request Account State"
+        msg = self.session.out_payload
+        msg.Clear()
+        msg.type = seto.PAYLOAD_ACCOUNT_STATE_REQUEST
+        self._send()
+
+    def request_orders_for_account(self):
+        "Request an account's orders"
+        msg = self.session.out_payload
+        msg.Clear()
+        msg.type = seto.PAYLOAD_ORDERS_FOR_ACCOUNT_REQUEST
+        self._send()
+
+    def request_orders_for_market(self, market):
+        "Request an account's orders for a market"
+        msg = self.session.out_payload
+        msg.Clear()
+        msg.type = seto.PAYLOAD_ORDERS_FOR_MARKET_REQUEST
+        msg.orders_for_market_request.market.CopyFrom(market)
+        self._send()
+
     def unsubscribe(self, market):
         "Unsubscribe from a market"
         msg = self.session.out_payload

@@ -29,7 +29,7 @@ from smarkets.orders import Order
 from smarkets.sessions import Session, SessionSettings
 
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 
 __all__ = sorted(name for name, obj in locals().items()
                  if not (name.startswith('_') or inspect.ismodule(obj)))
