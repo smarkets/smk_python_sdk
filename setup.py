@@ -168,7 +168,7 @@ long_description = f.read()
 f.close()
 
 
-__version__ = '0.2.1'  # This is ugly, we should be able to import it
+__version__ = '0.3.1'  # This is ugly, we should be able to import it
 
 sdict = {
     'name' : 'smk_python_sdk',
