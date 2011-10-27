@@ -140,13 +140,13 @@ class Smarkets(object):
         msg = self.session.out_payload
         msg.Clear()
         msg.type = seto.PAYLOAD_ACCOUNT_STATE_REQUEST
-        # python doesn't like account_state_request with no account id
-        # and server currently ignores it (only one account pp atm)
-        # so we're going to send it a dummy one. The server will always 
-        # return the primary account.
-        account = seto.Uuid128()
-        account.low = 0
-        msg.account_state_request.account.CopyFrom(account)
+        self._send()
+
+    def request_orders_for_account(self):
+        "Request an account's orders"
+        msg = self.session.out_payload
+        msg.Clear()
+        msg.type = seto.PAYLOAD_ORDERS_FOR_ACCOUNT_REQUEST
         self._send()
 
     def request_orders_for_market(self, market):
