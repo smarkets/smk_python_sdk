@@ -1,3 +1,5 @@
+.PHONY: docs dist
+
 all: deps
 
 deps:
@@ -15,7 +17,7 @@ distclean: clean
 	-find . -name "*.pyc" | xargs rm
 	-rm README
 
-release: deps
+dist: deps
 	python setup.py sdist --format=gztar,zip
 
 test: deps
