@@ -1,3 +1,5 @@
+.PHONY: docs dist
+
 all: deps
 
 deps:
