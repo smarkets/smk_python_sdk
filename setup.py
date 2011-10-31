@@ -23,7 +23,7 @@ from itertools import chain
 
 
 ETO_PIQI_URL = 'https://raw.github.com/smarkets/eto_common/v0.2.1/eto.piqi'
-SETO_PIQI_URL = 'https://raw.github.com/smarkets/smk_api_common/v0.3.0/seto.piqi'
+SETO_PIQI_URL = 'https://raw.github.com/smarkets/smk_api_common/v0.4.0/seto.piqi'
 
 def _safe_glob(pathname):
     "Do a safe version of glob which copes with win32"
