@@ -117,11 +117,13 @@ class Session(object):
         self.logger.debug(
             "buffering payload with outgoing sequence %d: %s",
             self.outseq, text_format.MessageToString(self.out_payload))
-        self.out_payload.eto_payload.seq = self.buf_outseq
+        sent_seq = self.buf_outseq
+        self.out_payload.eto_payload.seq = sent_seq
         self.send_buffer.put_nowait(self.out_payload.SerializeToString())
         self.buf_outseq += 1
         if flush:
             self.flush()
+        return sent_seq
 
     def flush(self):
         "Flush payloads to the socket"
