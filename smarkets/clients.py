@@ -109,7 +109,7 @@ class Smarkets(object):
         "Create a new order"
         msg = self.session.out_payload
         order.copy_to(msg, clear=True)
-        self._send()
+        return self._send()
 
     def order_cancel(self, order):
         "Cancel an existing order"
@@ -117,7 +117,7 @@ class Smarkets(object):
         msg.Clear()
         msg.type = seto.PAYLOAD_ORDER_CANCEL
         msg.order_cancel.order.CopyFrom(order)
-        self._send()
+        return self._send()
 
     def ping(self):
         "Ping the service"
@@ -125,7 +125,7 @@ class Smarkets(object):
         msg.Clear()
         msg.type = seto.PAYLOAD_ETO
         msg.eto_payload.type = eto.PAYLOAD_PING
-        self._send()
+        return self._send()
 
     def subscribe(self, market):
         "Subscribe to a market"
@@ -133,21 +133,21 @@ class Smarkets(object):
         msg.Clear()
         msg.type = seto.PAYLOAD_MARKET_SUBSCRIBE
         msg.market_subscribe.market.CopyFrom(market)
-        self._send()
+        return self._send()
 
     def request_account_state(self):
         "Request Account State"
         msg = self.session.out_payload
         msg.Clear()
         msg.type = seto.PAYLOAD_ACCOUNT_STATE_REQUEST
-        self._send()
+        return self._send()
 
     def request_orders_for_account(self):
         "Request an account's orders"
         msg = self.session.out_payload
         msg.Clear()
         msg.type = seto.PAYLOAD_ORDERS_FOR_ACCOUNT_REQUEST
-        self._send()
+        return self._send()
 
     def request_orders_for_market(self, market):
         "Request an account's orders for a market"
@@ -155,7 +155,7 @@ class Smarkets(object):
         msg.Clear()
         msg.type = seto.PAYLOAD_ORDERS_FOR_MARKET_REQUEST
         msg.orders_for_market_request.market.CopyFrom(market)
-        self._send()
+        return self._send()
 
     def unsubscribe(self, market):
         "Unsubscribe from a market"
@@ -163,14 +163,14 @@ class Smarkets(object):
         msg.Clear()
         msg.type = seto.PAYLOAD_MARKET_UNSUBSCRIBE
         msg.market_unsubscribe.market.CopyFrom(market)
-        self._send()
+        return self._send()
 
     def request_events(self, request):
         "Send a structured events request"
         msg = self.session.out_payload
         msg.Clear()
         request.copy_to(msg)
-        self._send()
+        return self._send()
 
     def fetch_http_found(self, payload, incoming_payload=None):
         "Fetch the URL specified by a http found payload"
@@ -230,8 +230,11 @@ class Smarkets(object):
         return payload_copy
 
     def _send(self):
-        "Send a payload via the session"
-        self.session.send(self.auto_flush)
+        """
+        Send a payload via the session and return the sequence number
+        used for the outgoing payload
+        """
+        return self.session.send(self.auto_flush)
 
     def _dispatch(self, message):
         "Dispatch a frame to the callbacks"
