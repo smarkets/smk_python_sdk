@@ -34,35 +34,36 @@ or if you want to build it yourself:
 
 ## Getting Started
 
-    >>> import logging
-    >>> logging.basicConfig(level=logging.DEBUG)
-    >>> import smarkets
-    >>> username = 'username'
-    >>> password = 'password'
-    >>> settings = smarkets.SessionSettings(username, password)
-    >>> settings.host = 'api.smarkets.com'
-    >>> settings.port = 3701
-    >>> session = smarkets.Session(settings)
-    >>> client = smarkets.Smarkets(session)
-    >>> client.login()
-    >>> client.ping()
-    >>> client.flush()
-    >>> client.read()
-    >>> market_id = client.str_to_uuid128('fc024')
-    >>> client.subscribe(market_id) # subscribe to a market
-    >>> client.flush()
-    >>> client.read()
-    >>> order = smarkets.Order()
-    >>> order.quantity = 400000 # £40 payout
-    >>> order.price = 2500 # 25.00%
-    >>> order.side = smarkets.Order.BUY
-    >>> order.market = market_id
-    >>> order.contract = client.str_to_uuid128('fcccc')
-    >>> client.order(order)
-    >>> client.flush()
-    >>> client.read()
-    >>> client.logout()
-
+```python
+import logging
+logging.basicConfig(level=logging.DEBUG)
+import smarkets
+username = 'username'
+password = 'password'
+settings = smarkets.SessionSettings(username, password)
+settings.host = 'api.smarkets.com'
+settings.port = 3701
+session = smarkets.Session(settings)
+client = smarkets.Smarkets(session)
+client.login()
+client.ping()
+client.flush()
+client.read()
+market_id = client.str_to_uuid128('fc024')
+client.subscribe(market_id) # subscribe to a market
+client.flush()
+client.read()
+order = smarkets.Order()
+order.quantity = 400000 # £40 payout
+order.price = 2500 # 25.00%
+order.side = smarkets.Order.BUY
+order.market = market_id
+order.contract = client.str_to_uuid128('fcccc')
+client.order(order)
+client.flush()
+client.read()
+client.logout()
+```
 
 ### Resuming a session
 
@@ -70,30 +71,32 @@ When resuming a session you need to know the incoming and outgoing
 sequence numbers you were using when the session was last used, from
 the example above they will now both be 5.
 
-    >>> username = 'username'
-    >>> password = 'password'
-    >>> settings = smarkets.SessionSettings(username, password)
-    >>> settings.host = 'api.smarkets.com'
-    >>> settings.port = 3701
-    >>> session_id = 'session-id'
-    >>> inseq = 5
-    >>> outseq = 5
-    >>> session = smarkets.Session(settings, session_id, inseq, outseq)
-    >>> client = smarkets.Smarkets(session)
-    >>> client.login()
-    >>> client.read()
-
+```python
+username = 'username'
+password = 'password'
+settings = smarkets.SessionSettings(username, password)
+settings.host = 'api.smarkets.com'
+settings.port = 3701
+session_id = 'session-id'
+inseq = 5
+outseq = 5
+session = smarkets.Session(settings, session_id, inseq, outseq)
+client = smarkets.Smarkets(session)
+client.login()
+client.read()
+```
 
 ### Registering callbacks
 
-    >>> from google.protobuf import text_format
-    >>> def login_response(msg):
-    >>>     print "eto.login_response", text_format.MessageToString(msg)
-    >>> def global_callback(name, msg):
-    >>>     print name, text_format.MessageToString(msg)
-    >>> client.add_handler('eto.login_response', login_response)
-    >>> client.add_global_handler(global_callback)
-
+```python
+from google.protobuf import text_format
+def login_response(msg):
+    print "eto.login_response", text_format.MessageToString(msg)
+def global_callback(name, msg):
+    print name, text_format.MessageToString(msg)
+client.add_handler('eto.login_response', login_response)
+client.add_global_handler(global_callback)
+```
 
 ## Connections
 
