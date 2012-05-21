@@ -344,14 +344,10 @@ class UuidTestCase(unittest.TestCase):
         "Test that Uuid class raises TypeError when given a bad 'base' value"
         tag = uuid.Uuid.tags.get('Account')
         uuid1 = uuid.Uuid(73786976294838235846L, tag)
-        with self.assertRaises(TypeError):
-            uuid1.to_slug(base=90)
-        with self.assertRaises(TypeError):
-            uuid1.to_slug(base=1)
-        with self.assertRaises(TypeError):
-            uuid1.to_slug(base=-1)
-        with self.assertRaises(TypeError):
-            uuid1.to_slug(chars='abc', base=4)
+        self.assertRaises(TypeError, lambda: uuid1.to_slug(base=90))
+        self.assertRaises(TypeError, lambda: uuid1.to_slug(base=1))
+        self.assertRaises(TypeError, lambda: uuid1.to_slug(base=-1))
+        self.assertRaises(TypeError, lambda: uuid1.to_slug(chars='abc', base=4))
 
     def test_slug(self):
         "Test that Uuid can be converted to/from slugs"
@@ -373,10 +369,8 @@ class UuidTestCase(unittest.TestCase):
         self.assertEquals(uuid1.to_hex(pad=0)[:-4], uuid1.shorthex)
         uuid2 = uuid.Uuid.from_hex(hex_str)
         self.assertEquals(uuid1, uuid2)
-        with self.assertRaises(TypeError):
-            uuid.Uuid.from_hex(10)
-        with self.assertRaises(ValueError):
-            uuid.Uuid.from_hex('aa0000')
+        self.assertRaises(TypeError, lambda: uuid.Uuid.from_hex(10))
+        self.assertRaises(ValueError, lambda: uuid.Uuid.from_hex('aa0000'))
 
     def test_int(self):
         "Test that Uuid can be converted to/from integer"
@@ -392,9 +386,6 @@ class UuidTestCase(unittest.TestCase):
         self.assertEqual(uuid2.low, low)
         uuid3 = uuid.Uuid.from_int((high, low), 'Account')
         self.assertEquals(uuid1, uuid3)
-        with self.assertRaises(TypeError):
-            uuid.Uuid.from_int('foo', 'Account')
-        with self.assertRaises(TypeError):
-            uuid.Uuid.from_int(-100, 'Account')
-        with self.assertRaises(ValueError):
-            uuid.Uuid.from_int(1, 'invalid-type')
+        self.assertRaises(TypeError, lambda: uuid.Uuid.from_int('foo', 'Account'))
+        self.assertRaises(TypeError, lambda: uuid.Uuid.from_int(-100, 'Account'))
+        self.assertRaises(ValueError, lambda: uuid.Uuid.from_int(1, 'invalid-type'))
