@@ -13,15 +13,17 @@ import types
 from collections import namedtuple
 
 
-UuidTagBase = namedtuple('UuidTag', ['name', 'hex_str', 'prefix'])
-UuidBase = namedtuple('Uuid', ['number', 'tag'])
+UuidTagBase = namedtuple('UuidTagBase', ['name', 'hex_str', 'prefix'])
+UuidBase = namedtuple('UuidBase', ['number', 'tag'])
 
 
 class UuidTag(UuidTagBase):
     "Represents tag information"
     tag_mult = 1 << 16
+
     @property
     def int_tag(self):
+        "Integer tag value"
         return int(self.hex_str, 16)
 
     def tag_number(self, number):
@@ -61,17 +63,21 @@ class Uuid(UuidBase):
 
     @property
     def low(self):
+        "Lower 64 bits of number"
         return self.number & self.mask64
 
     @property
     def high(self):
+        "Higher 64 bits of number"
         return (self.number >> 64) & self.mask64
 
     @property
     def shorthex(self):
+        "Short hex representation of Uuid"
         return '%x' % self.number
 
     def to_slug(self, base=36, chars=None, pad=0):
+        "Convert to slug representation"
         if chars is None:
             chars = self.chars
         if base < 2 or base > len(chars):
@@ -82,11 +88,13 @@ class Uuid(UuidBase):
         return '%s-%s' % (self.tag.prefix, slug)
 
     def to_hex(self, pad):
+        "Convert to tagged hex representation"
         hex_str = '%x%s' % (self.number, self.tag.hex_str)
         return self.pad_uuid(hex_str, pad=pad)
 
     @staticmethod
     def base_n(number, chars):
+        "Recursive helper for calculating a number in base len(chars)"
         return ((number == 0) and "0") \
             or (Uuid.base_n(number // (len(chars)), chars).lstrip("0") \
                     + chars[number % (len(chars))])
@@ -138,13 +146,15 @@ class Uuid(UuidBase):
         tag = cls.tags_by_int_tag.get(int_tag)
         if tag is None:
             raise ValueError("invalid integer tag: %r" % int_tag)
+        if prefix and tag != cls.tags_by_prefix.get(prefix):
+            raise ValueError("prefix %r did not match tag %r" % (prefix, tag))
         return cls(number, tag)
 
     @classmethod
     def from_hex(cls, hex_str):
         "Convert a hex uuid into a Uuid"
         if not isinstance(hex_str, types.StringTypes):
-            raise TypeError("hexstr must be a string: %r" % hexstr)
+            raise TypeError("hex_str must be a string: %r" % hex_str)
         hex_tag = hex_str[-4:]
         number = int(hex_str[:-4], 16)
         tag = cls.tags_by_hex_str.get(hex_tag)
