@@ -10,128 +10,211 @@ There are 3 main representations of IDs used in Smarkets:
 """
 import types
 
-
-_CHARS = '0123456789' \
-    'abcdefghijklmnopqrstuvwxyz' \
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-
-_UUID_TAGS = {
-    'Account':       'acc1',
-    'ContractGroup': 'c024',
-    'Contract':      'cccc',
-    'Order':         'fff0',
-    'Comment':       'b1a4',
-    'Entity':        '0444',
-    'Event':         '1100',
-    'Session':       '9999',
-    'User':          '0f00',
-    'Referrer':      '4e4e'
-}
-
-_UUID_TAGS_BY_TAG = dict(((v, k) for k, v in _UUID_TAGS.iteritems()))
-_UUID_INT_TAGS = dict((k, int(v, 16)) for k, v in _UUID_TAGS.iteritems())
-_UUID_INT_TAGS_BY_TAG = dict((int(v, 16), k) for k, v in _UUID_TAGS.iteritems())
+from collections import namedtuple
 
 
-def _base_n(number, chars):
+UuidTagBase = namedtuple('UuidTagBase', ['name', 'int_tag', 'prefix'])
+UuidBase = namedtuple('UuidBase', ['number', 'tag'])
+
+
+class UuidTag(UuidTagBase):
+    "Represents tag information"
+    __slots__ = ()
+    tag_mult = 1 << 16
+
+    @property
+    def hex_str(self):
+        "Hex tag value"
+        return '%x' % self.int_tag
+
+    def tag_number(self, number):
+        "Adds this tag to a number"
+        return number * self.tag_mult + self.int_tag
+
+    @classmethod
+    def split_int_tag(cls, number):
+        "Splits a number into the ID and tag"
+        return divmod(number, cls.tag_mult)
+
+
+class Uuid(UuidBase):
+    "Represents a UUID"
+    __slots__ = ()
+    chars = '0123456789' \
+        'abcdefghijklmnopqrstuvwxyz' \
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    tag_list = (
+        UuidTag('Account',       int('acc1', 16), 'a'),
+        UuidTag('ContractGroup', int('c024', 16), 'm'),
+        UuidTag('Contract',      int('cccc', 16), 'c'),
+        UuidTag('Order',         int('fff0', 16), 'o'),
+        UuidTag('Comment',       int('b1a4', 16), 'b'),
+        UuidTag('Entity',        int('0444', 16), 'n'),
+        UuidTag('Event',         int('1100', 16), 'e'),
+        UuidTag('Session',       int('9999', 16), 's'),
+        UuidTag('User',          int('0f00', 16), 'u'),
+        UuidTag('Referrer',      int('4e4e', 16), 'r'),
+    )
+
+    # Various indexes into uuid map
+    tags = dict((t.name, t) for t in tag_list)
+    tags_by_hex_str = dict((t.hex_str, t) for t in tag_list)
+    tags_by_prefix = dict((t.prefix, t) for t in tag_list)
+    tags_by_int_tag = dict((t.int_tag, t) for t in tag_list)
+    mask64 = (1 << 64) - 1
+
+    @property
+    def low(self):
+        "Lower 64 bits of number"
+        return self.number & self.mask64
+
+    @property
+    def high(self):
+        "Higher 64 bits of number"
+        return (self.number >> 64) & self.mask64
+
+    @property
+    def shorthex(self):
+        "Short hex representation of Uuid"
+        return '%x' % self.number
+
+    def to_slug(self, base=36, chars=None, pad=0):
+        "Convert to slug representation"
+        if chars is None:
+            chars = self.chars
+        if base < 2 or base > len(chars):
+            raise TypeError("base must be between 2 and %s" % len(chars))
+        chars = chars[:base]
+        number = self.tag.tag_number(self.number)
+        slug = self.pad_uuid(self.base_n(number, chars), pad=pad)
+        return '%s-%s' % (self.tag.prefix, slug)
+
+    def to_hex(self, pad=32):
+        "Convert to tagged hex representation"
+        hex_str = '%x%s' % (self.number, self.tag.hex_str)
+        return self.pad_uuid(hex_str, pad=pad)
+
+    @staticmethod
+    def base_n(number, chars):
+        "Recursive helper for calculating a number in base len(chars)"
+        return ((number == 0) and "0") \
+            or (Uuid.base_n(number // (len(chars)), chars).lstrip("0") \
+                    + chars[number % (len(chars))])
+
+    @staticmethod
+    def pad_uuid(uuid, pad=32, padchar='0'):
+        "Pads a UUID with <pad> <padchar>s"
+        return padchar * (pad - len(uuid)) + uuid
+
+    @classmethod
+    def unsplit64(cls, high, low):
+        "Converts a high/low 64-bit integer pair into a 128-bit large integer"
+        return ((high & cls.mask64) << 64) | (low & cls.mask64)
+
+    @classmethod
+    def from_int(cls, number, ttype):
+        "Convert an integer and tag type to a Uuid"
+        if isinstance(number, tuple):
+            number = cls.unsplit64(*number)
+        if not isinstance(number, (int, long)):
+            raise TypeError("Number must be an integer: %r" % number)
+        if number < 0:
+            raise TypeError("Number cannot be negative: %r" % number)
+        tag = cls.tags.get(ttype)
+        if tag is None:
+            raise ValueError("invalid type: %r" % ttype)
+        return cls(number, tag)
+
+    @classmethod
+    def from_slug(cls, slug, base=36, chars=None):
+        "Convert a slug into a Uuid"
+        if not isinstance(slug, types.StringTypes):
+            raise TypeError("slug must be a string: %r" % slug)
+        if chars is None:
+            chars = cls.chars
+        if base < 2 or base > len(chars):
+            raise TypeError("base must be between 2 and %s" % len(chars))
+        if base <= 36:
+            slug = slug.lower()
+        chars = chars[:base]
+        index = dict(zip(chars, range(0, len(chars))))
+        if len(slug) > 1 and '-' in slug:
+            # We have a prefix
+            prefix, slug = slug.split('-')
+        number = reduce(lambda acc, val: acc + val[0] * len(index) ** val[1],
+                        zip([index[x] for x in slug],
+                            reversed(range(0, len(slug)))), 0)
+        number, int_tag = UuidTag.split_int_tag(number)
+        tag = cls.tags_by_int_tag.get(int_tag)
+        if tag is None:
+            raise ValueError("invalid integer tag: %r" % int_tag)
+        if prefix and tag != cls.tags_by_prefix.get(prefix):
+            raise ValueError("prefix %r did not match tag %r" % (prefix, tag))
+        return cls(number, tag)
+
+    @classmethod
+    def from_hex(cls, hex_str):
+        "Convert a hex uuid into a Uuid"
+        if not isinstance(hex_str, types.StringTypes):
+            raise TypeError("hex_str must be a string: %r" % hex_str)
+        hex_tag = hex_str[-4:]
+        number = int(hex_str[:-4], 16)
+        tag = cls.tags_by_hex_str.get(hex_tag)
+        if tag is None:
+            raise ValueError("invalid hex tag: %r" % hex_tag)
+        return cls(number, tag)
+
+
+def int_to_slug(number, ttype):
+    "Convert a large integer to a slug"
+    return Uuid.from_int(number, ttype).to_slug()
+
+
+def slug_to_int(slug, return_tag=None, split=False):
     """
-    Helper method for recursing
+    Convert a slug to an integer, optionally splitting into high and
+    low 64 bit parts
     """
-    return ((number == 0) and "0") \
-        or (_base_n(number // (len(chars)), chars).lstrip("0") \
-                + chars[number % (len(chars))])
+    uuid = Uuid.from_slug(slug)
+    number = (uuid.high, uuid.low) if split else uuid.number
+    if return_tag == 'type':
+        return (number, uuid.tag.name)
+    elif return_tag == 'int':
+        return (number, uuid.tag.int_tag)
+    else:
+        return number
 
 
-def pad_uuid(uuid, pad=32, padchar='0'):
-    "Pads a UUID with <pad> <padchar>s"
-    return padchar * (pad - len(uuid)) + uuid
-
-
-def int_to_slug(number, base=36, chars=_CHARS, prefix=None, pad=0):
-    """
-    Convert a large integer to a slug
-    """
-    if not isinstance(number, (int, long)):
-        raise TypeError("Number must be an integer: %r" % number)
-    if number < 0:
-        raise TypeError("Number cannot be negative: %r" % number)
-    if base < 2 or base > len(_CHARS):
-        raise TypeError("base must be between 2 and %s" % len(_CHARS))
-    chars = chars[:base]
-    slug = pad_uuid(_base_n(number, chars), pad=pad)
-    if prefix is not None:
-        if not isinstance(prefix, types.StringTypes):
-            raise TypeError("prefix must be a string: %r" % prefix)
-        return '%s-%s' % (prefix, slug)
-    return slug
-
-
-def slug_to_int(slug, base=36, chars=_CHARS, prefix=None):
-    """
-    Convert a slug to a large integer
-    """
-    if not isinstance(slug, types.StringTypes):
-        raise TypeError("slug must be a string: %r" % slug)
-    if base < 2 or base > len(_CHARS):
-        raise TypeError("base must be between 2 and %s" % len(_CHARS))
-    if base <= 36:
-        slug = slug.lower()
-    chars = _CHARS[:base]
-    index = dict(zip(chars, range(0, len(chars))))
-    if prefix is not None:
-        # Prefix is simply an assertion here
-        got_prefix, slug = slug.split('-')
-        if (prefix or got_prefix) != got_prefix:
-            raise TypeError("Got prefix '%s' when expected '%s'" \
-                                % (got_prefix, prefix))
-    return reduce(lambda acc, val: acc + val[0] * len(index) ** val[1],
-                  zip([index[x] for x in slug],
-                      reversed(range(0, len(slug)))), 0)
-
-
-def uuid_to_slug(number, base=36, chars=_CHARS, prefix=None, pad=0):
+def uuid_to_slug(number):
     """
     Convert a Smarkets UUID (128-bit hex) to a slug
     """
-    if not isinstance(number, types.StringTypes):
-        raise TypeError("Number must be a string: %r" % number)
-    return int_to_slug(int(number, 16), base, chars, prefix, pad)
+    return Uuid.from_hex(number).to_slug()
 
 
-def slug_to_uuid(slug, base=36, chars=_CHARS, prefix=None, pad=32):
+def slug_to_uuid(slug):
     """
     Convert a slug to a Smarkets UUID
     """
-    if not isinstance(slug, types.StringTypes):
-        raise TypeError("slug must be a string: %r" % slug)
-    return pad_uuid('%x' % slug_to_int(slug, base, chars, prefix), pad=pad)
+    return Uuid.from_slug(slug).to_hex()
 
 
-def int_to_uuid(number, type):
+def int_to_uuid(number, ttype):
     "Convert an untagged integer into a tagged uuid"
-    if not isinstance(number, (long, int)):
-        raise TypeError("number must be an integer: %r", number)
-
-    tag = _UUID_TAGS.get(type)
-    if tag is None:
-        raise ValueError("invalid type: %r" % type)
-
-    return pad_uuid('%x%s' % (number, tag))
+    return Uuid.from_int(number, ttype).to_hex()
 
 
-def uuid_to_int(uuid, return_tag=None):
+def uuid_to_int(uuid, return_tag=None, split=False):
     "Convert a tagged uuid into an integer, optionally returning type"
-    tagless = uuid[:-4]
-    number = int(tagless, 16)
+    uuid = Uuid.from_hex(uuid)
+    number = (uuid.high, uuid.low) if split else uuid.number
     if return_tag == 'type':
-        tag = uuid[-4:]
-        tag_type = _UUID_TAGS_BY_TAG.get(tag)
-        if tag_type is None:
-            raise ValueError("Invalid tagged uuid: %r" % uuid)
-        return (number, tag_type)
-    if return_tag == 'int':
-        return (number, int(uuid[-4:], 16))
-    return number
+        return (number, uuid.tag.name)
+    elif return_tag == 'int':
+        return (number, uuid.tag.int_tag)
+    else:
+        return number
+
 
 def uuid_to_short(uuid):
     "Converts a full UUID to the shortened version"

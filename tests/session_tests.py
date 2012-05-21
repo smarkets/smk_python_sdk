@@ -191,7 +191,7 @@ class OrderTestCase(SessionTestCase):
         order_rejected_msg = self._simple_cb(
             self.clients[0], 'seto.order_rejected')
         order = self._test_order()
-        order.quantity = 4000000000  # should be insufficient funds
+        order.quantity = 50000000  # should be insufficient funds
         order.validate_new()
         self.assertEquals(
             self.clients[0].order(order), 2)
@@ -206,6 +206,26 @@ class OrderTestCase(SessionTestCase):
         self.assertEquals(
             order_rejected_msg.order_rejected.reason,
             seto.ORDER_REJECTED_INSUFFICIENT_FUNDS)
+
+    def test_order_invalid(self):
+        order_invalid_msg = self._simple_cb(
+            self.clients[0], 'seto.order_invalid')
+        order = self._test_order()
+        order.quantity = 500000001  # should be invalid
+        order.validate_new()
+        self.assertEquals(
+            self.clients[0].order(order), 2)
+        self.assertEquals(self.clients[0].session.outseq, 3)
+        self.clients[0].read()  # should be invalid
+        self.assertEquals(self.clients[0].session.inseq, 3)
+        self.assertEquals(
+            order_invalid_msg.type,
+            seto.PAYLOAD_ORDER_INVALID)
+        # Order create message was #2
+        self.assertEquals(order_invalid_msg.order_invalid.seq, 2)
+        self.assertEquals(
+            order_invalid_msg.order_invalid.reasons,
+            [seto.ORDER_INVALID_INVALID_QUANTITY])
 
     def test_order_cancel(self):
         order_accepted_msg = self._simple_cb(
