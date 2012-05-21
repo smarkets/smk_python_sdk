@@ -13,18 +13,19 @@ import types
 from collections import namedtuple
 
 
-UuidTagBase = namedtuple('UuidTagBase', ['name', 'hex_str', 'prefix'])
+UuidTagBase = namedtuple('UuidTagBase', ['name', 'int_tag', 'prefix'])
 UuidBase = namedtuple('UuidBase', ['number', 'tag'])
 
 
 class UuidTag(UuidTagBase):
     "Represents tag information"
+    __slots__ = ()
     tag_mult = 1 << 16
 
     @property
-    def int_tag(self):
-        "Integer tag value"
-        return int(self.hex_str, 16)
+    def hex_str(self):
+        "Hex tag value"
+        return '%x' % self.int_tag
 
     def tag_number(self, number):
         "Adds this tag to a number"
@@ -38,20 +39,21 @@ class UuidTag(UuidTagBase):
 
 class Uuid(UuidBase):
     "Represents a UUID"
+    __slots__ = ()
     chars = '0123456789' \
         'abcdefghijklmnopqrstuvwxyz' \
         'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     tag_list = (
-        UuidTag('Account',       'acc1', 'a'),
-        UuidTag('ContractGroup', 'c024', 'm'),
-        UuidTag('Contract',      'cccc', 'c'),
-        UuidTag('Order',         'fff0', 'o'),
-        UuidTag('Comment',       'b1a4', 'b'),
-        UuidTag('Entity',        '0444', 'n'),
-        UuidTag('Event',         '1100', 'e'),
-        UuidTag('Session',       '9999', 's'),
-        UuidTag('User',          '0f00', 'u'),
-        UuidTag('Referrer',      '4e4e', 'r'),
+        UuidTag('Account',       int('acc1', 16), 'a'),
+        UuidTag('ContractGroup', int('c024', 16), 'm'),
+        UuidTag('Contract',      int('cccc', 16), 'c'),
+        UuidTag('Order',         int('fff0', 16), 'o'),
+        UuidTag('Comment',       int('b1a4', 16), 'b'),
+        UuidTag('Entity',        int('0444', 16), 'n'),
+        UuidTag('Event',         int('1100', 16), 'e'),
+        UuidTag('Session',       int('9999', 16), 's'),
+        UuidTag('User',          int('0f00', 16), 'u'),
+        UuidTag('Referrer',      int('4e4e', 16), 'r'),
     )
 
     # Various indexes into uuid map
