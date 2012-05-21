@@ -89,7 +89,7 @@ class Uuid(UuidBase):
         slug = self.pad_uuid(self.base_n(number, chars), pad=pad)
         return '%s-%s' % (self.tag.prefix, slug)
 
-    def to_hex(self, pad):
+    def to_hex(self, pad=32):
         "Convert to tagged hex representation"
         hex_str = '%x%s' % (self.number, self.tag.hex_str)
         return self.pad_uuid(hex_str, pad=pad)
@@ -165,38 +165,43 @@ class Uuid(UuidBase):
         return cls(number, tag)
 
 
-def int_to_slug(number, ttype, base=36, chars=None, pad=0):
+def int_to_slug(number, ttype):
     "Convert a large integer to a slug"
-    return Uuid.from_int(number, ttype).to_slug(base, chars, pad)
+    return Uuid.from_int(number, ttype).to_slug()
 
 
-def slug_to_int(slug, base=36, chars=None, split=True, return_type=False):
+def slug_to_int(slug, return_tag=None, split=False):
     """
     Convert a slug to an integer, optionally splitting into high and
     low 64 bit parts
     """
-    uuid = Uuid.from_slug(slug, base, chars)
+    uuid = Uuid.from_slug(slug)
     number = (uuid.high, uuid.low) if split else uuid.number
-    return (number, uuid.tag.name) if return_type else number
+    if return_tag == 'type':
+        return (number, uuid.tag.name)
+    elif return_tag == 'int':
+        return (number, uuid.tag.int_tag)
+    else:
+        return number
 
 
-def uuid_to_slug(number, base=36, chars=None, pad=0):
+def uuid_to_slug(number):
     """
     Convert a Smarkets UUID (128-bit hex) to a slug
     """
-    return Uuid.from_hex(number).to_slug(base, chars, pad)
+    return Uuid.from_hex(number).to_slug()
 
 
-def slug_to_uuid(slug, base=36, chars=None, pad=32):
+def slug_to_uuid(slug):
     """
     Convert a slug to a Smarkets UUID
     """
-    return Uuid.from_slug(slug, base, chars).to_hex(pad)
+    return Uuid.from_slug(slug).to_hex()
 
 
-def int_to_uuid(number, ttype, pad=32):
+def int_to_uuid(number, ttype):
     "Convert an untagged integer into a tagged uuid"
-    return Uuid.from_int(number, ttype).to_hex(pad)
+    return Uuid.from_int(number, ttype).to_hex()
 
 
 def uuid_to_int(uuid, return_tag=None, split=False):
@@ -205,9 +210,10 @@ def uuid_to_int(uuid, return_tag=None, split=False):
     number = (uuid.high, uuid.low) if split else uuid.number
     if return_tag == 'type':
         return (number, uuid.tag.name)
-    if return_tag == 'int':
+    elif return_tag == 'int':
         return (number, uuid.tag.int_tag)
-    return number
+    else:
+        return number
 
 
 def uuid_to_short(uuid):
