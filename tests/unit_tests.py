@@ -1,11 +1,12 @@
 import unittest
 
 from contextlib import contextmanager
-from itertools import chain
+from itertools import chain, product
 from mock import Mock, patch, sentinel
 
 import smarkets.eto.piqi_pb2 as eto
 import smarkets.seto.piqi_pb2 as seto
+import smarkets.uuid as uuid
 
 from smarkets.clients import Callback, Smarkets
 from smarkets.exceptions import InvalidCallbackError
@@ -279,3 +280,121 @@ class SmarketsTestCase(unittest.TestCase):
         payload.eto_payload.login_response.session = 'session'
         payload.eto_payload.login_response.reset = 2
         return payload
+
+
+class UuidTestCase(unittest.TestCase):
+    "Unit tests for Uuids"
+    def test_int_roundtrip(self):
+        "Test converting an integer to a Uuid and back"
+        ttype = 'Account'
+        for i in chain(xrange(1, 1000), product(xrange(1, 10), repeat=2)):
+            u1 = uuid.int_to_uuid(i, ttype)
+            u2, test_ttype = uuid.uuid_to_int(u1, return_tag='type', split=isinstance(i, tuple))
+            self.assertEquals(i, u2)
+            self.assertEquals(test_ttype, ttype)
+            u3 = uuid.int_to_slug(i, ttype)
+            u4, test_ttype = uuid.slug_to_int(u3, return_tag='type', split=isinstance(i, tuple))
+            self.assertEquals(i, u4)
+            self.assertEquals(test_ttype, ttype)
+
+    def test_uuid_roundtrip(self):
+        "Test converting a hex string to a Uuid and back"
+        suffix = 'acc1'
+        for i in xrange(1, 1000):
+            hex_str = '%x%s' % (i, suffix)
+            hex_str = '0' * (32 - len(hex_str)) + hex_str
+            u1, ttype = uuid.uuid_to_int(hex_str, return_tag='type')
+            self.assertEquals(ttype, 'Account')
+            u2 = uuid.int_to_uuid(u1, ttype)
+            self.assertEquals(u2, hex_str)
+            u3 = uuid.uuid_to_slug(hex_str)
+            u4 = uuid.slug_to_uuid(u3)
+            self.assertEquals(u4, hex_str)
+
+    def test_uuid_tag(self):
+        "Test UuidTag class"
+        tag = uuid.Uuid.tags.get('Account')
+        self.assertEquals(tag.name, 'Account')
+        self.assertEquals(tag.hex_str, 'acc1')
+        self.assertEquals(tag.prefix, 'a')
+        self.assertEquals(tag.int_tag, 44225)
+        tagged_8 = tag.tag_number(8)
+        self.assertEquals(tagged_8, int('8acc1', 16))
+        self.assertEquals(tag.split_int_tag(tagged_8), (8, tag.int_tag))
+
+    def test_uuid_high_low(self):
+        "Test Uuid class support for high/low number"
+        tag = uuid.Uuid.tags.get('Account')
+        uuid1 = uuid.Uuid(73786976294838235846L, tag)
+        self.assertEquals(uuid1.low, 29382)
+        self.assertEquals(uuid1.high, 4)
+        uuid2 = uuid.Uuid(5, tag)
+        self.assertEquals(uuid2.low, 5)
+        self.assertEquals(uuid2.high, 0)
+
+    def test_uuid_shorthex(self):
+        "Test Uuid class support for short hex values"
+        tag = uuid.Uuid.tags.get('Account')
+        uuid1 = uuid.Uuid(73786976294838235846L, tag)
+        self.assertEquals(uuid1.shorthex, '400000000000072c6')
+        uuid2 = uuid.Uuid(5, tag)
+        self.assertEquals(uuid2.shorthex, '5')
+
+    def test_bad_base_raises(self):
+        "Test that Uuid class raises TypeError when given a bad 'base' value"
+        tag = uuid.Uuid.tags.get('Account')
+        uuid1 = uuid.Uuid(73786976294838235846L, tag)
+        with self.assertRaises(TypeError):
+            uuid1.to_slug(base=90)
+        with self.assertRaises(TypeError):
+            uuid1.to_slug(base=1)
+        with self.assertRaises(TypeError):
+            uuid1.to_slug(base=-1)
+        with self.assertRaises(TypeError):
+            uuid1.to_slug(chars='abc', base=4)
+
+    def test_slug(self):
+        "Test that Uuid can be converted to/from slugs"
+        tag = uuid.Uuid.tags.get('Account')
+        uuid1 = uuid.Uuid(73786976294838235846L, tag)
+        slug = 'a-lvgb2h48s4kweqbl'
+        self.assertEquals(uuid1.to_slug(), slug)
+        self.assertEquals(uuid1.to_slug(base=16)[2:], uuid1.to_hex().lstrip('0'))
+        uuid2 = uuid.Uuid.from_slug(slug)
+        self.assertEquals(uuid1, uuid2)
+
+    def test_hex(self):
+        "Test that Uuid can be converted to/from hex"
+        tag = uuid.Uuid.tags.get('Account')
+        uuid1 = uuid.Uuid(73786976294838235846L, tag)
+        hex_str = '00000000000400000000000072c6acc1'
+        self.assertEquals(uuid1.to_hex(), hex_str)
+        self.assertEquals(uuid1.shorthex, hex_str.lstrip('0')[:-4])
+        self.assertEquals(uuid1.to_hex(pad=0)[:-4], uuid1.shorthex)
+        uuid2 = uuid.Uuid.from_hex(hex_str)
+        self.assertEquals(uuid1, uuid2)
+        with self.assertRaises(TypeError):
+            uuid.Uuid.from_hex(10)
+        with self.assertRaises(ValueError):
+            uuid.Uuid.from_hex('aa0000')
+
+    def test_int(self):
+        "Test that Uuid can be converted to/from integer"
+        tag = uuid.Uuid.tags.get('Account')
+        number = 73786976294838235846L
+        low = 29382
+        high = 4
+        uuid1 = uuid.Uuid(number, tag)
+        uuid2 = uuid.Uuid.from_int(number, 'Account')
+        self.assertEqual(uuid1, uuid2)
+        self.assertEqual(uuid2.number, number)
+        self.assertEqual(uuid2.high, high)
+        self.assertEqual(uuid2.low, low)
+        uuid3 = uuid.Uuid.from_int((high, low), 'Account')
+        self.assertEquals(uuid1, uuid3)
+        with self.assertRaises(TypeError):
+            uuid.Uuid.from_int('foo', 'Account')
+        with self.assertRaises(TypeError):
+            uuid.Uuid.from_int(-100, 'Account')
+        with self.assertRaises(ValueError):
+            uuid.Uuid.from_int(1, 'invalid-type')
