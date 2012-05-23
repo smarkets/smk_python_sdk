@@ -141,6 +141,7 @@ class Uuid(UuidBase):  # pylint: disable=E1001
             slug = slug.lower()
         chars = chars[:base]
         index = dict(zip(chars, range(0, len(chars))))
+        prefix = None
         if len(slug) > 1 and '-' in slug:
             # We have a prefix
             prefix, slug = slug.split('-')

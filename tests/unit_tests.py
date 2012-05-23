@@ -396,3 +396,11 @@ class UuidTestCase(unittest.TestCase):
         for tag in uuid.Uuid.tag_list:
             self.assertTrue(isinstance(tag.hex_str, types.StringTypes))
             self.assertEquals(4, len(tag.hex_str))
+
+    def test_slugs_without_prefix(self):
+        "Test that slugs without prefixes are supported"
+        slug = 'a-lvgb2h48s4kweqbl'
+        slug_no_prefix = 'lvgb2h48s4kweqbl'
+        uuid_prefix = uuid.Uuid.from_slug(slug)
+        uuid_no_prefix = uuid.Uuid.from_slug(slug_no_prefix)
+        self.assertEqual(uuid_prefix, uuid_no_prefix)
