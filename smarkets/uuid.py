@@ -17,7 +17,7 @@ UuidTagBase = namedtuple('UuidTagBase', ['name', 'int_tag', 'prefix'])
 UuidBase = namedtuple('UuidBase', ['number', 'tag'])
 
 
-class UuidTag(UuidTagBase):
+class UuidTag(UuidTagBase):  # pylint: disable=E1001
     "Represents tag information"
     __slots__ = ()
     tag_mult = 1 << 16
@@ -25,7 +25,7 @@ class UuidTag(UuidTagBase):
     @property
     def hex_str(self):
         "Hex tag value"
-        return '%x' % self.int_tag
+        return '%04x' % self.int_tag
 
     def tag_number(self, number):
         "Adds this tag to a number"
@@ -37,7 +37,7 @@ class UuidTag(UuidTagBase):
         return divmod(number, cls.tag_mult)
 
 
-class Uuid(UuidBase):
+class Uuid(UuidBase):  # pylint: disable=E1001
     "Represents a UUID"
     __slots__ = ()
     chars = '0123456789' \
