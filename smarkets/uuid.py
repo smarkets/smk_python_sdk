@@ -78,7 +78,7 @@ class Uuid(UuidBase):
         "Short hex representation of Uuid"
         return '%x' % self.number
 
-    def to_slug(self, base=36, chars=None, pad=0):
+    def to_slug(self, prefix=True, base=36, chars=None, pad=0):
         "Convert to slug representation"
         if chars is None:
             chars = self.chars
@@ -87,7 +87,10 @@ class Uuid(UuidBase):
         chars = chars[:base]
         number = self.tag.tag_number(self.number)
         slug = self.pad_uuid(self.base_n(number, chars), pad=pad)
-        return '%s-%s' % (self.tag.prefix, slug)
+        if prefix:
+            return '%s-%s' % (self.tag.prefix, slug)
+        else:
+            return slug
 
     def to_hex(self, pad=32):
         "Convert to tagged hex representation"
@@ -185,11 +188,11 @@ def slug_to_int(slug, return_tag=None, split=False):
         return number
 
 
-def uuid_to_slug(number):
+def uuid_to_slug(number, prefix=True):
     """
     Convert a Smarkets UUID (128-bit hex) to a slug
     """
-    return Uuid.from_hex(number).to_slug()
+    return Uuid.from_hex(number).to_slug(prefix=prefix)
 
 
 def slug_to_uuid(slug):
