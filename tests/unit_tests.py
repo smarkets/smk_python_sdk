@@ -1,3 +1,4 @@
+import types
 import unittest
 
 from contextlib import contextmanager
@@ -389,3 +390,9 @@ class UuidTestCase(unittest.TestCase):
         self.assertRaises(TypeError, lambda: uuid.Uuid.from_int('foo', 'Account'))
         self.assertRaises(TypeError, lambda: uuid.Uuid.from_int(-100, 'Account'))
         self.assertRaises(ValueError, lambda: uuid.Uuid.from_int(1, 'invalid-type'))
+
+    def test_uuid_tag_lengths(self):
+        "Test that all uuid tags are 4 characters long (zero-padded)"
+        for tag in uuid.Uuid.tag_list:
+            self.assertTrue(isinstance(tag.hex_str, types.StringTypes))
+            self.assertEquals(4, len(tag.hex_str))
