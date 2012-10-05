@@ -14,8 +14,9 @@ Python API client for Smarkets.
 ### For building the code, running tests and generating documentation
 
 * curl
-* Piqi
 * mock
+* pandoc
+* Piqi
 * sphinx
 
 ## Installation
