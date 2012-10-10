@@ -154,14 +154,15 @@ readme_path = os.path.join(os.path.dirname(__file__), 'README')
 readme_src = os.path.join(os.path.dirname(__file__), 'README.md')
 
 # Generate README from README.md using pandoc
-if not os.path.exists(readme_path):
-    pandoc = find_executable("pandoc")
-    if pandoc is None:
-        sys.stderr.write("*** Cannot find pandoc; is it installed?\n")
-        sys.exit(-1)
-    args = (pandoc, '-s', readme_src, '-w', 'rst', '-o', readme_path)
-    if subprocess.call(args) != 0:
-        sys.exit(-1)
+# (disabled due to some pandoc/unicode weirdness on our CI machine)
+#if not os.path.exists(readme_path):
+#    pandoc = find_executable("pandoc")
+#    if pandoc is None:
+#        sys.stderr.write("*** Cannot find pandoc; is it installed?\n")
+#        sys.exit(-1)
+#    args = (pandoc, '-s', readme_src, '-w', 'rst', '-o', readme_path)
+#    if subprocess.call(args) != 0:
+#        sys.exit(-1)
 
 f = open(readme_path)
 long_description = f.read()
