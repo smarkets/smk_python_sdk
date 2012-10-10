@@ -22,8 +22,8 @@ from distutils.command import clean, build
 from itertools import chain
 
 
-ETO_PIQI_URL = 'http://git.corp.smarkets.com/?p=eto_common.git;a=blob_plain;f=eto.piqi;hb=refs/tags/v0.2.1'
-SETO_PIQI_URL = 'http://git.corp.smarkets.com/?p=smk_api_common.git;a=blob_plain;f=seto.piqi;hb=refs/tags/v0.4.0'
+ETO_PIQI_URL = 'https://raw.github.com/smarkets/eto_common/v0.2.1/eto.piqi'
+SETO_PIQI_URL = 'https://raw.github.com/smarkets/smk_api_common/v0.4.0/seto.piqi'
 
 
 def _safe_glob(pathname):
