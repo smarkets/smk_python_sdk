@@ -11,7 +11,7 @@ import smarkets.uuid as uuid
 
 from smarkets.clients import Callback, Smarkets
 from smarkets.exceptions import InvalidCallbackError
-from smarkets.orders import Order
+from smarkets.orders import OrderCreate, OrderCancel, BUY
 
 
 class CallbackTestCase(unittest.TestCase):
@@ -189,20 +189,20 @@ class SmarketsTestCase(unittest.TestCase):
         market_id = self.client.str_to_uuid128('1c024')
         contract_id = self.client.str_to_uuid128('1cccc')
         with self._clear_send():
-            order = Order()
+            order = OrderCreate()
             order.price = 2500
             order.quantity = 10000
-            order.side = Order.BUY
+            order.side = BUY
             order.market = market_id
             order.contract = contract_id
             order.validate_new()
-            self.client.order(order)
+            self.client.send(order)
 
     def test_order_cancel(self):
         "Test the `Smarkets.order_cancel` method"
         order_id = self.client.str_to_uuid128('1fff0')
         with self._clear_send():
-            self.client.order_cancel(order_id)
+            self.client.send(OrderCancel(order_id))
 
     def test_ping(self):
         "Test the `Smarkets.ping` method"

@@ -8,7 +8,7 @@ import smarkets.eto.piqi_pb2 as eto
 import smarkets.seto.piqi_pb2 as seto
 import smarkets as smk
 
-from smarkets.orders import Order
+from smarkets.orders import OrderCreate, BUY
 
 
 class SessionTestCase(unittest.TestCase):
@@ -161,10 +161,10 @@ class OrderTestCase(SessionTestCase):
         "Generate a test order"
         market_id, contract_ids = self.get_market(0)
         contract_id = contract_ids[0]
-        order = Order()
+        order = OrderCreate()
         order.quantity = 400000
         order.price = 2500
-        order.side = Order.BUY
+        order.side = BUY
         order.market = market_id
         order.contract = contract_id
         order.validate_new()

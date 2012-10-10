@@ -6,13 +6,13 @@
 
 import smarkets.seto.piqi_pb2 as seto
 
+BUY = 1
+SELL = 2
 
-class Order(object):
+
+class OrderCreate(object):
     "Simple order state with useful exceptions"
     __slots__ = ('quantity', 'price', 'side', 'market', 'contract')
-
-    BUY = 1
-    SELL = 2
 
     def __init__(self):
         self.quantity = None
@@ -37,7 +37,7 @@ class Order(object):
         if self.quantity > 9223372036854775807L:
             raise ValueError("quantity cannot exceed 63 bits")
 
-        if self.side not in (self.BUY, self.SELL):
+        if self.side not in (BUY, SELL):
             raise ValueError("side must be one of BUY or SELL")
 
         if not isinstance(self.market, seto.Uuid128):
@@ -45,19 +45,25 @@ class Order(object):
         if not isinstance(self.contract, seto.Uuid128):
             raise ValueError("contract must be a valid seto.Uuid128")
 
-    def copy_to(self, payload, clear=True):
+    def copy_to(self, payload):
         "Copy this order instruction to a message `payload`"
-        if clear:
-            payload.Clear()
         payload.type = seto.PAYLOAD_ORDER_CREATE
         payload.order_create.type = seto.ORDER_CREATE_LIMIT
         payload.order_create.market.CopyFrom(self.market)
         payload.order_create.contract.CopyFrom(self.contract)
-        if self.side == self.BUY:
+        if self.side == BUY:
             payload.order_create.side = seto.SIDE_BUY
-        elif self.side == self.SELL:
+        elif self.side == SELL:
             payload.order_create.side = seto.SIDE_SELL
         payload.order_create.quantity_type = seto.QUANTITY_PAYOFF_CURRENCY
         payload.order_create.quantity = self.quantity
         payload.order_create.price_type = seto.PRICE_PERCENT_ODDS
         payload.order_create.price = self.price
+
+class OrderCancel(object):
+    def __init__(self, uid=None):
+        self.uid = uid
+
+    def copy_to(self, payload):
+        payload.type = seto.PAYLOAD_ORDER_CANCEL
+        payload.order.CopyFrom(self.uid)

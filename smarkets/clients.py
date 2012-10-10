@@ -105,18 +105,10 @@ class Smarkets(object):
         "Flush the send buffer"
         self.session.flush()
 
-    def order(self, order):
-        "Create a new order"
-        msg = self.session.out_payload
-        order.copy_to(msg, clear=True)
-        return self._send()
-
-    def order_cancel(self, order):
-        "Cancel an existing order"
-        msg = self.session.out_payload
-        msg.Clear()
-        msg.type = seto.PAYLOAD_ORDER_CANCEL
-        msg.order_cancel.order.CopyFrom(order)
+    def send(self, message):
+        payload = self.session.out_payload
+        payload.Clear()
+        message.copy_to(payload)
         return self._send()
 
     def ping(self):
