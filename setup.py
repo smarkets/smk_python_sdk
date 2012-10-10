@@ -150,7 +150,7 @@ class SmarketsProtocolClean(clean.clean):
         clean.clean.run(self)
 
 
-readme_path = os.path.join(os.path.dirname(__file__), 'README')
+readme_path = os.path.join(os.path.dirname(__file__), 'README.md')
 readme_src = os.path.join(os.path.dirname(__file__), 'README.md')
 
 # Generate README from README.md using pandoc
