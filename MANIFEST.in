@@ -1,4 +1,4 @@
-include MANIFEST README LICENSE INSTALL run_tests eto.piqi seto.piqi smarkets.eto.piqi.proto smarkets.seto.piqi.proto
+include MANIFEST README.md LICENSE INSTALL run_tests eto.piqi seto.piqi smarkets.eto.piqi.proto smarkets.seto.piqi.proto
 recursive-include tests *.py
 recursive-include docs *
 recursive-exclude docs *.pyc
