@@ -14,6 +14,8 @@ class ThreadingTestCase(unittest.TestCase):
     "Test using separate reader and writer threads"
     host = None
     port = None
+    passwords = None
+    ssl = None
     def get_session(self, user_index, cls=None):
         if cls is None:
             cls = smk.Session
