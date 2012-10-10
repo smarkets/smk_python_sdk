@@ -60,10 +60,15 @@ class OrderCreate(object):
         payload.order_create.price_type = seto.PRICE_PERCENT_ODDS
         payload.order_create.price = self.price
 
+
 class OrderCancel(object):
+    """ Message to cancel the specified order"""
+    __slots__ = ('uid',)
+
     def __init__(self, uid=None):
         self.uid = uid
 
     def copy_to(self, payload):
+        "Copy this instruction to a message `payload`"
         payload.type = seto.PAYLOAD_ORDER_CANCEL
         payload.order.CopyFrom(self.uid)
