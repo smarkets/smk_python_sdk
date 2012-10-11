@@ -12,7 +12,8 @@ SELL = 2
 
 class OrderCreate(object):
     "Simple order state with useful exceptions"
-    __slots__ = ('quantity', 'price', 'side', 'market', 'contract')
+    __slots__ = ('quantity', 'price', 'side', 'market', 'contract',
+                    'accept_callback', 'reject_callback', 'invalid_callback', 'seq', 'client')
 
     def __init__(self):
         self.quantity = None
@@ -20,6 +21,11 @@ class OrderCreate(object):
         self.side = None
         self.market = None
         self.contract = None
+        self.accept_callback = None
+        self.reject_callback = None
+        self.invalid_callback = None
+        self.seq = None
+        self.client = None
 
     def validate_new(self):
         "Validate this order's properties as a new instruction"
@@ -60,10 +66,46 @@ class OrderCreate(object):
         payload.order_create.price_type = seto.PRICE_PERCENT_ODDS
         payload.order_create.price = self.price
 
+    def register_callbacks(self, client):
+        self.client = client
+        if self.accept_callback is not None:
+            client.add_handler('seto.order_accepted', self._accept_callback)
+        if self.reject_callback is not None:
+            client.add_handler('seto.order_rejected', self._reject_callback)
+        if self.invalid_callback is not None:
+            client.add_handler('seto.order_invalid', self._invalid_callback)
+
+    def clear_callbacks(self):
+        if self.accept_callback is not None:
+            self.client.del_handler('seto.order_accepted', self._accept_callback)
+        if self.reject_callback is not None:
+            self.client.del_handler('seto.order_rejected', self._reject_callback)
+        if self.invalid_callback is not None:
+            self.client.del_handler('seto.order_invalid', self._invalid_callback)
+
+    def _accept_callback(self, message):
+        if message.order_accepted.seq == self.seq:
+            self.accept_callback(message)
+            self.clear_callbacks()
+
+    def _reject_callback(self, message):
+        if message.order_rejected.seq == self.seq:
+            self.reject_callback(message)
+            self.clear_callbacks()
+
+    def _invalid_callback(self, message):
+        if message.order_invalid.seq == self.seq:
+            self.invalid_callback(message)
+            self.clear_callbacks()
+
+    def __repr__(self):
+        return "OrderCreate(price=%r, quantity=%r, side=%r, market=%r, contract=%r)" % (
+                    self.price, self.quantity, self.side, self.market, self.contract)
+
 
 class OrderCancel(object):
     """ Message to cancel the specified order"""
-    __slots__ = ('uid',)
+    __slots__ = ('uid', 'seq')
 
     def __init__(self, uid=None):
         self.uid = uid

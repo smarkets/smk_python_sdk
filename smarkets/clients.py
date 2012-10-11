@@ -109,7 +109,11 @@ class Smarkets(object):
         payload = self.session.out_payload
         payload.Clear()
         message.copy_to(payload)
-        return self._send()
+        seq = self._send()
+        message.seq = seq
+        if hasattr(message, 'register_callbacks'):
+            message.register_callbacks(self)
+        return seq
 
     def ping(self):
         "Ping the service"
@@ -240,6 +244,6 @@ class Smarkets(object):
                 callback(message)
             else:
                 self.logger.error("no callback %s", name)
-        else:
             self.logger.info("ignoring unknown message: %s", name)
-        self.global_callback(name, message)
+        else:
+            self.global_callback(name, message)
