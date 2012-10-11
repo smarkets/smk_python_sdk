@@ -6,6 +6,7 @@
 import logging
 
 from itertools import chain
+from copy import copy
 
 import smarkets.eto.piqi_pb2 as eto
 import smarkets.seto.piqi_pb2 as seto
@@ -48,7 +49,7 @@ class Callback(object):
 
     def fire(self, *args, **kwargs):
         "Raise the signal to the handlers"
-        for handler in self._handlers:
+        for handler in copy(self._handlers):
             handler(*args, **kwargs)
 
     def __len__(self):
