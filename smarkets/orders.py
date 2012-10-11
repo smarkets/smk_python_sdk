@@ -113,4 +113,4 @@ class OrderCancel(object):
     def copy_to(self, payload):
         "Copy this instruction to a message `payload`"
         payload.type = seto.PAYLOAD_ORDER_CANCEL
-        payload.order.CopyFrom(self.uid)
+        payload.order_cancel.order.CopyFrom(self.uid)
