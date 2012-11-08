@@ -5,8 +5,6 @@
 # http://www.opensource.org/licenses/mit-license.php
 import logging
 
-from itertools import chain
-
 import smarkets.eto.piqi_pb2 as eto
 import smarkets.seto.piqi_pb2 as seto
 
