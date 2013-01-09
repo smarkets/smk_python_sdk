@@ -90,6 +90,70 @@ class TennisByDate(SportByDate):
             seto.SPORT_BY_DATE_TENNIS
 
 
+class BasketballByDate(SportByDate):
+    "Request for basketball by date"
+    def __init__(self, date):
+        super(BasketballByDate, self).__init__(date)
+        self.payload.events_request.sport_by_date.type = \
+            seto.SPORT_BY_DATE_BASKETBALL
+
+
+class AmericanFootballByDate(SportByDate):
+    "Request for american football by date"
+    def __init__(self, date):
+        super(AmericanFootballByDate, self).__init__(date)
+        self.payload.events_request.sport_by_date.type = \
+            seto.SPORT_BY_DATE_AMERICANFOOTBALL
+
+
+class BaseballByDate(SportByDate):
+    "Request for baseball by date"
+    def __init__(self, date):
+        super(BaseballByDate, self).__init__(date)
+        self.payload.events_request.sport_by_date.type = \
+            seto.SPORT_BY_DATE_BASEBALL
+
+
+class CricketByDate(SportByDate):
+    "Request for cricket by date"
+    def __init__(self, date):
+        super(CricketByDate, self).__init__(date)
+        self.payload.events_request.sport_by_date.type = \
+            seto.SPORT_BY_DATE_CRICKET
+
+
+class HandballByDate(SportByDate):
+    "Request for handball by date"
+    def __init__(self, date):
+        super(HandballByDate, self).__init__(date)
+        self.payload.events_request.sport_by_date.type = \
+            seto.SPORT_BY_DATE_HANDBALL
+
+
+class RugbyByDate(SportByDate):
+    "Request for rugby by date"
+    def __init__(self, date):
+        super(RugbyByDate, self).__init__(date)
+        self.payload.events_request.sport_by_date.type = \
+            seto.SPORT_BY_DATE_RUGBY
+
+
+class RugbyLeagueByDate(SportByDate):
+    "Request for rugby league by date"
+    def __init__(self, date):
+        super(RugbyLeagueByDate, self).__init__(date)
+        self.payload.events_request.sport_by_date.type = \
+            seto.SPORT_BY_DATE_RUGBYLEAGUE
+
+
+class VolleyballByDate(SportByDate):
+    "Request for volleyball by date"
+    def __init__(self, date):
+        super(VolleyballByDate, self).__init__(date)
+        self.payload.events_request.sport_by_date.type = \
+            seto.SPORT_BY_DATE_VOLLEYBALL
+
+
 class SportOther(EventsRequest):
     "Request for other sport"
     _payload = seto.Payload()

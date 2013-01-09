@@ -15,6 +15,14 @@ from smarkets.events import (
     FootballByDate,
     HorseRacingByDate,
     TennisByDate,
+    BasketballByDate,
+    AmericanFootballByDate,
+    BaseballByDate,
+    CricketByDate,
+    HandballByDate,
+    RugbyByDate,
+    RugbyLeagueByDate,
+    VolleyballByDate,
     SportOther,
     )
 from smarkets.exceptions import (
