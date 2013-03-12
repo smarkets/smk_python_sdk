@@ -4,6 +4,7 @@ import unittest
 from contextlib import contextmanager
 from itertools import chain, product
 from mock import Mock, patch, sentinel
+from nose.tools import eq_
 
 import smarkets.eto.piqi_pb2 as eto
 import smarkets.seto.piqi_pb2 as seto
@@ -114,6 +115,12 @@ class CallbackTestCase(unittest.TestCase):
         raise Exception()
 
 
+class Handler(object):
+    call_count = 0
+
+    def __call__(self, *args, **kwargs):
+        self.call_count += 1
+
 class SmarketsTestCase(unittest.TestCase):
     "Tests for the `smarkets.Smarkets` client object"
     def setUp(self):
@@ -176,6 +183,19 @@ class SmarketsTestCase(unittest.TestCase):
             self.mock_session.method_calls,
             [('logout', (), {}),
              ('disconnect', (), {})])
+
+    def test_each_instance_has_separate_callbacks(self):
+        client_a, client_b = (Smarkets('_') for i in range(2))
+        handler = Handler()
+        client_a.add_handler('seto.http_found', handler)
+        eq_(handler.call_count, 0)
+
+        client_a.callbacks['seto.http_found']('irrelevant')
+        eq_(handler.call_count, 1)
+
+        client_b.callbacks['seto.http_found']('also irrelevant')
+        eq_(handler.call_count, 1)
+
 
     def test_flush(self):
         "Test the `Smarkets.flush` method"
