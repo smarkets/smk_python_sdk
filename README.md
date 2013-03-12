@@ -16,6 +16,7 @@ Python API client for Smarkets.
 * curl
 * Piqi
 * mock
+* nose
 * sphinx
 
 ## Installation
