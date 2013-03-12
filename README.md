@@ -19,6 +19,8 @@ Python API client for Smarkets.
 * pandoc
 * Piqi
 * sphinx
+* pep8
+* pylint
 
 ## Installation
 
