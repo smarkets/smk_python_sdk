@@ -5,7 +5,6 @@
 # http://www.opensource.org/licenses/mit-license.php
 import logging
 
-from itertools import chain
 from copy import copy
 
 import smarkets.eto.piqi_pb2 as eto
@@ -66,16 +65,14 @@ class Smarkets(object):
 
     Provides a simple interface wrapping the protobufs.
     """
-    CALLBACKS = dict(((name, Callback()) for name in chain(
-                _ETO_PAYLOAD_TYPES.itervalues(),
-                _SETO_PAYLOAD_TYPES.itervalues())))
+    CALLBACKS = _ETO_PAYLOAD_TYPES.values() + _SETO_PAYLOAD_TYPES.values()
 
     logger = logging.getLogger('smarkets.smarkets')
 
     def __init__(self, session, auto_flush=True):
         self.session = session
         self.auto_flush = auto_flush
-        self.callbacks = self.__class__.CALLBACKS.copy()
+        self.callbacks = dict((callback_name, Callback()) for callback_name in self.__class__.CALLBACKS)
         self.global_callback = Callback()
         self.fetch = fetch
 
