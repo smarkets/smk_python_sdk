@@ -25,7 +25,6 @@ from itertools import chain
 ETO_PIQI_URL = 'https://raw.github.com/smarkets/eto_common/v0.3.0/eto.piqi'
 SETO_PIQI_URL = 'https://raw.github.com/smarkets/smk_api_common/v0.6.4/seto.piqi'
 
-
 def _safe_glob(pathname):
     "Do a safe version of glob which copes with win32"
     is_win32 = sys.platform == 'win32'
