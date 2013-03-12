@@ -13,7 +13,7 @@ SELL = 2
 class OrderCreate(object):
     "Simple order state with useful exceptions"
     __slots__ = ('quantity', 'price', 'side', 'market', 'contract',
-                    'accept_callback', 'reject_callback', 'invalid_callback', 'seq', 'client')
+                 'accept_callback', 'reject_callback', 'invalid_callback', 'seq', 'client')
 
     def __init__(self):
         self.quantity = None
@@ -100,7 +100,7 @@ class OrderCreate(object):
 
     def __repr__(self):
         return "OrderCreate(price=%r, quantity=%r, side=%r, market=%r, contract=%r)" % (
-                    self.price, self.quantity, self.side, self.market, self.contract)
+            self.price, self.quantity, self.side, self.market, self.contract)
 
 
 class OrderCancel(object):

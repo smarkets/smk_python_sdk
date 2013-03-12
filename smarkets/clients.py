@@ -15,15 +15,15 @@ from smarkets.urls import fetch
 
 
 _ETO_PAYLOAD_TYPES = dict((
-    (getattr(eto, x),
-     'eto.%s' % x.replace('PAYLOAD_', '').lower()) \
-        for x in dir(eto) if x.startswith('PAYLOAD_')))
+    (getattr(eto, x), 'eto.%s' % x.replace('PAYLOAD_', '').lower())
+    for x in dir(eto) if x.startswith('PAYLOAD_')
+))
 
 
 _SETO_PAYLOAD_TYPES = dict((
-    (getattr(seto, x),
-     'seto.%s' % x.replace('PAYLOAD_', '').lower()) \
-        for x in dir(seto) if x.startswith('PAYLOAD_')))
+    (getattr(seto, x), 'seto.%s' % x.replace('PAYLOAD_', '').lower())
+    for x in dir(seto) if x.startswith('PAYLOAD_')
+))
 
 
 class Callback(object):

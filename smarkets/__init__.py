@@ -24,7 +24,7 @@ from smarkets.events import (
     RugbyLeagueByDate,
     VolleyballByDate,
     SportOther,
-    )
+)
 from smarkets.exceptions import (
     Error,
     ConnectionError,
@@ -32,7 +32,7 @@ from smarkets.exceptions import (
     ParseError,
     SocketDisconnected,
     InvalidCallbackError,
-    )
+)
 from smarkets.orders import OrderCreate
 from smarkets.sessions import Session, SessionSettings
 
