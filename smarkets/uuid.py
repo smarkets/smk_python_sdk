@@ -44,16 +44,16 @@ class Uuid(UuidBase):  # pylint: disable=E1001
         'abcdefghijklmnopqrstuvwxyz' \
         'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     tag_list = (
-        UuidTag('Account', ('acc1', 16), 'a'),
+        UuidTag('Account', int('acc1', 16), 'a'),
         UuidTag('ContractGroup', int('c024', 16), 'm'),
-        UuidTag('Contract', ('cccc', 16), 'c'),
-        UuidTag('Order', ('fff0', 16), 'o'),
-        UuidTag('Comment', ('b1a4', 16), 'b'),
-        UuidTag('Entity', ('0444', 16), 'n'),
-        UuidTag('Event', ('1100', 16), 'e'),
-        UuidTag('Session', ('9999', 16), 's'),
-        UuidTag('User', ('0f00', 16), 'u'),
-        UuidTag('Referrer', ('4e4e', 16), 'r'),
+        UuidTag('Contract', int('cccc', 16), 'c'),
+        UuidTag('Order', int('fff0', 16), 'o'),
+        UuidTag('Comment', int('b1a4', 16), 'b'),
+        UuidTag('Entity', int('0444', 16), 'n'),
+        UuidTag('Event', int('1100', 16), 'e'),
+        UuidTag('Session', int('9999', 16), 's'),
+        UuidTag('User', int('0f00', 16), 'u'),
+        UuidTag('Referrer', int('4e4e', 16), 'r'),
     )
 
     # Various indexes into uuid map
