@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 
+
 sys.path.insert(0, os.path.abspath("."))
 
 try:
@@ -20,6 +21,10 @@ except ImportError:
 from distutils.spawn import find_executable
 from distutils.command import clean, build
 from itertools import chain
+
+def check_call(*args, **kwargs):
+    print('Calling %s, %s' % (args, kwargs,))
+    subprocess.check_call(*args, **kwargs)
 
 
 ETO_PIQI_URL = 'https://raw.github.com/smarkets/eto_common/v0.3.0/eto.piqi'
@@ -62,35 +67,25 @@ class SmarketsProtocolBuild(build.build):
 
         eto_piqi = os.path.join(os.path.dirname(__file__), 'eto.piqi')
         if not os.path.exists(eto_piqi):
-            args = (self.curl, '-o', eto_piqi, ETO_PIQI_URL)
-            if subprocess.call(args) != 0:
-                sys.exit(-1)
+            check_call((self.curl, '-o', eto_piqi, ETO_PIQI_URL))
 
         seto_piqi = os.path.join(os.path.dirname(__file__), 'seto.piqi')
         if not os.path.exists(seto_piqi):
-            args = (self.curl, '-o', seto_piqi, SETO_PIQI_URL)
-            if subprocess.call(args) != 0:
-                sys.exit(-1)
+            check_call((self.curl, '-o', seto_piqi, SETO_PIQI_URL))
 
         eto_proto = os.path.join(
             os.path.dirname(__file__), 'smarkets.eto.piqi.proto')
         if not os.path.exists(eto_proto):
-            args = (self.piqi, 'to-proto', eto_piqi, '-o', eto_proto)
-            if subprocess.call(args) != 0:
-                sys.exit(-1)
+            check_call((self.piqi, 'to-proto', eto_piqi, '-o', eto_proto))
 
         seto_proto = os.path.join(
             os.path.dirname(__file__), 'smarkets.seto.piqi.proto')
         if not os.path.exists(seto_proto):
-            args = (self.piqi, 'to-proto', seto_piqi, '-o', seto_proto)
-            if subprocess.call(args) != 0:
-                sys.exit(-1)
+            check_call((self.piqi, 'to-proto', seto_piqi, '-o', seto_proto))
             self.replace_file(seto_proto, self.fix_import)
 
         for source in _safe_glob('*.proto'):
-            args = (self.protoc, '--python_out=.', source)
-            if subprocess.call(args) != 0:
-                sys.exit(-1)
+            check_call((self.protoc, '--python_out=.', source))
 
         for pkg_dir in ('eto', 'seto'):
             init_file = os.path.join(
@@ -151,17 +146,6 @@ class SmarketsProtocolClean(clean.clean):
 
 readme_path = os.path.join(os.path.dirname(__file__), 'README.md')
 readme_src = os.path.join(os.path.dirname(__file__), 'README.md')
-
-# Generate README from README.md using pandoc
-# (disabled due to some pandoc/unicode weirdness on our CI machine)
-#if not os.path.exists(readme_path):
-#    pandoc = find_executable("pandoc")
-#    if pandoc is None:
-#        sys.stderr.write("*** Cannot find pandoc; is it installed?\n")
-#        sys.exit(-1)
-#    args = (pandoc, '-s', readme_src, '-w', 'rst', '-o', readme_path)
-#    if subprocess.call(args) != 0:
-#        sys.exit(-1)
 
 f = open(readme_path)
 long_description = f.read()

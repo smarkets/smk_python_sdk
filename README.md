@@ -2,13 +2,15 @@
 
 Python API client for Smarkets.
 
+[![Build Status](https://travis-ci.org/smarkets/smk_python_sdk.png?branch=master)](https://travis-ci.org/smarkets/smk_python_sdk)
+
 ## Getting the code
 
 * https://github.com/smarkets/smk_python_sdk/
 
 ## Requirements
 
-* Python >= 2.5
+* Python >= 2.6
 * Google protocol buffers compiler and libraries
 
 ### For building the code, running tests and generating documentation
