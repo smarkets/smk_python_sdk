@@ -10,8 +10,13 @@ import shutil
 import subprocess
 import sys
 
+from errno import EEXIST
+from os import makedirs
+from os.path import abspath, dirname, isdir, join
 
-sys.path.insert(0, os.path.abspath("."))
+
+PROJECT_ROOT = abspath(dirname(__file__))
+sys.path.insert(0, PROJECT_ROOT)
 
 try:
     from setuptools import setup
@@ -65,21 +70,19 @@ class SmarketsProtocolBuild(build.build):
         "Get the .piqi definitions and run the 'protoc' compiler command"
         self.check_executables()
 
-        eto_piqi = os.path.join(os.path.dirname(__file__), 'eto.piqi')
+        eto_piqi = join(PROJECT_ROOT, 'eto.piqi')
         if not os.path.exists(eto_piqi):
             check_call((self.curl, '-o', eto_piqi, ETO_PIQI_URL))
 
-        seto_piqi = os.path.join(os.path.dirname(__file__), 'seto.piqi')
+        seto_piqi = join(PROJECT_ROOT, 'seto.piqi')
         if not os.path.exists(seto_piqi):
             check_call((self.curl, '-o', seto_piqi, SETO_PIQI_URL))
 
-        eto_proto = os.path.join(
-            os.path.dirname(__file__), 'smarkets.eto.piqi.proto')
+        eto_proto = join(PROJECT_ROOT, 'smarkets.eto.piqi.proto')
         if not os.path.exists(eto_proto):
             check_call((self.piqi, 'to-proto', eto_piqi, '-o', eto_proto))
 
-        seto_proto = os.path.join(
-            os.path.dirname(__file__), 'smarkets.seto.piqi.proto')
+        seto_proto = join(PROJECT_ROOT, 'smarkets.seto.piqi.proto')
         if not os.path.exists(seto_proto):
             check_call((self.piqi, 'to-proto', seto_piqi, '-o', seto_proto))
             self.replace_file(seto_proto, self.fix_import)
@@ -88,8 +91,7 @@ class SmarketsProtocolBuild(build.build):
             check_call((self.protoc, '--python_out=.', source))
 
         for pkg_dir in ('eto', 'seto'):
-            init_file = os.path.join(
-                os.path.dirname(__file__), 'smarkets', pkg_dir, '__init__.py')
+            init_file = join(PROJECT_ROOT, 'smarkets', pkg_dir, '__init__.py')
             initf = open(init_file, 'w')
             initf.write(
 """"Protocol-buffers generated package"
@@ -128,10 +130,11 @@ class SmarketsProtocolClean(clean.clean):
     def run(self):
         """Do the clean up"""
         for src_dir in [
-            os.path.join(os.path.dirname(__file__), 'build', 'pb'),
-            os.path.join(os.path.dirname(__file__), 'smarkets', 'eto'),
-            os.path.join(os.path.dirname(__file__), 'smarkets', 'seto'),
-            ]:
+            join('build', 'pb'),
+            join('smarkets', 'eto'),
+            join('smarkets', 'seto'),
+                ]:
+            src_dir = join(PROJECT_ROOT, src_dir)
             if os.path.exists(src_dir):
                 shutil.rmtree(src_dir)
         for filename in chain(
@@ -143,14 +146,28 @@ class SmarketsProtocolClean(clean.clean):
         # Call the parent class clean command
         clean.clean.run(self)
 
+class ReadTheDocsBuild(build.build):
+    def run(self):
+        for package in ('eto', 'seto'):
+            directory = join(PROJECT_ROOT, 'smarkets', package)
 
-readme_path = os.path.join(os.path.dirname(__file__), 'README.md')
-readme_src = os.path.join(os.path.dirname(__file__), 'README.md')
+            try:
+                makedirs(directory)
+            except OSError as e:
+                if e.errno != EEXIST or not isdir(directory):
+                    raise
 
-f = open(readme_path)
-long_description = f.read()
-f.close()
+            with open(join(directory, '__init__.py'), 'w') as f:
+                f.write('')
 
+            with open(join(directory, 'piqi_pb2.py'), 'w') as f:
+                f.write('')
+
+
+readme_path = join(PROJECT_ROOT, 'README.md')
+
+with open(readme_path) as f:
+    long_description = f.read()
 
 __version__ = '0.4.0'  # This is ugly, we should be able to import it
 
@@ -177,7 +194,7 @@ sdict = {
         'Operating System :: OS Independent',
         'Programming Language :: Python'],
     'cmdclass' : {
-        'build': SmarketsProtocolBuild,
+        'build': ReadTheDocsBuild if 'READTHEDOCS' in os.environ else SmarketsProtocolBuild,
         'clean': SmarketsProtocolClean},
     }
 
