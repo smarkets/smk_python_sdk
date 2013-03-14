@@ -146,24 +146,6 @@ class SmarketsProtocolClean(clean.clean):
         # Call the parent class clean command
         clean.clean.run(self)
 
-class ReadTheDocsBuild(build.build):
-    def run(self):
-        for package in ('eto', 'seto'):
-            directory = join(PROJECT_ROOT, 'smarkets', package)
-
-            try:
-                makedirs(directory)
-            except OSError as e:
-                if e.errno != EEXIST or not isdir(directory):
-                    raise
-
-            with open(join(directory, '__init__.py'), 'w') as f:
-                f.write('')
-
-            with open(join(directory, 'piqi_pb2.py'), 'w') as f:
-                f.write('')
-
-
 readme_path = join(PROJECT_ROOT, 'README.md')
 
 with open(readme_path) as f:
@@ -184,7 +166,8 @@ sdict = {
     'maintainer_email' : 'support@smarkets.com',
     'keywords' : ['Smarkets', 'betting exchange'],
     'license' : 'MIT',
-    'packages' : ['smarkets', 'smarkets.eto', 'smarkets.seto'],
+    'packages' : ['smarkets'] +
+        [] if 'READTHEDOCS' in os.environ else ['smarkets.eto', 'smarkets.seto'],
     'test_suite' : 'tests.all_tests',
     'classifiers' : [
         'Development Status :: 3 - Alpha',
@@ -194,7 +177,7 @@ sdict = {
         'Operating System :: OS Independent',
         'Programming Language :: Python'],
     'cmdclass' : {
-        'build': ReadTheDocsBuild if 'READTHEDOCS' in os.environ else SmarketsProtocolBuild,
+        'build': SmarketsProtocolBuild,
         'clean': SmarketsProtocolClean},
     }
 

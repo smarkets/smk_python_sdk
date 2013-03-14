@@ -4,6 +4,15 @@
 # This module is released under the MIT License:
 # http://www.opensource.org/licenses/mit-license.php
 import inspect
+import os
+
+if 'READTHEDOCS' in os.environ:
+    from mock import Mock
+    import sys
+
+    eto = seto = \
+    sys.modules['smarkets.eto'] = sys.modules['smarkets.eto.piqi_pb2'] = \
+    sys.modules['smarkets.seto'] = sys.modules['smarkets.seto.piqi_pb2'] = Mock()
 
 from smarkets.clients import Smarkets
 from smarkets.events import (

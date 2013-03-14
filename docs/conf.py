@@ -11,9 +11,15 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+from os import chdir, getcwd
+from os.path import abspath, dirname, join
+from subprocess import check_call
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+import os
+import sys
+
+PROJECT_ROOT = join(dirname(__file__), '..')
+sys.path.append(PROJECT_ROOT)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
