@@ -11,8 +11,8 @@ if 'READTHEDOCS' in os.environ:
     import sys
 
     eto = seto = \
-    sys.modules['smarkets.eto'] = sys.modules['smarkets.eto.piqi_pb2'] = \
-    sys.modules['smarkets.seto'] = sys.modules['smarkets.seto.piqi_pb2'] = Mock()
+        sys.modules['smarkets.eto'] = sys.modules['smarkets.eto.piqi_pb2'] = \
+        sys.modules['smarkets.seto'] = sys.modules['smarkets.seto.piqi_pb2'] = Mock()
 
 from smarkets.clients import Smarkets
 from smarkets.events import (
