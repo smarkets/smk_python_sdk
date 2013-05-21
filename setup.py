@@ -151,7 +151,13 @@ readme_path = join(PROJECT_ROOT, 'README.md')
 with open(readme_path) as f:
     long_description = f.read()
 
-__version__ = '0.4.0'  # This is ugly, we should be able to import it
+
+# this is not ideal but at at least we're not repeating ourselved when updating package version
+
+with open(join(PROJECT_ROOT, 'smarkets', '__init__.py')) as f:
+    version_line = [line for line in f if line.startswith('__version__')][0]
+
+__version__ = version_line.split('=')[1].strip().strip("'").strip('"')
 
 sdict = {
     'name' : 'smk_python_sdk',
@@ -166,8 +172,7 @@ sdict = {
     'maintainer_email' : 'support@smarkets.com',
     'keywords' : ['Smarkets', 'betting exchange'],
     'license' : 'MIT',
-    'packages' : ['smarkets'] +
-        [] if 'READTHEDOCS' in os.environ else ['smarkets.eto', 'smarkets.seto'],
+    'packages' : ['smarkets'],
     'test_suite' : 'tests.all_tests',
     'classifiers' : [
         'Development Status :: 3 - Alpha',
