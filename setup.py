@@ -159,6 +159,13 @@ with open(join(PROJECT_ROOT, 'smarkets', '__init__.py')) as f:
 
 __version__ = version_line.split('=')[1].strip().strip("'").strip('"')
 
+# smarkets.eto and smarkets.eto in packages break creating source dists in current setup
+# also nasty hack to make it buildable on readthedocs.org
+if 'sdist' in sys.argv or 'READTHEDOCS' in os.environ:
+    extra_packages = []
+else:
+    extra_packages = ['smarkets.eto', 'smarkets.seto']
+
 sdict = {
     'name' : 'smk_python_sdk',
     'version' : __version__,
@@ -172,7 +179,7 @@ sdict = {
     'maintainer_email' : 'support@smarkets.com',
     'keywords' : ['Smarkets', 'betting exchange'],
     'license' : 'MIT',
-    'packages' : ['smarkets'],
+    'packages' : ['smarkets'] + extra_packages,
     'test_suite' : 'tests.all_tests',
     'classifiers' : [
         'Development Status :: 3 - Alpha',
