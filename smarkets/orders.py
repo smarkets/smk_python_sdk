@@ -13,7 +13,8 @@ SELL = 2
 class OrderCreate(object):
     "Simple order state with useful exceptions"
     __slots__ = ('quantity', 'price', 'side', 'market', 'contract',
-                 'accept_callback', 'reject_callback', 'invalid_callback', 'seq', 'client')
+                 'accept_callback', 'reject_callback', 'invalid_callback', 'seq', 'client',
+                 'time_inforce')
 
     def __init__(self):
         self.quantity = None
@@ -26,6 +27,7 @@ class OrderCreate(object):
         self.invalid_callback = None
         self.seq = None
         self.client = None
+        self.time_inforce = None
 
     def validate_new(self):
         "Validate this order's properties as a new instruction"
@@ -51,12 +53,20 @@ class OrderCreate(object):
         if not isinstance(self.contract, seto.Uuid128):
             raise ValueError("contract must be a valid seto.Uuid128")
 
+        if self.time_inforce:
+            if not self.time_inforce == seto.IMMEDIATE_OR_CANCEL and \
+               not self.time_inforce == seto.GOOD_TIL_CANCELLED:
+                raise ValueError("Time inforce must be one of IMMEDIATE_OR_CANCEL, GOOD_TIL_CANCELLED")
+
     def copy_to(self, payload):
         "Copy this order instruction to a message `payload`"
         payload.type = seto.PAYLOAD_ORDER_CREATE
         payload.order_create.type = seto.ORDER_CREATE_LIMIT
+        payload.order_create.tif = seto.IMMEDIATE_OR_CANCEL
         payload.order_create.market.CopyFrom(self.market)
         payload.order_create.contract.CopyFrom(self.contract)
+        if self.time_inforce:
+            payload.order_create.tif = self.time_inforce
         if self.side == BUY:
             payload.order_create.side = seto.SIDE_BUY
         elif self.side == SELL:
