@@ -13,8 +13,8 @@ SELL = 2
 class OrderCreate(object):
     "Simple order state with useful exceptions"
     __slots__ = ('quantity', 'price', 'side', 'market', 'contract',
-                 'accept_callback', 'reject_callback', 'invalid_callback', 'seq', 'client',
-                 'time_in_force')
+                 'accept_callback', 'reject_callback', 'invalid_callback', 'executed_callback',
+                 'seq', 'client', 'time_in_force')
 
     def __init__(self):
         self.quantity = None
@@ -25,6 +25,7 @@ class OrderCreate(object):
         self.accept_callback = None
         self.reject_callback = None
         self.invalid_callback = None
+        self.executed_callback = None
         self.seq = None
         self.client = None
         self.time_in_force = None
@@ -84,6 +85,8 @@ class OrderCreate(object):
             client.add_handler('seto.order_rejected', self._reject_callback)
         if self.invalid_callback is not None:
             client.add_handler('seto.order_invalid', self._invalid_callback)
+        if self.executed_callback is not None:
+            client.add_handler('seto.order_executed', self._executed_callback)
 
     def clear_callbacks(self):
         if self.accept_callback is not None:
@@ -92,11 +95,12 @@ class OrderCreate(object):
             self.client.del_handler('seto.order_rejected', self._reject_callback)
         if self.invalid_callback is not None:
             self.client.del_handler('seto.order_invalid', self._invalid_callback)
+        if self.executed_callback is not None:
+            self.client.del_handler('seto.order_executed', self._executed_callback)
 
     def _accept_callback(self, message):
         if message.order_accepted.seq == self.seq:
             self.accept_callback(message)
-            self.clear_callbacks()
 
     def _reject_callback(self, message):
         if message.order_rejected.seq == self.seq:
@@ -108,6 +112,10 @@ class OrderCreate(object):
             self.invalid_callback(message)
             self.clear_callbacks()
 
+    def _executed_callback(self, message):
+        self.executed_callback(message)
+        self.clear_callbacks()
+
     def __repr__(self):
         return "OrderCreate(price=%r, quantity=%r, side=%r, market=%r, contract=%r)" % (
             self.price, self.quantity, self.side, self.market, self.contract)
@@ -115,12 +123,59 @@ class OrderCreate(object):
 
 class OrderCancel(object):
     """ Message to cancel the specified order"""
-    __slots__ = ('uid', 'seq')
+    __slots__ = ('uid', 'seq', 'client', 'cancelled_callback', 'reject_callback')
 
     def __init__(self, uid=None):
         self.uid = uid
+        self.client = None
+        self.cancelled_callback = None
+        self.reject_callback = None
+
+    def validate_new(self):
+        "Validate this order's properties as a new instruction"
+        if not isinstance(self.uid, seto.Uuid128):
+            raise ValueError("order uid must be a valid seto.Uuid128")
 
     def copy_to(self, payload):
         "Copy this instruction to a message `payload`"
         payload.type = seto.PAYLOAD_ORDER_CANCEL
         payload.order_cancel.order.CopyFrom(self.uid)
+
+    def register_callbacks(self, client):
+        self.client = client
+        if self.cancelled_callback is not None:
+            client.add_handler('seto.order_cancelled', self._cancelled_callback)
+        if self.reject_callback is not None:
+            client.add_handler('seto.order_cancel_rejected', self._reject_callback)
+
+    def clear_callbacks(self):
+        if self.cancelled_callback is not None:
+            self.client.del_handler('seto.order_cancelled', self._cancelled_callback)
+        if self.reject_callback is not None:
+            self.client.del_handler('seto.order_cancel_rejected', self._reject_callback)
+
+    def _cancelled_callback(self, message):
+        self.clear_callbacks()
+        self.cancelled_callback(message)
+
+    def _reject_callback(self, message):
+        if message.order_cancel_rejected.seq == self.seq:
+            self.reject_callback(message)
+            self.clear_callbacks()
+
+
+class OrdersForMarket(object):
+    """ Message to cancel the specified order"""
+    __slots__ = ('market_uid', 'seq')
+
+    def __init__(self, market_uid):
+        self.market_uid = market_uid
+
+    def validate_new(self):
+        if not isinstance(self.market_uid, seto.Uuid128):
+            raise ValueError("market must be a valid seto.Uuid128")
+
+    def copy_to(self, payload):
+        "Copy this instruction to a message `payload`"
+        payload.type = seto.PAYLOAD_ORDERS_FOR_MARKET_REQUEST
+        payload.orders_for_market_request.market.CopyFrom(self.market_uid)
