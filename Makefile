@@ -37,7 +37,7 @@ check:
 		| grep -v "Instance of 'Payload' has no 'login' member" \
 		| grep -v "Instance of 'Events' has no 'ParseFromString' member" \
 		> build/pylint/pylint.out
-	pep8 --exclude=piqi_pb2.py --ignore=E501 smarkets > build/pep8/pep8.out
+	pep8 --exclude=piqi_pb2.py --ignore=E501,W292 smarkets > build/pep8/pep8.out
 
 docs:
 	$(MAKE) -C docs html
