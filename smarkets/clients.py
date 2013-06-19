@@ -236,12 +236,12 @@ class Smarkets(object):
         if name == 'seto.eto':
             name = _ETO_PAYLOAD_TYPES.get(message.eto_payload.type)
         if name in self.callbacks:
-            self.logger.info("dispatching callback %s", name)
+            self.logger.debug("dispatching callback %s", name)
             callback = self.callbacks.get(name)
             if callback is not None:
                 callback(message)
             else:
                 self.logger.error("no callback %s", name)
-            self.logger.info("ignoring unknown message: %s", name)
+            self.logger.debug("ignoring unknown message: %s", name)
         else:
             self.global_callback(name, message)
