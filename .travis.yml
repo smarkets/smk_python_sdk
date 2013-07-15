@@ -8,5 +8,6 @@ install:
     - sudo apt-get install -qq curl protobuf-compiler libprotobuf-dev libncurses5 libc6
     - sudo sh -c "curl -k https://raw.github.com/alavrik/piqi-binary/master/Linux-x86_64/piqi > /usr/bin/piqi"
     - sudo chmod +x /usr/bin/piqi
+    - pip install --upgrade distribute
     - pip install --upgrade -r requirements-dev.txt
 script: make test && make check
