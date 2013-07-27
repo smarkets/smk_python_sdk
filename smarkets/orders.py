@@ -11,6 +11,7 @@ SELL = 2
 
 
 class OrderCreate(object):
+
     "Simple order state with useful exceptions"
     __slots__ = ('quantity', 'price', 'side', 'market', 'contract',
                  'accept_callback', 'reject_callback', 'invalid_callback', 'executed_callback',
@@ -122,6 +123,7 @@ class OrderCreate(object):
 
 
 class OrderCancel(object):
+
     """ Message to cancel the specified order"""
     __slots__ = ('uid', 'seq', 'client', 'cancelled_callback', 'reject_callback')
 
@@ -165,6 +167,7 @@ class OrderCancel(object):
 
 
 class OrdersForMarket(object):
+
     """ Message to cancel the specified order"""
     __slots__ = ('market_uid', 'seq')
 

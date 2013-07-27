@@ -18,7 +18,9 @@ from smarkets.exceptions import ConnectionError, SocketDisconnected
 
 
 class SessionSettings(object):
+
     "Encapsulate settings necessary to create a new session"
+
     def __init__(self, username, password):
         if username is None:
             raise ValueError("username cannot be None")
@@ -54,6 +56,7 @@ class SessionSettings(object):
 
 
 class Session(object):
+
     "Manages TCP communication via Smarkets streaming API"
     logger = logging.getLogger('smarkets.session')
 
@@ -200,6 +203,7 @@ class Session(object):
 
 
 class SessionSocket(object):
+
     "Wraps a socket with basic framing/deframing"
     logger = logging.getLogger('smarkets.session.socket')
     wire_logger = logging.getLogger('smarkets.session.wire')

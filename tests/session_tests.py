@@ -12,6 +12,7 @@ from smarkets.orders import OrderCreate, BUY
 
 
 class SessionTestCase(unittest.TestCase):
+
     "Base class for session tests"
     markets = None
     passwords = None
@@ -39,7 +40,7 @@ class SessionTestCase(unittest.TestCase):
         return cls(settings)
 
     def get_client(
-        self, cls=None, session=None, session_cls=None, user_index=0):
+            self, cls=None, session=None, session_cls=None, user_index=0):
         if cls is None:
             cls = smk.Smarkets
         if session is None:
@@ -85,6 +86,7 @@ class SessionTestCase(unittest.TestCase):
 
     def _simple_cb(self, client, name):
         msg = seto.Payload()
+
         def _inner_cb(recv_msg):
             # Copy message in callback to the outer context
             msg.Clear()
@@ -97,7 +99,9 @@ class SessionTestCase(unittest.TestCase):
 
 
 class LoginTestCase(SessionTestCase):
+
     "Test basic login/login response"
+
     def setUp(self):
         # Skip defaults
         pass
@@ -128,6 +132,7 @@ class LoginTestCase(SessionTestCase):
 
 
 class PingTestCase(SessionTestCase):
+
     "Test ping/pong"
     ping_total = 1000
     ping_each = 100
@@ -156,7 +161,9 @@ class PingTestCase(SessionTestCase):
 
 
 class OrderTestCase(SessionTestCase):
+
     "Test simple order placement and cancellation"
+
     def _test_order(self):
         "Generate a test order"
         market_id, contract_ids = self.get_market(0)
@@ -177,7 +184,7 @@ class OrderTestCase(SessionTestCase):
             self.clients[0].order(self._test_order()),
             2)
         self.assertEquals(self.clients[0].session.outseq, 3)
-        self.clients[0].read() # should be accepted
+        self.clients[0].read()  # should be accepted
         self.assertEquals(self.clients[0].session.inseq, 3)
         self.assertEquals(
             order_accepted_msg.type,
@@ -236,7 +243,7 @@ class OrderTestCase(SessionTestCase):
             self.clients[0].order(self._test_order()),
             2)
         self.assertEquals(self.clients[0].session.outseq, 3)
-        self.clients[0].read() # should be accepted
+        self.clients[0].read()  # should be accepted
         self.assertEquals(self.clients[0].session.inseq, 3)
         self.assertEquals(
             order_accepted_msg.type,
@@ -251,7 +258,7 @@ class OrderTestCase(SessionTestCase):
                 order_accepted_msg.order_accepted.order),
             3)
         self.assertEquals(self.clients[0].session.outseq, 4)
-        self.clients[0].read() # should be cancelled
+        self.clients[0].read()  # should be cancelled
         self.assertEquals(self.clients[0].session.inseq, 4)
         self.assertEquals(
             order_cancelled_msg.type,
@@ -274,7 +281,7 @@ class OrderTestCase(SessionTestCase):
             order.quantity = 4000
             order.validate_new()
             self.clients[0].order(order)
-            self.clients[0].read() # should be accepted
+            self.clients[0].read()  # should be accepted
             self.assertEquals(
                 order_accepted_msg.type,
                 seto.PAYLOAD_ORDER_ACCEPTED)
@@ -285,7 +292,7 @@ class OrderTestCase(SessionTestCase):
         for order_id in to_cancel:
             # Send a cancel
             self.clients[0].order_cancel(order_id)
-            self.clients[0].read() # should be cancelled
+            self.clients[0].read()  # should be cancelled
             self.assertEquals(
                 order_cancelled_msg.type,
                 seto.PAYLOAD_ORDER_CANCELLED)
@@ -301,7 +308,7 @@ class OrderTestCase(SessionTestCase):
             self.clients[0].order_cancel(self.clients[0].str_to_uuid128('1fff0')),
             2)
         self.assertEquals(self.clients[0].session.outseq, 3)
-        self.clients[0].read() # should be cancel rejected -- order not found
+        self.clients[0].read()  # should be cancel rejected -- order not found
         self.assertEquals(self.clients[0].session.inseq, 3)
         self.assertEquals(
             order_cancel_rejected_msg.type,
@@ -347,7 +354,7 @@ class OrderTestCase(SessionTestCase):
             self.clients[0].order(self._test_order()),
             2)
         self.assertEquals(self.clients[0].session.outseq, 3)
-        self.clients[0].read() # should be accepted
+        self.clients[0].read()  # should be accepted
         self.assertEquals(self.clients[0].session.inseq, 3)
         self.assertEquals(
             order_accepted_msg.type,
@@ -361,7 +368,7 @@ class OrderTestCase(SessionTestCase):
             self.clients[0].order_cancel(order_accepted_msg.order_accepted.order),
             3)
         self.assertEquals(self.clients[0].session.outseq, 4)
-        self.clients[0].read() # should be cancelled
+        self.clients[0].read()  # should be cancelled
         self.assertEquals(self.clients[0].session.inseq, 4)
         self.assertEquals(
             order_cancelled_msg.type,
@@ -378,7 +385,7 @@ class OrderTestCase(SessionTestCase):
             self.clients[0].order_cancel(order_accepted_msg.order_accepted.order),
             5)
         self.assertEquals(self.clients[0].session.outseq, 6)
-        self.clients[0].read() # should be cancel rejected -- order not live
+        self.clients[0].read()  # should be cancel rejected -- order not live
         self.assertEquals(self.clients[0].session.inseq, 5)
         self.assertEquals(
             order_cancel_rejected_msg.type,
@@ -388,7 +395,7 @@ class OrderTestCase(SessionTestCase):
             seto.ORDER_CANCEL_REJECTED_NOT_LIVE)
         self.assertEquals(
             order_cancel_rejected_msg.order_cancel_rejected.seq, 4)
-        self.clients[0].read() # should be 2nd cancel rejected -- order not live
+        self.clients[0].read()  # should be 2nd cancel rejected -- order not live
         self.assertEquals(self.clients[0].session.inseq, 6)
         self.assertEquals(
             order_cancel_rejected_msg.type,
@@ -401,14 +408,16 @@ class OrderTestCase(SessionTestCase):
 
 
 class QuoteTestCase(SessionTestCase):
+
     "Test market data requests"
+
     def test_market_subscription(self):
         market_quotes_msg = self._simple_cb(self.clients[0], 'seto.market_quotes')
         market_id, _ = self.get_market(0)
         self.assertEquals(
             self.clients[0].subscribe(market_id), 2)
         self.assertEquals(self.clients[0].session.outseq, 3)
-        self.clients[0].read() # should be market quotes
+        self.clients[0].read()  # should be market quotes
         self.assertEquals(self.clients[0].session.inseq, 3)
         self.assertEquals(
             market_quotes_msg.type,
@@ -434,7 +443,7 @@ class QuoteTestCase(SessionTestCase):
         market_id, contract_ids = self.get_market(0)
         contract_id = contract_ids[0]
         self.clients[0].subscribe(market_id)
-        self.clients[0].read() # read the market quotes
+        self.clients[0].read()  # read the market quotes
         self.assertEquals(
             market_quotes_msg.type,
             seto.PAYLOAD_MARKET_QUOTES)
@@ -450,7 +459,7 @@ class QuoteTestCase(SessionTestCase):
         order.contract = contract_id
         order.validate_new()
         self.clients[0].order(order)
-        self.clients[0].read(2) # could be accepted or market quotes
+        self.clients[0].read(2)  # could be accepted or market quotes
         self.assertEquals(
             order_accepted_msg.type,
             seto.PAYLOAD_ORDER_ACCEPTED)
@@ -462,7 +471,7 @@ class QuoteTestCase(SessionTestCase):
             start_qty + order.quantity)
         contract_quotes_msg.Clear()
         self.clients[0].order_cancel(order_accepted_msg.order_accepted.order)
-        self.clients[0].read(2) # could be accepted or market quotes
+        self.clients[0].read(2)  # could be accepted or market quotes
         self.assertEquals(
             order_cancelled_msg.type,
             seto.PAYLOAD_ORDER_CANCELLED)
@@ -475,13 +484,15 @@ class QuoteTestCase(SessionTestCase):
 
 
 class EventTestCase(SessionTestCase):
+
     "Test various event requests"
+
     def _event_found_request(self, event_request):
         http_found_msg = self._simple_cb(self.clients[0], 'seto.http_found')
         self.assertEquals(
             self.clients[0].request_events(event_request), 2)
         self.assertEquals(self.clients[0].session.outseq, 3)
-        self.clients[0].read() # should be accepted
+        self.clients[0].read()  # should be accepted
         self.assertEquals(self.clients[0].session.inseq, 3)
         self.assertEquals(http_found_msg.type, seto.PAYLOAD_HTTP_FOUND)
         self.assertTrue(http_found_msg.http_found.url is not None)
@@ -494,7 +505,7 @@ class EventTestCase(SessionTestCase):
         self.assertEquals(
             self.clients[0].request_events(event_request), 2)
         self.assertEquals(self.clients[0].session.outseq, 3)
-        self.clients[0].read() # should be accepted
+        self.clients[0].read()  # should be accepted
         self.assertEquals(self.clients[0].session.inseq, 3)
         self.assertEquals(
             invalid_request_msg.type, seto.PAYLOAD_INVALID_REQUEST)

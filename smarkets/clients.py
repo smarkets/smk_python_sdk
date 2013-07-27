@@ -27,7 +27,9 @@ _SETO_PAYLOAD_TYPES = dict((
 
 
 class Callback(object):
+
     "Container for callbacks"
+
     def __init__(self):
         self._handlers = set()
 
@@ -60,6 +62,7 @@ class Callback(object):
 
 
 class Smarkets(object):
+
     """
     Smarkets API implementation
 

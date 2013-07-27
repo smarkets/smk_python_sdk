@@ -18,6 +18,7 @@ UuidBase = namedtuple('UuidBase', ['number', 'tag'])
 
 
 class UuidTag(UuidTagBase):  # pylint: disable=E1001
+
     "Represents tag information"
     __slots__ = ()
     tag_mult = 1 << 16
@@ -38,6 +39,7 @@ class UuidTag(UuidTagBase):  # pylint: disable=E1001
 
 
 class Uuid(UuidBase):  # pylint: disable=E1001
+
     "Represents a UUID"
     __slots__ = ()
     chars = '0123456789' \

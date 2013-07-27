@@ -16,7 +16,9 @@ from smarkets.orders import OrderCreate, OrderCancel, BUY
 
 
 class CallbackTestCase(unittest.TestCase):
+
     "Test the `smarkets.Callback` class"
+
     def setUp(self):
         "Set up the tests"
         self.callback = Callback()
@@ -121,8 +123,11 @@ class Handler(object):
     def __call__(self, *args, **kwargs):
         self.call_count += 1
 
+
 class SmarketsTestCase(unittest.TestCase):
+
     "Tests for the `smarkets.Smarkets` client object"
+
     def setUp(self):
         "Patch the `Session` object for mock use"
         self.session_patcher = patch('smarkets.sessions.Session')
@@ -196,7 +201,6 @@ class SmarketsTestCase(unittest.TestCase):
         client_b.callbacks['seto.http_found']('also irrelevant')
         eq_(handler.call_count, 1)
 
-
     def test_flush(self):
         "Test the `Smarkets.flush` method"
         self.client.flush()
@@ -267,7 +271,7 @@ class SmarketsTestCase(unittest.TestCase):
     def test_add_bad_handler(self):
         "Test trying to add a bad handler either as a global or normal"
         for bad_handler in (
-            50, 'foo', False, True, u'foo', 1.2, 1L):
+                50, 'foo', False, True, u'foo', 1.2, 1L):
             self.assertRaises(
                 ValueError, self.client.add_handler, 'eto.pong', bad_handler)
             self.assertRaises(
@@ -304,7 +308,9 @@ class SmarketsTestCase(unittest.TestCase):
 
 
 class UuidTestCase(unittest.TestCase):
+
     "Unit tests for Uuids"
+
     def test_int_roundtrip(self):
         "Test converting an integer to a Uuid and back"
         ttype = 'Account'

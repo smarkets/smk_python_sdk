@@ -7,6 +7,7 @@ import smarkets.seto.piqi_pb2 as seto
 
 
 class EventsRequest(object):
+
     "Base class for events requests"
     __slots__ = ('_payload',)
     _payload = seto.Payload()
@@ -25,6 +26,7 @@ class EventsRequest(object):
 
 
 class Politics(EventsRequest):
+
     "Request for politics events"
     _payload = seto.Payload()
     _payload.CopyFrom(EventsRequest._payload)
@@ -32,6 +34,7 @@ class Politics(EventsRequest):
 
 
 class CurrentAffairs(EventsRequest):
+
     "Request for current affairs events"
     _payload = seto.Payload()
     _payload.CopyFrom(EventsRequest._payload)
@@ -39,6 +42,7 @@ class CurrentAffairs(EventsRequest):
 
 
 class TvAndEntertainment(EventsRequest):
+
     "Request for TV/entertainment events"
     _payload = seto.Payload()
     _payload.CopyFrom(EventsRequest._payload)
@@ -46,6 +50,7 @@ class TvAndEntertainment(EventsRequest):
 
 
 class SportByDate(EventsRequest):
+
     "Request for sport by date"
     __slots__ = ('date', 'payload')
     _payload = seto.Payload()
@@ -67,7 +72,9 @@ class SportByDate(EventsRequest):
 
 
 class FootballByDate(SportByDate):
+
     "Request for football by date"
+
     def __init__(self, date):
         super(FootballByDate, self).__init__(date)
         self.payload.events_request.sport_by_date.type = \
@@ -75,7 +82,9 @@ class FootballByDate(SportByDate):
 
 
 class HorseRacingByDate(SportByDate):
+
     "Request for horse racing by date"
+
     def __init__(self, date):
         super(HorseRacingByDate, self).__init__(date)
         self.payload.events_request.sport_by_date.type = \
@@ -83,7 +92,9 @@ class HorseRacingByDate(SportByDate):
 
 
 class TennisByDate(SportByDate):
+
     "Request for football by date"
+
     def __init__(self, date):
         super(TennisByDate, self).__init__(date)
         self.payload.events_request.sport_by_date.type = \
@@ -91,7 +102,9 @@ class TennisByDate(SportByDate):
 
 
 class BasketballByDate(SportByDate):
+
     "Request for basketball by date"
+
     def __init__(self, date):
         super(BasketballByDate, self).__init__(date)
         self.payload.events_request.sport_by_date.type = \
@@ -99,7 +112,9 @@ class BasketballByDate(SportByDate):
 
 
 class AmericanFootballByDate(SportByDate):
+
     "Request for american football by date"
+
     def __init__(self, date):
         super(AmericanFootballByDate, self).__init__(date)
         self.payload.events_request.sport_by_date.type = \
@@ -107,7 +122,9 @@ class AmericanFootballByDate(SportByDate):
 
 
 class BaseballByDate(SportByDate):
+
     "Request for baseball by date"
+
     def __init__(self, date):
         super(BaseballByDate, self).__init__(date)
         self.payload.events_request.sport_by_date.type = \
@@ -115,7 +132,9 @@ class BaseballByDate(SportByDate):
 
 
 class CricketByDate(SportByDate):
+
     "Request for cricket by date"
+
     def __init__(self, date):
         super(CricketByDate, self).__init__(date)
         self.payload.events_request.sport_by_date.type = \
@@ -123,7 +142,9 @@ class CricketByDate(SportByDate):
 
 
 class HandballByDate(SportByDate):
+
     "Request for handball by date"
+
     def __init__(self, date):
         super(HandballByDate, self).__init__(date)
         self.payload.events_request.sport_by_date.type = \
@@ -131,7 +152,9 @@ class HandballByDate(SportByDate):
 
 
 class RugbyByDate(SportByDate):
+
     "Request for rugby by date"
+
     def __init__(self, date):
         super(RugbyByDate, self).__init__(date)
         self.payload.events_request.sport_by_date.type = \
@@ -139,7 +162,9 @@ class RugbyByDate(SportByDate):
 
 
 class RugbyLeagueByDate(SportByDate):
+
     "Request for rugby league by date"
+
     def __init__(self, date):
         super(RugbyLeagueByDate, self).__init__(date)
         self.payload.events_request.sport_by_date.type = \
@@ -147,7 +172,9 @@ class RugbyLeagueByDate(SportByDate):
 
 
 class VolleyballByDate(SportByDate):
+
     "Request for volleyball by date"
+
     def __init__(self, date):
         super(VolleyballByDate, self).__init__(date)
         self.payload.events_request.sport_by_date.type = \
@@ -155,6 +182,7 @@ class VolleyballByDate(SportByDate):
 
 
 class SportOther(EventsRequest):
+
     "Request for other sport"
     _payload = seto.Payload()
     _payload.CopyFrom(EventsRequest._payload)

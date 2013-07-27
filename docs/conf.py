@@ -195,8 +195,8 @@ htmlhelp_basename = 'smk_python_sdkdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'smk_python_sdk.tex', u'Smarkets Python API Client Documentation',
-   u'Smarkets Limited', 'manual'),
+    ('index', 'smk_python_sdk.tex', u'Smarkets Python API Client Documentation',
+     u'Smarkets Limited', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

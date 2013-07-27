@@ -11,11 +11,13 @@ import smarkets as smk
 
 
 class ThreadingTestCase(unittest.TestCase):
+
     "Test using separate reader and writer threads"
     host = None
     port = None
     passwords = None
     ssl = None
+
     def get_session(self, user_index, cls=None):
         if cls is None:
             cls = smk.Session
@@ -33,7 +35,7 @@ class ThreadingTestCase(unittest.TestCase):
         return cls(settings)
 
     def get_client(
-        self, cls=None, session=None, session_cls=None, user_index=0):
+            self, cls=None, session=None, session_cls=None, user_index=0):
         if cls is None:
             cls = smk.Smarkets
         if session is None:
@@ -87,8 +89,10 @@ class ThreadingTestCase(unittest.TestCase):
 
 
 class WorkItem(object):
+
     "Individual item of work for a sending thread"
     __slots__ = ('callable_obj', 'args', 'kwargs', 'login')
+
     def __init__(self, callable_obj, args=None, kwargs=None, login=False):
         if args is None:
             args = []
@@ -106,8 +110,10 @@ class WorkItem(object):
 
 
 class SendingThread(threading.Thread):
+
     "Thread used for all sending payloads"
     logger = logging.getLogger('smarkets.test.sender')
+
     def __init__(self, client):
         super(SendingThread, self).__init__()
         self.client = client
@@ -152,9 +158,10 @@ class SendingThread(threading.Thread):
 
 
 class ReceivingThread(threading.Thread):
+
     "Thread used for receiving payloads from the socket"
     logger = logging.getLogger('smarkets.test.receiver')
-    queue_timeout = 1 # 1 second max wait
+    queue_timeout = 1  # 1 second max wait
 
     def __init__(self, client):
         super(ReceivingThread, self).__init__()
