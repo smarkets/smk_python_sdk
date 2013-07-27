@@ -188,6 +188,7 @@ sdict = {
         'Programming Language :: Python'],
     'install_requires': [
         'protobuf',
+        'six',
     ],
     'cmdclass': {
         'build': SmarketsProtocolBuild,
