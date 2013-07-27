@@ -14,7 +14,7 @@ from google.protobuf import text_format
 import smarkets.eto.piqi_pb2 as eto
 import smarkets.seto.piqi_pb2 as seto
 
-from smarkets.exceptions import ConnectionError, SocketDisconnected
+from smarkets.exceptions import ConnectionError, reraise, SocketDisconnected
 
 
 class SessionSettings(object):
@@ -240,7 +240,7 @@ class SessionSocket(object):
                 self.settings.host, self.settings.port)
             sock.connect((self.settings.host, self.settings.port))
         except socket.error as exc:
-            raise ConnectionError(self._error_message(exc))
+            reraise(ConnectionError(self._error_message(exc)))
 
         self._sock = sock
         return True
@@ -257,15 +257,15 @@ class SessionSocket(object):
             self._sock.shutdown(socket.SHUT_RDWR)
             self.logger.info("closing socket")
             self._sock.close()
-        except socket.error:
+        except socket.error as e:
             # Ignore exceptions while disconnecting
-            pass
+            self.logger.debug('Exception when disconnecting: %r', e)
         self._sock = None
 
     def send(self, msg_bytes):
         "Send a payload"
         if self._sock is None:
-            raise SocketDisconnected()
+            raise SocketDisconnected('Trying to write to socket when disconnected')
         byte_count = len(msg_bytes)
         # Pad to 4 bytes
         padding = '\x00' * max(0, 3 - byte_count)
@@ -276,13 +276,8 @@ class SessionSocket(object):
         try:
             self.wire_logger.debug("sending frame bytes %r", frame)
             self._sock.sendall(frame)
-        except socket.error as exc:
-            if len(exc.args) == 1:
-                _errno, errmsg = 'UNKNOWN', exc.args[0]
-            else:
-                _errno, errmsg = exc.args
-            raise ConnectionError("Error %s while writing to socket. %s." % (
-                _errno, errmsg))
+        except socket.error as e:
+            reraise(ConnectionError("Error while writing to socket", e))
 
     def recv(self):
         "Read a frame with header"
@@ -321,25 +316,31 @@ class SessionSocket(object):
     def _fill_buffer(self, min_size=4, empty=False):
         "Ensure the buffer has at least 4 bytes"
         if self._sock is None:
-            raise SocketDisconnected()
+            raise SocketDisconnected(
+                'Trying to read from a socket when disconnected')
+
         if empty:
             self._buffer = ''
         while len(self._buffer) < min_size:
             bytes_needed = min_size - len(self._buffer)
             self.logger.debug("receiving %d bytes", bytes_needed)
-            if self.settings.ssl:
-                inbytes = self._recv_msg_ssl(bytes_needed)
-            else:
-                inbytes = self._recv_msg_sock(bytes_needed)
+            try:
+                if self.settings.ssl:
+                    inbytes = self._recv_msg_ssl(bytes_needed)
+                else:
+                    inbytes = self._recv_msg_sock(bytes_needed)
+            except socket.error as e:
+                reraise(ConnectionError('Error while reading from socket', e))
+
             self._buffer += inbytes
 
     def _recv_msg_sock(self, bytes_needed):
         "Wrap reading from a plain socket"
         inbytes = self._sock.recv(bytes_needed, socket.MSG_WAITALL)
         if len(inbytes) != bytes_needed:
-            self.logger.info(
-                "socket disconnected while receiving, got %r", inbytes)
-            raise SocketDisconnected()
+            message = "Socket disconnected while receiving, got %r" % (inbytes,)
+            self.logger.info(message)
+            raise SocketDisconnected(message)
         return inbytes
 
     def _recv_msg_ssl(self, bytes_needed):
@@ -350,8 +351,9 @@ class SessionSocket(object):
             chunk = self._sock.recv(
                 min(self.settings.read_chunksize, bytes_needed - msglen))
             if not chunk:
-                self.logger.info("socket disconnected while receiving")
-                raise SocketDisconnected()
+                message = "Socket disconnected while receiving"
+                self.logger.info(message)
+                raise SocketDisconnected(message)
             msglist.append(chunk)
             msglen += len(chunk)
         return ''.join(msglist)
