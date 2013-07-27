@@ -10,22 +10,17 @@ import shutil
 import subprocess
 import sys
 
-from errno import EEXIST
-from os import makedirs
-from os.path import abspath, dirname, isdir, join
+from os.path import abspath, dirname, join
 
 
 PROJECT_ROOT = abspath(dirname(__file__))
 sys.path.insert(0, PROJECT_ROOT)
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
-
 from distutils.spawn import find_executable
 from distutils.command import clean, build
+from setuptools import setup
 from itertools import chain
+
 
 def check_call(*args, **kwargs):
     print('Calling %s, %s' % (args, kwargs,))
@@ -188,9 +183,13 @@ sdict = {
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python'],
+    'install_requires': [
+        'protobuf',
+    ],
     'cmdclass' : {
         'build': SmarketsProtocolBuild,
-        'clean': SmarketsProtocolClean},
-    }
+        'clean': SmarketsProtocolClean,
+    },
+}
 
 setup(**sdict)
