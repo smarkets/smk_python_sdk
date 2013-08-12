@@ -90,32 +90,39 @@ class OrderCreate(object):
             client.add_handler('seto.order_executed', self._executed_callback)
 
     def clear_callbacks(self):
+        self.clear_acceptance_callbacks()
+        self.clear_execution_callbacks()
+
+    def clear_acceptance_callbacks(self):
         if self.accept_callback is not None:
             self.client.del_handler('seto.order_accepted', self._accept_callback)
         if self.reject_callback is not None:
             self.client.del_handler('seto.order_rejected', self._reject_callback)
         if self.invalid_callback is not None:
             self.client.del_handler('seto.order_invalid', self._invalid_callback)
+
+    def clear_execution_callbacks(self):
         if self.executed_callback is not None:
             self.client.del_handler('seto.order_executed', self._executed_callback)
 
     def _accept_callback(self, message):
         if message.order_accepted.seq == self.seq:
+            self.clear_acceptance_callbacks()
             self.accept_callback(message)
 
     def _reject_callback(self, message):
         if message.order_rejected.seq == self.seq:
-            self.reject_callback(message)
             self.clear_callbacks()
+            self.reject_callback(message)
 
     def _invalid_callback(self, message):
         if message.order_invalid.seq == self.seq:
-            self.invalid_callback(message)
             self.clear_callbacks()
+            self.invalid_callback(message)
 
     def _executed_callback(self, message):
+        self.clear_execution_callbacks()
         self.executed_callback(message)
-        self.clear_callbacks()
 
     def __repr__(self):
         return "OrderCreate(price=%r, quantity=%r, side=%r, market=%r, contract=%r)" % (
@@ -162,8 +169,8 @@ class OrderCancel(object):
 
     def _reject_callback(self, message):
         if message.order_cancel_rejected.seq == self.seq:
-            self.reject_callback(message)
             self.clear_callbacks()
+            self.reject_callback(message)
 
 
 class OrdersForMarket(object):
