@@ -14,8 +14,8 @@ if 'READTHEDOCS' in os.environ:
         sys.modules['smarkets.eto'] = sys.modules['smarkets.eto.piqi_pb2'] = \
         sys.modules['smarkets.seto'] = sys.modules['smarkets.seto.piqi_pb2'] = Mock()
 
-from smarkets.clients import Smarkets
-from smarkets.events import (
+from smarkets.clients import Smarkets  # noqa
+from smarkets.events import (  # noqa
     EventsRequest,
     Politics,
     CurrentAffairs,
@@ -34,7 +34,7 @@ from smarkets.events import (
     VolleyballByDate,
     SportOther,
 )
-from smarkets.exceptions import (
+from smarkets.exceptions import (  # noqa
     Error,
     ConnectionError,
     DecodeError,
@@ -42,11 +42,11 @@ from smarkets.exceptions import (
     SocketDisconnected,
     InvalidCallbackError,
 )
-from smarkets.orders import OrderCreate
-from smarkets.sessions import Session, SessionSettings
+from smarkets.orders import OrderCreate  # noqa
+from smarkets.sessions import Session, SessionSettings  # noqa
 
 
-__version__ = '0.4.11'
+__version__ = '0.4.12'
 
 __all__ = sorted(name for name, obj in locals().items()
                  if not (name.startswith('_') or inspect.ismodule(obj)))
