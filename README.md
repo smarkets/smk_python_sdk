@@ -71,27 +71,6 @@ client.read()
 client.logout()
 ```
 
-### Resuming a session
-
-When resuming a session you need to know the incoming and outgoing
-sequence numbers you were using when the session was last used, from
-the example above they will now both be 5.
-
-```python
-username = 'username'
-password = 'password'
-settings = smarkets.SessionSettings(username, password)
-settings.host = 'api.smarkets.com'
-settings.port = 3701
-session_id = 'session-id'
-inseq = 5
-outseq = 5
-session = smarkets.Session(settings, session_id, inseq, outseq)
-client = smarkets.Smarkets(session)
-client.login()
-client.read()
-```
-
 ### Registering callbacks
 
 ```python

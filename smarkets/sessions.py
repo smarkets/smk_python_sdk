@@ -60,13 +60,13 @@ class Session(object):
     "Manages TCP communication via Smarkets streaming API"
     logger = logging.getLogger('smarkets.session')
 
-    def __init__(self, settings, session=None, inseq=1, outseq=1):
+    def __init__(self, settings, inseq=1, outseq=1, account_sequence=None):
         if not isinstance(settings, SessionSettings):
             raise ValueError("settings is not a SessionSettings")
         settings.validate()
         self.settings = settings
+        self.account_sequence = account_sequence
         self.socket = SessionSocket(settings)
-        self.session = session
         self.inseq = inseq
         # Outgoing socket sequence number
         self.outseq = outseq
@@ -95,10 +95,11 @@ class Session(object):
             login.login.username = self.settings.username
             login.login.password = self.settings.password
             self.logger.info("sending login payload")
-            if self.session is not None:
-                self.logger.info(
-                    "attempting to resume session %s", self.session)
-                login.eto_payload.login.session = self.session
+            if self.account_sequence is not None:
+                self.logger.info("Attempting to resume session, account sequence %d",
+                                 self.account_sequence)
+                login.login.account_sequence = self.account_sequence
+
             # Always flush outgoing login message
             self.send(True)
 
@@ -186,10 +187,8 @@ class Session(object):
             self.outseq = msg.eto_payload.login_response.reset
             self.buf_outseq = self.outseq
             self.send_buffer = Queue.Queue()
-            self.logger.info(
-                "received login_response with session %s and reset %d",
-                self.session,
-                self.outseq)
+            self.logger.info("received login_response with session %r and outseq %d",
+                             self.session, self.outseq)
         elif msg.eto_payload.type == eto.PAYLOAD_HEARTBEAT:
             self.logger.debug("received heartbeat message, responding...")
             heartbeat = self.out_payload
