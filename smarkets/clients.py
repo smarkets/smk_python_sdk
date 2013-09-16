@@ -246,5 +246,6 @@ class Smarkets(object):
             else:
                 self.logger.error("no callback %s", name)
             self.logger.debug("ignoring unknown message: %s", name)
-        else:
-            self.global_callback(name, message)
+
+        self.logger.debug('Dispatching global callbacks for %s', name)
+        self.global_callback(name, message)
