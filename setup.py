@@ -190,6 +190,7 @@ sdict = {
         'protobuf',
         'six',
     ],
+    'zip_safe': False,
     'cmdclass': {
         'build': SmarketsProtocolBuild,
         'clean': SmarketsProtocolClean,
