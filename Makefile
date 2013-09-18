@@ -27,7 +27,7 @@ test: deps
 
 check:
 	mkdir -p build/pylint build/pep8
-	pylint --rcfile=./.pylintrc --ignore=piqi_pb2.py -f parseable -r n smarkets
+	pylint --rcfile=./.pylintrc --ignore=piqi_pb2.py -f parseable -r n smarkets; test $$(( $$? & 3 )) -eq 0
 	pep8 --exclude=piqi_pb2.py --ignore=E501,W292 smarkets
 
 docs:
