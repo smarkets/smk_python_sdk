@@ -109,7 +109,6 @@ class Smarkets(object):
         payload.Clear()
         message.copy_to(payload)
         seq = self._send()
-        message.seq = seq
         if hasattr(message, 'register_callbacks'):
             message.register_callbacks(self)
         return seq

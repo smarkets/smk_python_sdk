@@ -4,10 +4,18 @@
 # This module is released under the MIT License:
 # http://www.opensource.org/licenses/mit-license.php
 
+from types import NoneType
+
 import smarkets.seto.piqi_pb2 as seto
 
 BUY = 1
 SELL = 2
+
+
+def references_match(o1, o2):
+    o1ref = o1.reference
+    o2ref = o2.reference
+    return o1ref is not None and o2ref is not None and o1ref == o2ref
 
 
 class OrderCreate(object):
@@ -15,21 +23,11 @@ class OrderCreate(object):
     "Simple order state with useful exceptions"
     __slots__ = ('quantity', 'price', 'side', 'market', 'contract',
                  'accept_callback', 'reject_callback', 'invalid_callback', 'executed_callback',
-                 'seq', 'client', 'time_in_force')
+                 'seq', 'client', 'time_in_force', 'reference')
 
     def __init__(self):
-        self.quantity = None
-        self.price = None
-        self.side = None
-        self.market = None
-        self.contract = None
-        self.accept_callback = None
-        self.reject_callback = None
-        self.invalid_callback = None
-        self.executed_callback = None
-        self.seq = None
-        self.client = None
-        self.time_in_force = None
+        for k in self.__slots__:
+            setattr(self, k, None)
 
     def validate_new(self):
         "Validate this order's properties as a new instruction"
@@ -54,6 +52,8 @@ class OrderCreate(object):
             raise ValueError("market must be a valid seto.Uuid128")
         if not isinstance(self.contract, seto.Uuid128):
             raise ValueError("contract must be a valid seto.Uuid128")
+        if not isinstance(self.reference, (NoneType, int, long)):
+            raise ValueError("reference must be either None or an integer")
 
         if self.time_in_force:
             if not self.time_in_force == seto.IMMEDIATE_OR_CANCEL and \
@@ -77,6 +77,9 @@ class OrderCreate(object):
         payload.order_create.quantity = self.quantity
         payload.order_create.price_type = seto.PRICE_PERCENT_ODDS
         payload.order_create.price = self.price
+
+        if self.reference is not None:
+            payload.order_create.reference = self.reference
 
     def register_callbacks(self, client):
         self.client = client
@@ -106,17 +109,17 @@ class OrderCreate(object):
             self.client.del_handler('seto.order_executed', self._executed_callback)
 
     def _accept_callback(self, message):
-        if message.order_accepted.seq == self.seq:
+        if references_match(self, message.order_accepted):
             self.clear_acceptance_callbacks()
             self.accept_callback(message)
 
     def _reject_callback(self, message):
-        if message.order_rejected.seq == self.seq:
+        if references_match(self, message.order_rejected):
             self.clear_callbacks()
             self.reject_callback(message)
 
     def _invalid_callback(self, message):
-        if message.order_invalid.seq == self.seq:
+        if references_match(self, message.order_invalid):
             self.clear_callbacks()
             self.invalid_callback(message)
 
@@ -132,13 +135,13 @@ class OrderCreate(object):
 class OrderCancel(object):
 
     """ Message to cancel the specified order"""
-    __slots__ = ('uid', 'seq', 'client', 'cancelled_callback', 'reject_callback')
+    __slots__ = ('uid', 'seq', 'client', 'cancelled_callback', 'reject_callback', 'reference')
 
     def __init__(self, uid=None):
+        for k in self.__slots__:
+            setattr(self, k, None)
+
         self.uid = uid
-        self.client = None
-        self.cancelled_callback = None
-        self.reject_callback = None
 
     def validate_new(self):
         "Validate this order's properties as a new instruction"
@@ -168,7 +171,7 @@ class OrderCancel(object):
         self.cancelled_callback(message)
 
     def _reject_callback(self, message):
-        if message.order_cancel_rejected.seq == self.seq:
+        if references_match(self, message.order_cancel_rejected):
             self.clear_callbacks()
             self.reject_callback(message)
 

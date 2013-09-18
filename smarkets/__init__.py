@@ -27,9 +27,7 @@ from smarkets.orders import OrderCreate  # noqa
 from smarkets.sessions import Session, SessionSettings  # noqa
 
 
-__version__ = '0.4.15'
+__version__ = '0.5.0c1'
 
 __all__ = sorted(name for name, obj in locals().items()
                  if not (name.startswith('_') or inspect.ismodule(obj)))
-
-VERSION = tuple((int(x) for x in __version__.split('.')))
