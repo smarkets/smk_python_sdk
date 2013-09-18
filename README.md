@@ -15,14 +15,7 @@ Python API client for Smarkets.
 
 ### For building the code, running tests and generating documentation
 
-* curl
-* mock
-* nose
-* pandoc
-* Piqi
-* sphinx
-* pep8
-* pylint
+    $ pip install -r requirements-dev.txt
 
 ## Installation
 
@@ -30,13 +23,9 @@ To install:
 
     $ pip install smk_python_sdk
 
-or if that doesn't work:
-
-    $ easy_install smk_python_sdk
-
 or if you want to build it yourself:
 
-    $ sudo python setup.py build install
+    $ python setup.py build install
 
 ## Getting Started
 
