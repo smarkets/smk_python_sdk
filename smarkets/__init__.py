@@ -15,25 +15,6 @@ if 'READTHEDOCS' in os.environ:
         sys.modules['smarkets.seto'] = sys.modules['smarkets.seto.piqi_pb2'] = Mock()
 
 from smarkets.clients import Smarkets  # noqa
-from smarkets.events import (  # noqa
-    EventsRequest,
-    Politics,
-    CurrentAffairs,
-    TvAndEntertainment,
-    SportByDate,
-    FootballByDate,
-    HorseRacingByDate,
-    TennisByDate,
-    BasketballByDate,
-    AmericanFootballByDate,
-    BaseballByDate,
-    CricketByDate,
-    HandballByDate,
-    RugbyByDate,
-    RugbyLeagueByDate,
-    VolleyballByDate,
-    SportOther,
-)
 from smarkets.exceptions import (  # noqa
     Error,
     ConnectionError,

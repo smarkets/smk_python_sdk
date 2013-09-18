@@ -245,29 +245,6 @@ class SmarketsTestCase(unittest.TestCase):
         with self._clear_send():
             self.client.unsubscribe(market_id)
 
-    def test_request_events(self):
-        "Test the `Smarkets.request_events` method"
-        with patch('smarkets.events.Politics') as mock_politics:
-            request = mock_politics.return_value
-            with self._clear_send():
-                self.client.request_events(request)
-            request.copy_to.assert_called_once_with(
-                self.mock_session.out_payload)
-
-    def test_fetch_http_found(self):
-        "Test the `Smarkets.fetch_http_found` method"
-        mock_fetch = Mock()
-        self.client.fetch = mock_fetch
-        expected = seto.Events()
-        payload_bytes = expected.SerializeToString()
-        mock_fetch.return_value = ('application/x-protobuf', payload_bytes)
-        payload = seto.Payload()
-        payload.type = seto.PAYLOAD_HTTP_FOUND
-        payload.http_found.url = 'http://domain.invalid/url'
-        payload.http_found.seq = 2
-        self.assertEqual(expected, self.client.fetch_http_found(payload))
-        mock_fetch.assert_called_once_with(payload.http_found.url)
-
     def test_add_bad_handler(self):
         "Test trying to add a bad handler either as a global or normal"
         for bad_handler in (

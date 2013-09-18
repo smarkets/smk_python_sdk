@@ -11,7 +11,6 @@ import smarkets.eto.piqi_pb2 as eto
 import smarkets.seto.piqi_pb2 as seto
 
 from smarkets.exceptions import InvalidCallbackError
-from smarkets.urls import fetch
 
 
 _ETO_PAYLOAD_TYPES = dict((
@@ -77,7 +76,6 @@ class Smarkets(object):
         self.auto_flush = auto_flush
         self.callbacks = dict((callback_name, Callback()) for callback_name in self.__class__.CALLBACKS)
         self.global_callback = Callback()
-        self.fetch = fetch
 
     def login(self, receive=True):
         "Connect and ensure the session is active"
@@ -168,15 +166,6 @@ class Smarkets(object):
         msg.Clear()
         request.copy_to(msg)
         return self._send()
-
-    def fetch_http_found(self, payload, incoming_payload=None):
-        "Fetch the URL specified by a http found payload"
-        content_type, result = self.fetch(payload.http_found.url)
-        if content_type == 'application/x-protobuf':
-            if incoming_payload is None:
-                incoming_payload = seto.Events()
-            incoming_payload.ParseFromString(result)
-            return incoming_payload
 
     def add_handler(self, name, callback):
         "Add a callback handler"
