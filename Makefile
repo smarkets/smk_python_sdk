@@ -23,7 +23,7 @@ release: deps
 test: deps
 	mkdir -p build/test
 	nosetests --with-xunit --with-ignore-docstrings --verbose \
-		--xunit-file=build/test/nosetests.xml
+		--xunit-file=build/test/nosetests.xml tests/unit_tests.py
 
 check:
 	mkdir -p build/pylint build/pep8
