@@ -178,7 +178,6 @@ sdict = {
     'keywords': ['Smarkets', 'betting exchange'],
     'license': 'MIT',
     'packages': ['smarkets'] + extra_packages,
-    'test_suite': 'tests.all_tests',
     'classifiers': [
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
