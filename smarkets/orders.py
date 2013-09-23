@@ -58,9 +58,10 @@ class OrderCreate(object):
             raise ValueError("reference must be either None or an integer")
 
         if self.time_in_force:
-            if not self.time_in_force == seto.IMMEDIATE_OR_CANCEL and \
-               not self.time_in_force == seto.GOOD_TIL_CANCELLED:
-                raise ValueError("Time inforce must be one of IMMEDIATE_OR_CANCEL, GOOD_TIL_CANCELLED")
+            allowed = seto._TIMEINFORCETYPE.values
+            if self.time_in_force not in [enum.number for enum in allowed]:
+                raise ValueError("Time inforce must be one of: %s" % (
+                    [enum.name for enum in allowed],))
 
     def copy_to(self, payload):
         "Copy this order instruction to a message `payload`"
