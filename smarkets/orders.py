@@ -83,52 +83,6 @@ class OrderCreate(object):
         if self.reference is not None:
             payload.order_create.reference = self.reference
 
-    def register_callbacks(self, client):
-        self.client = client
-        if self.accept_callback is not None:
-            client.add_handler('seto.order_accepted', self._accept_callback)
-        if self.reject_callback is not None:
-            client.add_handler('seto.order_rejected', self._reject_callback)
-        if self.invalid_callback is not None:
-            client.add_handler('seto.order_invalid', self._invalid_callback)
-        if self.executed_callback is not None:
-            client.add_handler('seto.order_executed', self._executed_callback)
-
-    def clear_callbacks(self):
-        self.clear_acceptance_callbacks()
-        self.clear_execution_callbacks()
-
-    def clear_acceptance_callbacks(self):
-        if self.accept_callback is not None:
-            self.client.del_handler('seto.order_accepted', self._accept_callback)
-        if self.reject_callback is not None:
-            self.client.del_handler('seto.order_rejected', self._reject_callback)
-        if self.invalid_callback is not None:
-            self.client.del_handler('seto.order_invalid', self._invalid_callback)
-
-    def clear_execution_callbacks(self):
-        if self.executed_callback is not None:
-            self.client.del_handler('seto.order_executed', self._executed_callback)
-
-    def _accept_callback(self, message):
-        if references_match(self, message.order_accepted):
-            self.clear_acceptance_callbacks()
-            self.accept_callback(message)
-
-    def _reject_callback(self, message):
-        if references_match(self, message.order_rejected):
-            self.clear_callbacks()
-            self.reject_callback(message)
-
-    def _invalid_callback(self, message):
-        if references_match(self, message.order_invalid):
-            self.clear_callbacks()
-            self.invalid_callback(message)
-
-    def _executed_callback(self, message):
-        self.clear_execution_callbacks()
-        self.executed_callback(message)
-
     def __repr__(self):
         return "OrderCreate(price=%r, quantity=%r, side=%r, market=%r, contract=%r)" % (
             self.price, self.quantity, self.side, self.market, self.contract)
@@ -154,28 +108,6 @@ class OrderCancel(object):
         "Copy this instruction to a message `payload`"
         payload.type = seto.PAYLOAD_ORDER_CANCEL
         payload.order_cancel.order.CopyFrom(self.uid)
-
-    def register_callbacks(self, client):
-        self.client = client
-        if self.cancelled_callback is not None:
-            client.add_handler('seto.order_cancelled', self._cancelled_callback)
-        if self.reject_callback is not None:
-            client.add_handler('seto.order_cancel_rejected', self._reject_callback)
-
-    def clear_callbacks(self):
-        if self.cancelled_callback is not None:
-            self.client.del_handler('seto.order_cancelled', self._cancelled_callback)
-        if self.reject_callback is not None:
-            self.client.del_handler('seto.order_cancel_rejected', self._reject_callback)
-
-    def _cancelled_callback(self, message):
-        self.clear_callbacks()
-        self.cancelled_callback(message)
-
-    def _reject_callback(self, message):
-        if references_match(self, message.order_cancel_rejected):
-            self.clear_callbacks()
-            self.reject_callback(message)
 
 
 class OrdersForMarket(object):
