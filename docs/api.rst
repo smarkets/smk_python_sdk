@@ -35,30 +35,6 @@ Orders
 .. autoclass:: Order
    :inherited-members:
 
-Events
-~~~~~~
-
-.. autoclass:: EventsRequest
-   :inherited-members:
-
-.. autoclass:: Politics
-   :inherited-members:
-.. autoclass:: CurrentAffairs
-   :inherited-members:
-.. autoclass:: TvAndEntertainment
-   :inherited-members:
-.. autoclass:: SportByDate
-   :inherited-members:
-.. autoclass:: FootballByDate
-   :inherited-members:
-.. autoclass:: HorseRacingByDate
-   :inherited-members:
-.. autoclass:: TennisByDate
-   :inherited-members:
-.. autoclass:: SportOther
-   :inherited-members:
-
-
 Internals
 ---------
 
