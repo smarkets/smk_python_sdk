@@ -11,6 +11,8 @@ import smarkets.seto.piqi_pb2 as seto
 BUY = 1
 SELL = 2
 
+MAX_QUANTITY = 2 ** 31 - 1
+
 
 def references_match(o1, o2):
     o1ref = o1.reference
@@ -42,8 +44,8 @@ class OrderCreate(object):
             raise ValueError("quantity must be an integer")
         if self.quantity < 1000:
             raise ValueError("quantity must be at least 1,000")
-        if self.quantity > 9223372036854775807L:
-            raise ValueError("quantity cannot exceed 63 bits")
+        if self.quantity > MAX_QUANTITY:
+            raise ValueError("quantity cannot exceed %r" % MAX_QUANTITY)
 
         if self.side not in (BUY, SELL):
             raise ValueError("side must be one of BUY or SELL")
