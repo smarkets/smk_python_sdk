@@ -11,11 +11,8 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-from os import chdir, getcwd
-from os.path import abspath, dirname, join
-from subprocess import check_call
+from os.path import dirname, join
 
-import os
 import sys
 
 PROJECT_ROOT = join(dirname(__file__), '..')
