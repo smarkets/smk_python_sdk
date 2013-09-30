@@ -44,60 +44,46 @@ class SmarketsProtocolBuild(build.build):
 
     description = "build the protocol buffer output with protobuf-compiler"
 
-    def check_executables(self):
-        "Check that various executables are available"
-        self.curl = find_executable("curl")
-        if self.curl is None:
-            sys.stderr.write("*** Cannot find curl; is it installed?\n")
-            sys.exit(-1)
-
-        self.protoc = find_executable("protoc")
-        if self.protoc is None:
-            sys.stderr.write("*** Cannot find protoc; is the protobuf compiler"
-                             " installed?\n")
-            sys.exit(-1)
-
-        self.piqi = find_executable("piqi")
-        if self.piqi is None:
-            sys.stderr.write("*** Cannot find piqi; are the piqi build tools"
-                             " installed?\n")
-            sys.exit(-1)
+    def find(self, name):
+        result = find_executable(name)
+        if result is None:
+            raise Exception("*** Cannot find %s; make sure it's installed" % (name,))
+        return result
 
     def run(self):
         "Get the .piqi definitions and run the 'protoc' compiler command"
-        self.check_executables()
 
         eto_piqi = join(PROJECT_ROOT, 'eto.piqi')
         if not os.path.exists(eto_piqi):
-            check_call((self.curl, '-o', eto_piqi, ETO_PIQI_URL))
+            check_call((self.find('curl'), '-o', eto_piqi, ETO_PIQI_URL))
 
         seto_piqi = join(PROJECT_ROOT, 'seto.piqi')
         if not os.path.exists(seto_piqi):
-            check_call((self.curl, '-o', seto_piqi, SETO_PIQI_URL))
+            check_call((self.find('curl'), '-o', seto_piqi, SETO_PIQI_URL))
 
         eto_proto = join(PROJECT_ROOT, 'smarkets.eto.piqi.proto')
         if not os.path.exists(eto_proto):
-            check_call((self.piqi, 'to-proto', eto_piqi, '-o', eto_proto))
+            check_call((self.find('piqi'), 'to-proto', eto_piqi, '-o', eto_proto))
 
         seto_proto = join(PROJECT_ROOT, 'smarkets.seto.piqi.proto')
         if not os.path.exists(seto_proto):
-            check_call((self.piqi, 'to-proto', seto_piqi, '-o', seto_proto))
+            check_call((self.find('piqi'), 'to-proto', seto_piqi, '-o', seto_proto))
             self.replace_file(seto_proto, self.fix_import)
 
-        for source in _safe_glob('*.proto'):
-            check_call((self.protoc, '--python_out=.', source))
+        for pkg in ('eto', 'seto'):
+            pkg_dir = join(PROJECT_ROOT, 'smarkets', pkg)
+            init_file = join(pkg_dir, '__init__.py')
 
-        for pkg_dir in ('eto', 'seto'):
-            init_file = join(PROJECT_ROOT, 'smarkets', pkg_dir, '__init__.py')
-            initf = open(init_file, 'w')
-            initf.write(
-                """"Protocol-buffers generated package"
+            if not os.path.exists(init_file):
+                check_call((self.find('protoc'), '--python_out=.', 'smarkets.%s.piqi.proto' % (pkg,)))
+
+            with open(init_file, 'w') as initf:
+                initf.write(""""Protocol-buffers generated package"
 # Copyright (C) 2011 Smarkets Limited <support@smarkets.com>
 #
 # This module is released under the MIT License:
 # http://www.opensource.org/licenses/mit-license.php
 """)
-            initf.close()
 
         build.build.run(self)
 
@@ -136,7 +122,7 @@ class SmarketsProtocolClean(clean.clean):
             if os.path.exists(src_dir):
                 shutil.rmtree(src_dir)
         for filename in chain(
-            _safe_glob('*.proto'),
+                _safe_glob('*.proto'),
                 _safe_glob('*.piqi')):
             if os.path.exists(filename):
                 os.unlink(filename)
