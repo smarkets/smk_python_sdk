@@ -59,6 +59,7 @@ class Session(object):
 
     "Manages TCP communication via Smarkets streaming API"
     logger = logging.getLogger('smarkets.session')
+    flush_logger = logging.getLogger('smarkets.session.flush')
 
     def __init__(self, settings, inseq=1, outseq=1, account_sequence=None):
         if not isinstance(settings, SessionSettings):
@@ -132,7 +133,7 @@ class Session(object):
 
     def flush(self):
         "Flush payloads to the socket"
-        self.logger.debug("flushing %d payloads", self.send_buffer.qsize())
+        self.flush_logger.debug("flushing %d payloads", self.send_buffer.qsize())
         while not self.send_buffer.empty():
             try:
                 msg_bytes = self.send_buffer.get_nowait()
