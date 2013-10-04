@@ -7,10 +7,9 @@ import logging
 
 from copy import copy
 
-import smarkets.eto.piqi_pb2 as eto
-import smarkets.seto.piqi_pb2 as seto
-
-from smarkets.exceptions import InvalidCallbackError
+from smarkets.streaming_api import eto
+from smarkets.streaming_api import seto
+from smarkets.streaming_api.exceptions import InvalidCallbackError
 
 
 _ETO_PAYLOAD_TYPES = dict((
@@ -60,8 +59,7 @@ class Callback(object):
     __call__ = fire
 
 
-class Smarkets(object):
-
+class StreamingAPIClient(object):
     """
     Smarkets API implementation
 
@@ -69,7 +67,7 @@ class Smarkets(object):
     """
     CALLBACKS = _ETO_PAYLOAD_TYPES.values() + _SETO_PAYLOAD_TYPES.values()
 
-    logger = logging.getLogger('smarkets.smarkets')
+    logger = logging.getLogger(__name__ + '.SETOClient')
 
     def __init__(self, session, auto_flush=True):
         self.session = session

@@ -10,24 +10,9 @@ if 'READTHEDOCS' in os.environ:
     from mock import Mock
     import sys
 
-    eto = seto = \
-        sys.modules['smarkets.eto'] = sys.modules['smarkets.eto.piqi_pb2'] = \
-        sys.modules['smarkets.seto'] = sys.modules['smarkets.seto.piqi_pb2'] = Mock()
+    sys.modules['smarkets.streaming_api.eto'] = sys.modules['smarkets.streaming_api.seto'] = Mock()
 
-from smarkets.clients import Smarkets  # noqa
-from smarkets.exceptions import (  # noqa
-    Error,
-    ConnectionError,
-    DecodeError,
-    ParseError,
-    SocketDisconnected,
-    InvalidCallbackError,
-)
-from smarkets.orders import OrderCreate  # noqa
-from smarkets.sessions import Session, SessionSettings  # noqa
-
-
-__version__ = '0.5.3'
+__version__ = '0.6.0c1'
 
 __all__ = sorted(name for name, obj in locals().items()
                  if not (name.startswith('_') or inspect.ismodule(obj)))

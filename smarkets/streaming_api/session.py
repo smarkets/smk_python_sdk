@@ -11,10 +11,9 @@ import ssl
 
 from google.protobuf import text_format
 
-import smarkets.eto.piqi_pb2 as eto
-import smarkets.seto.piqi_pb2 as seto
-
-from smarkets.exceptions import ConnectionError, reraise, SocketDisconnected
+from smarkets.errors import reraise
+from smarkets.streaming_api import eto, seto
+from smarkets.streaming_api.exceptions import ConnectionError, SocketDisconnected
 
 
 class SessionSettings(object):

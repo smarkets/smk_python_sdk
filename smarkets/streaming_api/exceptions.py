@@ -4,59 +4,46 @@
 # This module is released under the MIT License:
 # http://www.opensource.org/licenses/mit-license.php
 
-import sys as _sys
-
-import six as _six
+from smarkets.errors import Error as _Error
 
 
-def reraise(exception):
-    prev_cls, prev, tb = _sys.exc_info()
-    _six.reraise(type(exception), exception, tb)
-
-
-class Error(Exception):
-
-    "General Smarkets API error"
-    pass
-
-
-class ConnectionError(Error):
+class ConnectionError(_Error):
 
     "TCP connection-related error"
     pass
 
 
-class DecodeError(Error):
+class DecodeError(_Error):
 
     "Header decoding error"
     pass
 
 
-class ParseError(Error):
+class ParseError(_Error):
 
     "Error parsing a message or frame"
     pass
 
 
-class SocketDisconnected(Error):
+class SocketDisconnected(_Error):
 
     "Socket was disconnected while reading"
     pass
 
 
-class InvalidCallbackError(Error):
+class InvalidCallbackError(_Error):
 
     "Invalid callback was specified"
     pass
 
 
-class InvalidUrlError(Error):
+class InvalidUrlError(_Error):
 
     "Raised when a URL is invalid"
     pass
 
 
-class DownloadError(Error):
+class DownloadError(_Error):
 
     "Raised when a URL could not be fetched"
     pass

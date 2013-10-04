@@ -6,13 +6,10 @@ from itertools import chain, product
 from mock import Mock, patch, sentinel
 from nose.tools import eq_
 
-import smarkets.eto.piqi_pb2 as eto
-import smarkets.seto.piqi_pb2 as seto
-import smarkets.uuid as uuid
 
-from smarkets.clients import Callback, Smarkets
-from smarkets.exceptions import InvalidCallbackError
-from smarkets.orders import OrderCreate, OrderCancel, BUY
+from smarkets import uuid
+from smarkets.streaming_api.api import (
+    BUY, Callback, eto, InvalidCallbackError, OrderCancel, OrderCreate, seto, StreamingAPIClient)
 
 
 class CallbackTestCase(unittest.TestCase):
@@ -130,10 +127,10 @@ class SmarketsTestCase(unittest.TestCase):
 
     def setUp(self):
         "Patch the `Session` object for mock use"
-        self.session_patcher = patch('smarkets.sessions.Session')
+        self.session_patcher = patch('smarkets.streaming_api.session.Session')
         self.mock_session_cls = self.session_patcher.start()
         self.mock_session = self.mock_session_cls.return_value
-        self.client = Smarkets(self.mock_session)
+        self.client = StreamingAPIClient(self.mock_session)
 
     def tearDown(self):
         "Stop the patcher"
@@ -190,7 +187,7 @@ class SmarketsTestCase(unittest.TestCase):
              ('disconnect', (), {})])
 
     def test_each_instance_has_separate_callbacks(self):
-        client_a, client_b = (Smarkets('_') for i in range(2))
+        client_a, client_b = (StreamingAPIClient('_') for i in range(2))
         handler = Handler()
         client_a.add_handler('seto.http_found', handler)
         eq_(handler.call_count, 0)

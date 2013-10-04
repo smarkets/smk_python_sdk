@@ -1,9 +1,9 @@
 *.pyc
 *.piqi
 *.proto
-smarkets/seto/
-smarkets/eto/
 build/
+smarkets/streaming_api/eto.py
+smarkets/streaming_api/seto.py
 dist/
 *.egg-info/
 README

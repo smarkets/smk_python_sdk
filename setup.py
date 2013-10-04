@@ -5,7 +5,6 @@
 # http://www.opensource.org/licenses/mit-license.php
 import glob
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -61,29 +60,28 @@ class SmarketsProtocolBuild(build.build):
         if not os.path.exists(seto_piqi):
             check_call((self.find('curl'), '-o', seto_piqi, SETO_PIQI_URL))
 
-        eto_proto = join(PROJECT_ROOT, 'smarkets.eto.piqi.proto')
+        eto_proto = join(PROJECT_ROOT, 'smarkets.streaming_api.eto.proto')
         if not os.path.exists(eto_proto):
             check_call((self.find('piqi'), 'to-proto', eto_piqi, '-o', eto_proto))
 
-        seto_proto = join(PROJECT_ROOT, 'smarkets.seto.piqi.proto')
+        seto_proto = join(PROJECT_ROOT, 'smarkets.streaming_api.seto.proto')
         if not os.path.exists(seto_proto):
             check_call((self.find('piqi'), 'to-proto', seto_piqi, '-o', seto_proto))
-            self.replace_file(seto_proto, self.fix_import)
+            self.replace_file(seto_proto,
+                              lambda line: line.replace(
+                                  'import "eto.piqi.proto"',
+                                  'import "smarkets.streaming_api.eto.proto"'))
 
         for pkg in ('eto', 'seto'):
-            pkg_dir = join(PROJECT_ROOT, 'smarkets', pkg)
-            init_file = join(pkg_dir, '__init__.py')
+            dst_pkg_file = join(PROJECT_ROOT, 'smarkets', 'streaming_api', '%s.py' % (pkg,))
+            tmp_pkg_file = dst_pkg_file.replace('.py', '_pb2.py')
 
-            if not os.path.exists(init_file):
-                check_call((self.find('protoc'), '--python_out=.', 'smarkets.%s.piqi.proto' % (pkg,)))
+            if not os.path.exists(dst_pkg_file):
+                check_call((self.find('protoc'),
+                            '--python_out=.', 'smarkets.streaming_api.%s.proto' % (pkg,)))
 
-            with open(init_file, 'w') as initf:
-                initf.write(""""Protocol-buffers generated package"
-# Copyright (C) 2011 Smarkets Limited <support@smarkets.com>
-#
-# This module is released under the MIT License:
-# http://www.opensource.org/licenses/mit-license.php
-""")
+                shutil.move(tmp_pkg_file, dst_pkg_file)
+                self.replace_file(dst_pkg_file, lambda line: line.replace('_pb2', ''))
 
         build.build.run(self)
 
@@ -96,14 +94,6 @@ class SmarketsProtocolBuild(build.build):
             for line in lines:
                 sources.write(line_map(line))
 
-    @staticmethod
-    def fix_import(line):
-        "Fix the import line in smarkets.seto.piqi.proto"
-        return re.sub(
-            r'import "eto\.piqi\.proto"',
-            'import "smarkets.eto.piqi.proto"',
-            line)
-
 
 class SmarketsProtocolClean(clean.clean):
 
@@ -115,15 +105,15 @@ class SmarketsProtocolClean(clean.clean):
         """Do the clean up"""
         for src_dir in [
             join('build', 'pb'),
-            join('smarkets', 'eto'),
-            join('smarkets', 'seto'),
         ]:
             src_dir = join(PROJECT_ROOT, src_dir)
             if os.path.exists(src_dir):
                 shutil.rmtree(src_dir)
         for filename in chain(
                 _safe_glob('*.proto'),
-                _safe_glob('*.piqi')):
+                _safe_glob('*.piqi'),
+                (join(PROJECT_ROOT, 'smarkets', 'streaming_api', '%s.py' % key)
+                 for key in ('eto', 'seto'))):
             if os.path.exists(filename):
                 os.unlink(filename)
 
@@ -143,27 +133,21 @@ with open(join(PROJECT_ROOT, 'smarkets', '__init__.py')) as f:
 
 __version__ = version_line.split('=')[1].strip().strip("'").strip('"')
 
-# smarkets.eto and smarkets.eto in packages break creating source dists in current setup
-# also nasty hack to make it buildable on readthedocs.org
-if 'sdist' in sys.argv or 'READTHEDOCS' in os.environ:
-    extra_packages = []
-else:
-    extra_packages = ['smarkets.eto', 'smarkets.seto']
-
 sdict = {
     'name': 'smk_python_sdk',
     'version': __version__,
     'description': 'Python client for Smarkets streaming API',
     'long_description': long_description,
     'url': 'https://github.com/smarkets/smk_python_sdk',
-    'download_url': 'https://github.com/smarkets/smk_python_sdk/downloads/smk_python_sdk-%s.tar.gz' % __version__,
+    'download_url': 'https://github.com/smarkets/smk_python_sdk/downloads/smk_python_sdk-%s.tar.gz' % (
+        __version__,),
     'author': 'Smarkets Limited',
     'author_email': 'support@smarkets.com',
     'maintainer': 'Smarkets Limited',
     'maintainer_email': 'support@smarkets.com',
     'keywords': ['Smarkets', 'betting exchange'],
     'license': 'MIT',
-    'packages': ['smarkets'] + extra_packages,
+    'packages': ['smarkets'],
     'classifiers': [
         'Development Status :: 3 - Alpha',
         'Environment :: Console',

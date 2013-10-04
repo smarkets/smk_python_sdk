@@ -22,12 +22,13 @@ release: deps
 test: deps
 	mkdir -p build/test
 	nosetests --with-xunit --with-ignore-docstrings --verbose \
-		--xunit-file=build/test/nosetests.xml tests/
+		--xunit-file=build/test/nosetests.xml smarkets.tests
 
 check:
 	mkdir -p build/pylint build/pep8
-	pylint --rcfile=./.pylintrc --ignore=piqi_pb2.py -f parseable -r n smarkets; test $$(( $$? & 3 )) -eq 0
-	pep8 --exclude=piqi_pb2.py --ignore=E501,W292 smarkets
+	pylint --rcfile=./.pylintrc --ignore=eto.py --ignore=seto.py -f parseable \
+		-r n smarkets; test $$(( $$? & 3 )) -eq 0
+	#pep8 --exclude=eto.py --exclude=seto.py --ignore=E501,W292 smarkets
 
 docs:
 	$(MAKE) -C docs html
@@ -38,3 +39,6 @@ github:
 
 delvsn:
 	git push github :refs/tags/v$(VSN)
+
+autopep8:
+	find . -name \*.py |egrep -v "env|travis" | xargs autopep8 --max-line-length=115 --recursive --in-place -j 8
