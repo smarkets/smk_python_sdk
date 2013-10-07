@@ -1,0 +1,2 @@
+-r requirements-dev-base.txt
+-e git+https://github.com/openx/python3-protobuf.git#egg=protobuf&subdirectory=python

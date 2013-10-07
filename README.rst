@@ -100,7 +100,7 @@ You can install Python dependencies by executing:
 
 .. code-block:: shell
 
-    pip install -r requirements-dev.txt
+    pip install -r requirements-dev-py2.txt
 
 To build and install call:
 

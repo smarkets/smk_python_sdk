@@ -2,6 +2,5 @@ mock
 nose==1.3.0
 nose-ignore-docstring
 sphinx
-protobuf
 pep8
 pylint
