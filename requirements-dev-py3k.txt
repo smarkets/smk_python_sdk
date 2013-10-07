@@ -1,2 +1,2 @@
 -r requirements-dev-base.txt
--e git+https://github.com/openx/python3-protobuf.git#egg=protobuf&subdirectory=python
+https://github.com/smarkets/3rdparty/blob/master/protobuf-2.4.2-pre-python3.tar.gz?raw=true
