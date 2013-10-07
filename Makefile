@@ -15,7 +15,6 @@ distclean: clean
 	-rm -rf smarkets/eto
 	-rm -rf smarkets/seto
 	-find . -name "*.pyc" | xargs rm
-	-rm README
 
 release: deps
 	python setup.py sdist --format=gztar,zip

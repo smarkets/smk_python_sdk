@@ -130,7 +130,7 @@ class SmarketsProtocolClean(clean.clean):
         # Call the parent class clean command
         clean.clean.run(self)
 
-readme_path = join(PROJECT_ROOT, 'README.md')
+readme_path = join(PROJECT_ROOT, 'README.rst')
 
 with open(readme_path) as f:
     long_description = f.read()
