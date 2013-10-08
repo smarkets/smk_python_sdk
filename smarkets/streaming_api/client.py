@@ -5,8 +5,7 @@
 # http://www.opensource.org/licenses/mit-license.php
 import logging
 
-from copy import copy
-
+from smarkets.signal import Signal
 from smarkets.streaming_api import eto
 from smarkets.streaming_api import seto
 from smarkets.streaming_api.exceptions import InvalidCallbackError
@@ -24,41 +23,6 @@ _SETO_PAYLOAD_TYPES = dict((
 ))
 
 
-class Callback(object):
-
-    "Container for callbacks"
-
-    def __init__(self):
-        self._handlers = set()
-
-    def handle(self, handler):
-        "Add a handler to the set of handlers"
-        self._handlers.add(handler)
-        return self
-
-    def unhandle(self, handler):
-        "Remove a handler from the set of handlers"
-        try:
-            self._handlers.remove(handler)
-        except KeyError:
-            raise ValueError(
-                "Callback is not handling this signal, "
-                "so it cannot unhandle it")
-        return self
-
-    def fire(self, *args, **kwargs):
-        "Raise the signal to the handlers"
-        for handler in copy(self._handlers):
-            handler(*args, **kwargs)
-
-    def __len__(self):
-        return len(self._handlers)
-
-    __iadd__ = handle
-    __isub__ = unhandle
-    __call__ = fire
-
-
 class StreamingAPIClient(object):
     """
     Smarkets API implementation
@@ -72,8 +36,8 @@ class StreamingAPIClient(object):
     def __init__(self, session, auto_flush=True):
         self.session = session
         self.auto_flush = auto_flush
-        self.callbacks = dict((callback_name, Callback()) for callback_name in self.__class__.CALLBACKS)
-        self.global_callback = Callback()
+        self.callbacks = dict((callback_name, Signal()) for callback_name in self.__class__.CALLBACKS)
+        self.global_callback = Signal()
 
     def login(self, receive=True):
         "Connect and ensure the session is active"
