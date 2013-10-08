@@ -161,7 +161,7 @@ sdict = {
     'maintainer_email': 'support@smarkets.com',
     'keywords': ['Smarkets', 'betting exchange'],
     'license': 'MIT',
-    'packages': ['smarkets'],
+    'packages': ['smarkets', 'smarkets.streaming_api', 'smarkets.tests'],
     'classifiers': [
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
