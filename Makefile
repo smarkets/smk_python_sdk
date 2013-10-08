@@ -28,7 +28,7 @@ check:
 	mkdir -p build/pylint build/pep8
 	pylint --rcfile=./.pylintrc --ignore=eto.py --ignore=seto.py -f parseable \
 		-r n smarkets; test $$(( $$? & 3 )) -eq 0
-	pep8 --exclude=eto.py --exclude=seto.py --ignore=E501,W292 smarkets
+	pep8 --exclude=eto.py,seto.py --ignore=E501,W292 smarkets
 
 docs:
 	$(MAKE) -C docs html
