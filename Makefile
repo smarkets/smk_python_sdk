@@ -21,14 +21,14 @@ release: deps
 
 test: deps
 	mkdir -p build/test
-	nosetests --with-xunit --with-ignore-docstrings --verbose \
-		--xunit-file=build/test/nosetests.xml smarkets.tests
+	nosetests --with-xunit --with-ignore-docstrings --verbose --all-modules \
+		--xunit-file=build/test/nosetests.xml smarkets
 
 check:
 	mkdir -p build/pylint build/pep8
 	pylint --rcfile=./.pylintrc --ignore=eto.py --ignore=seto.py -f parseable \
 		-r n smarkets; test $$(( $$? & 3 )) -eq 0
-	#pep8 --exclude=eto.py --exclude=seto.py --ignore=E501,W292 smarkets
+	pep8 --exclude=eto.py --exclude=seto.py --ignore=E501,W292 smarkets
 
 docs:
 	$(MAKE) -C docs html

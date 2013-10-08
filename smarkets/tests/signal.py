@@ -1,7 +1,10 @@
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import unittest
 from itertools import chain
 
 from mock import Mock, sentinel
+from nose.tools import eq_, raises
 
 from smarkets.signal import Signal
 
@@ -107,3 +110,17 @@ class SignalTest(unittest.TestCase):
         "Always raise `Exception` with no arguments"
         raise Exception()
 
+
+@raises(KeyError)
+def test_removing_non_existing_handler_fails():
+    e = Signal()
+    e -= 'irrelevant'
+
+
+def test_removing_handler_works():
+    e = Signal()
+    h = Mock()
+    e += h
+    e -= h
+    e.fire()
+    eq_(h.called, False)

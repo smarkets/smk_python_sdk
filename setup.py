@@ -156,6 +156,7 @@ sdict = {
         'Operating System :: OS Independent',
         'Programming Language :: Python'],
     'install_requires': [
+        'injector',
         'protobuf',
         'six',
     ],

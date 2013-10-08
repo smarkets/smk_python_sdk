@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 """
 Utility methods for dealing with Smarkets UUIDS.
 
