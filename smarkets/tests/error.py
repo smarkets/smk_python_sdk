@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 
 from nose.tools import eq_, raises
 
-from smarkets.error import swallow
+from smarkets.errors import swallow
 
 
 def throw_or_return(to_raise=None, to_return=None):
