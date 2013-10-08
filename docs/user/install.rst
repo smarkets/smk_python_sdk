@@ -29,9 +29,15 @@ Pip
 
 Install the client with `pip`_::
 
-    $ pip install smk_python_sdk
+    $ pip install smk-python-sdk
 
 .. _`pip`: http://www.pip-installer.org
+
+
+Updating the SDK
+----------------
+
+Minor updates (0.5.0 to 0.5.1) are backwards compatible. Major updates (for example 0.5.1 to 0.6.0) are not necessarily backwards compatible, please consult SDK :ref:`changelog`.
 
 Github
 ------

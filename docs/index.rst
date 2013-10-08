@@ -25,6 +25,11 @@ instructions for getting started using the client.
    user/install
    user/quickstart
 
+.. toctree::
+   :maxdepth: 1
+
+   changelog
+
 
 API Documentation
 -----------------

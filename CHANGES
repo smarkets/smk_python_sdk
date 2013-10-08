@@ -1,0 +1,47 @@
+0.6.0
+-----
+
+- Merge smkcommon project
+- Refactor documentation
+
+0.5.3
+-----
+
+- Create separate logger for "flushing x payloads" message
+
+0.5.2
+-----
+
+- Update SETO definitions
+
+0.5.1
+-----
+
+- Stop requiring curl/piqi/protoc if installing distribution
+
+0.5.0
+-----
+
+- Handle order reference property
+- Remove per-message streaming API callbacks
+- Remove unused API
+
+0.4.x/0.3.x
+-----------
+
+Change list available only in git log.
+
+
+0.2.0
+-----
+
+- Update to latest eto and seto definitions
+- Add additional integration tests
+- Add unit tests
+- Add first pass at documentation
+
+
+0.1.0
+-----
+
+- Initial Release
