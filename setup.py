@@ -21,6 +21,13 @@ from setuptools import setup
 from itertools import chain
 
 
+try:
+    from collections import OrderedDict  # noqa
+    has_ordered_dict = True
+except ImportError:
+    has_ordered_dict = False
+
+
 def check_call(*args, **kwargs):
     print('Calling %s, %s' % (args, kwargs,))
     subprocess.check_call(*args, **kwargs)
@@ -160,7 +167,7 @@ sdict = {
         'injector',
         'protobuf',
         'six',
-    ],
+    ] + [] if has_ordered_dict else ['ordereddict'],
     'zip_safe': False,
     'cmdclass': {
         'build': SmarketsProtocolBuild,
