@@ -14,4 +14,9 @@ if 'READTHEDOCS' in os.environ:
 
 __version__ = '0.6.0c1'
 
+
+def private(something):
+    something.__private__ = True
+    return something
+
 __all__ = ()

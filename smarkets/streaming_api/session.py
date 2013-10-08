@@ -11,6 +11,7 @@ import ssl
 
 from google.protobuf import text_format
 
+from smarkets import private
 from smarkets.errors import reraise
 from smarkets.streaming_api import eto, seto
 from smarkets.streaming_api.exceptions import ConnectionError, SocketDisconnected
@@ -57,8 +58,8 @@ class SessionSettings(object):
 class Session(object):
 
     "Manages TCP communication via Smarkets streaming API"
-    logger = logging.getLogger('smarkets.session')
-    flush_logger = logging.getLogger('smarkets.session.flush')
+    logger = private(logging.getLogger('smarkets.session'))
+    flush_logger = private(logging.getLogger('smarkets.session.flush'))
 
     def __init__(self, settings, inseq=1, outseq=1, account_sequence=None):
         if not isinstance(settings, SessionSettings):
@@ -204,8 +205,8 @@ class Session(object):
 class SessionSocket(object):
 
     "Wraps a socket with basic framing/deframing"
-    logger = logging.getLogger('smarkets.session.socket')
-    wire_logger = logging.getLogger('smarkets.session.wire')
+    logger = private(logging.getLogger('smarkets.session.socket'))
+    wire_logger = private(logging.getLogger('smarkets.session.wire'))
 
     def __init__(self, settings):
         if not isinstance(settings, SessionSettings):

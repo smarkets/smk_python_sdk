@@ -32,10 +32,9 @@ API Documentation
 Specific modules, classes and methods are listed in this section.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
-   api
-
+   smarkets 
 
 Support
 -------

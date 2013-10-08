@@ -228,3 +228,16 @@ man_pages = [
     ('index', 'smk_python_sdk', u'Smarkets Python API Client Documentation',
      [u'Smarkets Limited'], 1)
 ]
+
+
+def setup(app):
+    app.connect('autodoc-skip-member', skip_member)
+
+
+def skip_member(app, what, name, obj, skip, options):
+    return (
+        skip or
+        not getattr(obj, '__doc__', None) or
+        getattr(obj, '__private__', False) is True or
+        getattr(getattr(obj, '__func__', None), '__private__', False) is True
+    )
