@@ -1,12 +1,13 @@
 smk-python-sdk
 ==============
 
+.. image:: https://travis-ci.org/smarkets/smk_python_sdk.png?branch=master
+   :alt: Build status
+   :target: https://travis-ci.org/smarkets/smk_python_sdk
+
 Smarkets Python library (streaming API client, id generation, more to come).
 
-[![Build Status](https://travis-ci.org/smarkets/smk_python_sdk.png?branch=master)](https://travis-ci.org/smarkets/smk_python_sdk)
-
-
-Compatible with Python 2.x >= 2.6 and PyPy 1.9+
+Compatible with Python 2.x >= 2.6 and PyPy 1.9+.
 
 
 Installing using source distribution
@@ -16,7 +17,7 @@ When you install smk-python-sdk using PyPI distribution there are no non-Python 
 
 PyPI page: https://pypi.python.org/pypi/smk_python_sdk
 
-.. code-block:: shell
+::
 
     pip install smk-python-sdk
 
@@ -72,6 +73,7 @@ Registering callbacks
 '''''''''''''''''''''
 
 .. code-block:: python
+
     from google.protobuf import text_format
     def login_response(msg):
         print "eto.login_response", text_format.MessageToString(msg)
@@ -98,14 +100,14 @@ Non-Python dependencies:
 
 You can install Python dependencies by executing:
 
-.. code-block:: shell
+::
 
     pip install -r requirements-dev-py2.txt
 
 To build and install call:
 
 
-.. code-block:: shell
+::
 
     python setup.py clean build install
 
@@ -115,4 +117,4 @@ License
 
 Copyright (C) 2011-2013 Smarkets Limited <support@smarkets.com>
 
-This module is released under the MIT License: http://www.opensource.org/licenses/mit-license.php (or see `LICENSE` file)
+This module is released under the MIT License: http://www.opensource.org/licenses/mit-license.php (or see the LICENSE file)
