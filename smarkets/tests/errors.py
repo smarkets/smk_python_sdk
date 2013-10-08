@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import
 
 from nose.tools import eq_, raises
 
@@ -8,7 +7,7 @@ from smarkets.errors import swallow
 
 def throw_or_return(to_raise=None, to_return=None):
     if to_raise:
-        raise to_raise
+        raise to_raise  # pylint: disable=E0702
 
     if to_return:
         return to_return
