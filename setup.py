@@ -150,7 +150,7 @@ __version__ = version_line.split('=')[1].strip().strip("'").strip('"')
 sdict = {
     'name': 'smk_python_sdk',
     'version': __version__,
-    'description': 'Python client for Smarkets streaming API',
+    'description': 'Smarkets Python SDK - API clients and utility library',
     'long_description': long_description,
     'url': 'https://github.com/smarkets/smk_python_sdk',
     'download_url': 'https://github.com/smarkets/smk_python_sdk/downloads/smk_python_sdk-%s.tar.gz' % (
