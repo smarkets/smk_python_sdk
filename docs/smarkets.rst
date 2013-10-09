@@ -11,14 +11,6 @@ Subpackages
 Submodules
 ----------
 
-smarkets.collections module
----------------------------
-
-.. automodule:: smarkets.collections
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 smarkets.compatibility module
 -----------------------------
 
@@ -35,34 +27,10 @@ smarkets.configuration module
     :undoc-members:
     :show-inheritance:
 
-smarkets.error module
+smarkets.errors module
 ---------------------
 
-.. automodule:: smarkets.error
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-smarkets.graphite module
-------------------------
-
-.. automodule:: smarkets.graphite
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-smarkets.greenlet module
-------------------------
-
-.. automodule:: smarkets.greenlet
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-smarkets.interfaces module
---------------------------
-
-.. automodule:: smarkets.interfaces
+.. automodule:: smarkets.errors
     :members:
     :undoc-members:
     :show-inheritance:
@@ -75,34 +43,11 @@ smarkets.itertools module
     :undoc-members:
     :show-inheritance:
 
-smarkets.modules module
------------------------
-
-.. automodule:: smarkets.modules
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 smarkets.signal module
 ----------------------
 
 .. automodule:: smarkets.signal
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-smarkets.statsd module
-----------------------
-
-.. automodule:: smarkets.statsd
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-smarkets.string module
-----------------------
-
-.. automodule:: smarkets.string
     :members:
     :undoc-members:
     :show-inheritance:
