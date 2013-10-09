@@ -172,8 +172,11 @@ sdict = {
     'install_requires': [
         'decorator',
         'injector',
+        'requests',
+        'requests-oauthlib',
         'protobuf',
         'six',
+        'simplejson',
     ] + ([] if has_ordered_dict else ['ordereddict']) + ([] if has_greenlet else ['greenlet']),
     'zip_safe': False,
     'cmdclass': {
