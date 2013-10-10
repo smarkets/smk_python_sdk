@@ -12,7 +12,7 @@ if 'READTHEDOCS' in os.environ:
 
     sys.modules['smarkets.streaming_api.eto'] = sys.modules['smarkets.streaming_api.seto'] = Mock()
 
-__version__ = '0.6.1'
+__version__ = '0.6.2'
 
 
 def private(something):
