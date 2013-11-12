@@ -36,7 +36,8 @@ class StreamingAPIClient(object):
     def __init__(self, session, auto_flush=True):
         self.session = session
         self.auto_flush = auto_flush
-        self.callbacks = dict((callback_name, Signal()) for callback_name in self.__class__.CALLBACKS)
+        self.callbacks = dict((callback_name, Signal())
+                              for callback_name in self.__class__.CALLBACKS)
         self.global_callback = Signal()
 
     def login(self, receive=True):
@@ -70,10 +71,7 @@ class StreamingAPIClient(object):
         payload = self.session.out_payload
         payload.Clear()
         message.copy_to(payload)
-        seq = self._send()
-        if hasattr(message, 'register_callbacks'):
-            message.register_callbacks(self)
-        return seq
+        self._send()
 
     def ping(self):
         "Ping the service"

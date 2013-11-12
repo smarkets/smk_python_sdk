@@ -30,42 +30,36 @@ Getting Started
     import logging
     logging.basicConfig(level=logging.DEBUG)
 
-    import smarkets
+    from smarkets.streaming_api.api import (
+        BUY, GOOD_TIL_CANCELLED, OrderCreate, SessionSettings, Session, StreamingAPIClient)
 
     username = 'username'
     password = 'password'
 
-    settings = smarkets.SessionSettings(username, password)
+    settings = SessionSettings(username, password)
     settings.host = 'api.smarkets.com'
     settings.port = 3701
 
-    session = smarkets.Session(settings)
+    session = Session(settings)
 
-    client = smarkets.Smarkets(session)
+    client = StreamingAPIClient(session)
 
     client.login()
     client.ping()
-    client.flush()
     client.read()
+    client.flush()
 
     market_id = client.str_to_uuid128('fc024')
 
-    client.subscribe(market_id)
-    client.flush()
-    client.read()
-
-    order = smarkets.Order()
+    order = OrderCreate()
     order.quantity = 400000 # £40 payout
     order.price = 2500 # 25.00%
-    order.side = smarkets.Order.BUY
+    order.side = BUY
     order.market = market_id
     order.contract = client.str_to_uuid128('fcccc')
+    order.time_in_force = GOOD_TIL_CANCELLED
 
-    client.order(order)
-    client.flush()
-
-    client.read()
-
+    client.send(order)
     client.logout()
 
 
@@ -75,10 +69,13 @@ Registering callbacks
 .. code-block:: python
 
     from google.protobuf import text_format
+
     def login_response(msg):
-        print "eto.login_response", text_format.MessageToString(msg)
+        print("eto.login_response", text_format.MessageToString(msg))
+
     def global_callback(name, msg):
-        print name, text_format.MessageToString(msg)
+        print(name, text_format.MessageToString(msg))
+
     client.add_handler('eto.login_response', login_response)
     client.add_global_handler(global_callback)
 

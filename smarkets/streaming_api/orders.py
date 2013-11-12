@@ -24,7 +24,6 @@ class OrderCreate(object):
 
     "Simple order state with useful exceptions"
     __slots__ = ('quantity', 'price', 'side', 'market', 'contract',
-                 'accept_callback', 'reject_callback', 'invalid_callback', 'executed_callback',
                  'seq', 'client', 'time_in_force', 'reference')
 
     def __init__(self):
@@ -92,7 +91,7 @@ class OrderCreate(object):
 class OrderCancel(object):
 
     """ Message to cancel the specified order"""
-    __slots__ = ('uid', 'seq', 'client', 'cancelled_callback', 'reject_callback', 'reference')
+    __slots__ = ('uid', 'seq', 'client', 'reference')
 
     def __init__(self, uid=None):
         for k in self.__slots__:
