@@ -56,8 +56,17 @@ class StreamingAPIClient(object):
             self.read()
         self.session.disconnect()
 
+    @property
+    def raw_socket(self):
+        """
+        Get raw socket used for communication with remote endpoint.
+
+        :rtype: :class:`socket.socket`
+        """
+        return self.session.raw_socket
+
     def read(self, num=1):
-        "Receive the next `num` payloads and block"
+        "Receive the next `num` payloads and block if needed"
         for _ in xrange(0, num):
             frame = self.session.next_frame()
             if frame:

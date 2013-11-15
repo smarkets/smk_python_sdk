@@ -78,6 +78,14 @@ class Session(object):
         self.send_buffer = Queue.Queue()
 
     @property
+    def raw_socket(self):
+        '''
+        Get raw socket used for communication with remote endpoint.
+        :rtype: :class:`socket.socket`
+        '''
+        return self.socket._sock
+
+    @property
     def connected(self):
         "Returns True if the socket is currently connected"
         return self.socket.connected
