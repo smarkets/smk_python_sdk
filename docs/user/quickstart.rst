@@ -25,22 +25,23 @@ In order to do anything meaningful with the API, you must first start
 a new session. We import the base module and create our
 :class:`SessionSettings` object::
 
-    >>> import smarkets
+    >>> from smarkets.streaming_api.api import (
+    ...     BUY, SELL, OrderCreate, Session, SessionSettings, StreamingAPIClient)
     >>> username = 'username'
     >>> password = 'password'
-    >>> settings = smarkets.SessionSettings(username, password)
+    >>> settings = SessionSettings(username, password)
     >>> settings.host = 'api.smarkets.com'
     >>> settings.port = 3701
 
 Then, we create the :class:`Session` object which we will use to keep
 track of sequence numbers::
 
-    >>> session = smarkets.Session(settings)
+    >>> session = Session(settings)
 
 Finally, the :class:`Client` class is the higher-level wrapper which
 allows us to send and handle messages::
 
-    >>> client = smarkets.Smarkets(session)
+    >>> client = StreamingAPIClient(session)
 
 Now, let's login! ::
 
@@ -57,41 +58,16 @@ And logout::
     >>> client.logout()
 
 
-Resuming a session
-------------------
-
-One of the key aspects of our streaming API is the ability to resume a
-session in the event of a network failure or software bug which closes
-a socket connection prematurely.
-
-We can re-use our :class:`SessionSettings` object from the above
-section. However, when creating the :class:`Session` object, we
-specify three additional parameters: **session_id**, **inseq** and
-**outseq** ::
-
-    >> session = smarkets.Session(settings, session_id='foo', inseq=3, outseq=3)
-
-The rest works normally::
-
-    >>> client = smarkets.Smarkets(session)
-    >>> client.login()
-
-However, because our login message contains a session id which we
-intend to resume (and the sequence numbers we last saw and sent), the
-client will implicitly request a **replay** to collect the missing
-messages.
-
-
 Placing a bet
 -------------
 
 The :class:`Order` class provides the mechanism to send a message to
 create a new order::
 
-    >>> order = smarkets.Order()
+    >>> order = OrderCreate()
     >>> order.quantity = 400000  # 40.0000 GBP payout
     >>> order.price = 2500  # 25.00%
-    >>> order.side = smarkets.Order.BUY
+    >>> order.side = BUY
     >>> order.market = client.str_to_uuid128('fc024')
     >>> order.contract = client.str_to_uuid128('fcccc')
 

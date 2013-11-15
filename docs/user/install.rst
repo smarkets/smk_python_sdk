@@ -11,7 +11,7 @@ Requirements
 
 These packages are necessary at runtime.
 
-* `Protocol buffers`_ 2.3.0 or 2.4.1
+* `protobuf` Python package, version 2.5.0 or higher (`smk-python-sdk` package installation process will automatically install it)
 
 These are required to build from source and run unit tests, etc.
 
