@@ -52,6 +52,6 @@ sync:
 	git remote | while read remote; do \
 		git pull $$remote master; \
 		git push -u $$remote master; \
-		git pull $$remote --tags; \
+		git fetch $$remote --tags; \
 		git push $$remote --tags; \
 	done;
