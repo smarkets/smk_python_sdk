@@ -47,3 +47,9 @@ delvsn:
 
 autopep8:
 	find . -name \*.py |egrep -v "env|travis" | xargs autopep8 --max-line-length=115 --recursive --in-place -j 8
+
+sync:
+	git remote | while read remote; do \
+		git pull $$remote master; \
+		git push -u $$remote master; \
+	done;
