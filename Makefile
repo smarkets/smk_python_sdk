@@ -12,12 +12,17 @@ distclean: clean
 	-rm -rf dist
 	-rm -rf build
 	-rm -rf smk.egg-info
-	-rm -rf smarkets/eto
-	-rm -rf smarkets/seto
+	-rm -rf smarkets/streaming_api/eto.py
+	-rm -rf smarkets/streaming_api/seto.py
 	-find . -name "*.pyc" | xargs rm
 
-release: deps
-	python setup.py sdist --format=gztar,zip
+dist: distclean deps
+	python setup.py sdist
+	python setup.py bdist_wheel
+
+release: dist
+	python setup.py sdist upload
+	python setup.py bdist_wheel upload
 
 test: deps
 	mkdir -p build/test
