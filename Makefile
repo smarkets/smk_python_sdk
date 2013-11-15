@@ -14,7 +14,7 @@ distclean: clean
 	-rm -rf smk.egg-info
 	-rm -rf smarkets/streaming_api/eto.py
 	-rm -rf smarkets/streaming_api/seto.py
-	-find . -name "*.pyc" | xargs rm
+	find . -name "*.pyc" -exec rm {} \;
 
 dist: distclean deps
 	python setup.py sdist
