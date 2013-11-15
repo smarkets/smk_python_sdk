@@ -137,7 +137,6 @@ class Session(object):
         self.buf_outseq += 1
         if flush:
             self.flush()
-        return sent_seq
 
     def flush(self):
         "Flush payloads to the socket"

@@ -88,7 +88,7 @@ class StreamingAPIClient(object):
         msg.Clear()
         msg.type = seto.PAYLOAD_ETO
         msg.eto_payload.type = eto.PAYLOAD_PING
-        return self._send()
+        self._send()
 
     def subscribe(self, market):
         "Subscribe to a market"
@@ -96,21 +96,21 @@ class StreamingAPIClient(object):
         msg.Clear()
         msg.type = seto.PAYLOAD_MARKET_SUBSCRIBE
         msg.market_subscribe.market.CopyFrom(market)
-        return self._send()
+        self._send()
 
     def request_account_state(self):
         "Request Account State"
         msg = self.session.out_payload
         msg.Clear()
         msg.type = seto.PAYLOAD_ACCOUNT_STATE_REQUEST
-        return self._send()
+        self._send()
 
     def request_orders_for_account(self):
         "Request an account's orders"
         msg = self.session.out_payload
         msg.Clear()
         msg.type = seto.PAYLOAD_ORDERS_FOR_ACCOUNT_REQUEST
-        return self._send()
+        self._send()
 
     def request_orders_for_market(self, market):
         "Request an account's orders for a market"
@@ -118,7 +118,7 @@ class StreamingAPIClient(object):
         msg.Clear()
         msg.type = seto.PAYLOAD_ORDERS_FOR_MARKET_REQUEST
         msg.orders_for_market_request.market.CopyFrom(market)
-        return self._send()
+        self._send()
 
     def unsubscribe(self, market):
         "Unsubscribe from a market"
@@ -126,14 +126,14 @@ class StreamingAPIClient(object):
         msg.Clear()
         msg.type = seto.PAYLOAD_MARKET_UNSUBSCRIBE
         msg.market_unsubscribe.market.CopyFrom(market)
-        return self._send()
+        self._send()
 
     def request_events(self, request):
         "Send a structured events request"
         msg = self.session.out_payload
         msg.Clear()
         request.copy_to(msg)
-        return self._send()
+        self._send()
 
     def add_handler(self, name, callback):
         "Add a callback handler"
@@ -185,10 +185,9 @@ class StreamingAPIClient(object):
 
     def _send(self):
         """
-        Send a payload via the session and return the sequence number
-        used for the outgoing payload
+        Send a payload via the session.
         """
-        return self.session.send(self.auto_flush)
+        self.session.send(self.auto_flush)
 
     def _dispatch(self, message):
         "Dispatch a frame to the callbacks"
