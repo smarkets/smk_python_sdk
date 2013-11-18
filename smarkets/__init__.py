@@ -5,6 +5,7 @@
 
 __version__ = '0.6.4'
 
+
 def private(something):
     something.__private__ = True
     return something
