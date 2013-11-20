@@ -51,11 +51,17 @@ class RestAPIClient(object):
 
         :raises:
             :ResourceNotFound: No event with such path exists.
+            :RestAPIException: Other unhandled exception.
         :type path: string
         :rtype: dict
         '''
         transformed_path = path.replace('/events', '').replace('/sports/', '/sport/').lstrip('/')
-        return self._get('events/%s' % (transformed_path,))
+        data = self._get('events/%s' % (transformed_path,))
+        try:
+            (event,) = data['event']
+            return event
+        except Exception as e:
+            raise RestAPIException(e)
 
     @classmethod
     def create_unauthenticated(cls, **kwargs):
