@@ -2,13 +2,11 @@
 
 all: deps
 
-deps:
+build:
 	python setup.py build
 
 clean:
 	python setup.py clean
-
-distclean: clean
 	-rm -rf dist
 	-rm -rf build
 	-rm -rf smk.egg-info
@@ -16,7 +14,7 @@ distclean: clean
 	-rm -rf smarkets/streaming_api/seto.py
 	find . -name "*.pyc" -exec rm {} \;
 
-dist: distclean deps
+dist: clean build
 	python setup.py sdist
 	python setup.py bdist_wheel
 
@@ -24,7 +22,7 @@ release: dist
 	python setup.py sdist upload
 	python setup.py bdist_wheel upload
 
-test: deps
+test: build
 	mkdir -p build/test
 	nosetests --with-xunit --with-ignore-docstrings --verbose --all-modules \
 		--xunit-file=build/test/nosetests.xml smarkets
