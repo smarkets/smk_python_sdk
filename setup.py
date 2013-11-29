@@ -41,7 +41,7 @@ def check_call(*args, **kwargs):
 
 
 ETO_PIQI_URL = 'https://raw.github.com/smarkets/eto_common/v0.3.2/eto.piqi'
-SETO_PIQI_URL = 'https://raw.github.com/smarkets/smk_api_common/v0.7.7/seto.piqi'
+SETO_PIQI_URL = 'https://raw.github.com/smarkets/smk_api_common/v0.7.9/seto.piqi'
 
 
 def _safe_glob(pathname):
