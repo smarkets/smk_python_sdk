@@ -11,16 +11,18 @@ from smarkets.streaming_api import seto
 from smarkets.streaming_api.exceptions import InvalidCallbackError
 
 
-_ETO_PAYLOAD_TYPES = dict((
-    (getattr(eto, x), 'eto.%s' % x.replace('PAYLOAD_', '').lower())
-    for x in dir(eto) if x.startswith('PAYLOAD_')
-))
+def _get_payload_types(module):
+    module_name = module.__name__.split('.')[-1]
+
+    return dict((
+        (getattr(module, x),
+         '%s.%s' % (module_name, x.replace('PAYLOAD_', '').lower()))
+        for x in dir(module) if x.startswith('PAYLOAD_')
+    ))
 
 
-_SETO_PAYLOAD_TYPES = dict((
-    (getattr(seto, x), 'seto.%s' % x.replace('PAYLOAD_', '').lower())
-    for x in dir(seto) if x.startswith('PAYLOAD_')
-))
+_ETO_PAYLOAD_TYPES = _get_payload_types(eto)
+_SETO_PAYLOAD_TYPES = _get_payload_types(seto)
 
 
 class StreamingAPIClient(object):
