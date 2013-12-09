@@ -89,13 +89,13 @@ class SmarketsTestCase(unittest.TestCase):
     def test_each_instance_has_separate_callbacks(self):
         client_a, client_b = (StreamingAPIClient('_') for i in range(2))
         handler = Handler()
-        client_a.add_handler('seto.http_found', handler)
+        client_a.add_handler('seto.order_accepted', handler)
         eq_(handler.call_count, 0)
 
-        client_a.callbacks['seto.http_found']('irrelevant')
+        client_a.callbacks['seto.order_accepted']('irrelevant')
         eq_(handler.call_count, 1)
 
-        client_b.callbacks['seto.http_found']('also irrelevant')
+        client_b.callbacks['seto.order_accepted']('also irrelevant')
         eq_(handler.call_count, 1)
 
     def test_flush(self):
