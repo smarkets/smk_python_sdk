@@ -25,7 +25,8 @@ release: dist
 test: build
 	mkdir -p build/test
 	nosetests --with-xunit --with-ignore-docstrings --verbose --all-modules \
-		--xunit-file=build/test/nosetests.xml smarkets
+		--xunit-file=build/test/nosetests.xml --with-doctest \
+		--with-coverage --cover-package=smarkets smarkets
 
 check:
 	mkdir -p build/pylint build/pep8
