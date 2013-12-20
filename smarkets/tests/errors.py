@@ -38,3 +38,13 @@ class TestSwallow(object):
     def test_eceptions_accept_many_exceptions(self):
         fun = swallow(exceptions=[SystemExit, KeyboardInterrupt])(throw_or_return)
         fun(to_raise=SystemExit)
+
+    def test_swallow_works_as_context_manager(self):
+        with swallow(KeyError):
+            raise KeyError(1)
+
+        try:
+            with swallow(KeyError):
+                raise ValueError(1)
+        except ValueError:
+            pass
