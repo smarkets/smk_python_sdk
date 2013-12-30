@@ -35,6 +35,15 @@ smarkets.errors module
     :undoc-members:
     :show-inheritance:
 
+smarkets.functools module
+-------------------------
+
+.. automodule:: smarkets.functools
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 smarkets.itertools module
 -------------------------
 
