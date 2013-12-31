@@ -7,11 +7,15 @@ class OverrideError(Exception):
     '''Method override fails'''
 
 
-def overrides(parent_class):
-    '''Mark method as overriding parent_class' method.
+def overrides(ancestor_class):
+    '''Mark method as overriding ``ancestor_class``' method.
 
     .. note::
         Overriding method can not have its own docstring.
+
+    .. note::
+        Method being overridden must be (re)defined in ``ancestor_class`` itself (see ``BadChild3``
+        example below); :func:`overrides` will not follow the inheritance tree.
 
     Usage::
 
@@ -36,6 +40,17 @@ def overrides(parent_class):
         Traceback (most recent call last):
         OverrideError: No docstrings allowed in overriding method
         >>>
+        >>> class IntermediateChild(Parent):
+        ...     pass
+        ...
+        >>> class BadChild3(IntermediateChild):
+        ...     @overrides(IntermediateChild)
+        ...     def method(self):
+        ...         pass
+        ...
+        Traceback (most recent call last):
+        OverrideError: No method 'method' in class <class 'smarkets.functools.IntermediateChild'> to override
+        >>>
         >>> class GoodChild(Parent):
         ...     @overrides(Parent)
         ...     def method(self):
@@ -53,9 +68,9 @@ def overrides(parent_class):
     def wrapper(fun):
         name = fun.__name__
         try:
-            original = getattr(parent_class, name)
-        except AttributeError:
-            raise OverrideError('No method %r in class %r to override' % (name, parent_class))
+            original = ancestor_class.__dict__[name]
+        except KeyError:
+            raise OverrideError('No method %r in class %r to override' % (name, ancestor_class))
 
         if fun.__doc__:
             raise OverrideError('No docstrings allowed in overriding method')
