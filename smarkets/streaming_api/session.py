@@ -9,10 +9,11 @@ import socket
 import types
 import ssl
 
-from google.protobuf import text_format
+from google.protobuf.text_format import MessageToString
 
 from smarkets import private
 from smarkets.errors import reraise
+from smarkets.lazy import LazyCall
 from smarkets.streaming_api import eto, seto
 from smarkets.streaming_api.exceptions import ConnectionError, SocketDisconnected
 
@@ -130,7 +131,7 @@ class Session(object):
         "Serialise, sequence, add header, and send payload"
         self.logger.debug(
             "buffering payload with outgoing sequence %d: %s",
-            self.outseq, text_format.MessageToString(self.out_payload))
+            self.outseq, LazyCall(MessageToString, self.out_payload))
         sent_seq = self.buf_outseq
         self.out_payload.eto_payload.seq = sent_seq
         self.send_buffer.put_nowait(self.out_payload.SerializeToString())
@@ -187,9 +188,7 @@ class Session(object):
     def _handle_in_payload(self):
         "Pre-consume the login response message"
         msg = self.in_payload
-        self.logger.debug(
-            "received message to dispatch: %s",
-            text_format.MessageToString(msg))
+        self.logger.debug("received message to dispatch: %s", LazyCall(MessageToString, msg))
         if msg.eto_payload.type == eto.PAYLOAD_LOGIN_RESPONSE:
             self.session = msg.eto_payload.login_response.session
             self.outseq = msg.eto_payload.login_response.reset
