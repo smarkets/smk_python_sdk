@@ -9,11 +9,8 @@ import socket
 import types
 import ssl
 
-from google.protobuf.text_format import MessageToString
-
 from smarkets import private
 from smarkets.errors import reraise
-from smarkets.lazy import LazyCall
 from smarkets.streaming_api import eto, seto
 from smarkets.streaming_api.exceptions import ConnectionError, SocketDisconnected
 
@@ -60,7 +57,6 @@ class Session(object):
 
     "Manages TCP communication via Smarkets streaming API"
     logger = private(logging.getLogger('smarkets.session'))
-    flush_logger = private(logging.getLogger('smarkets.session.flush'))
 
     def __init__(self, settings, inseq=1, outseq=1, account_sequence=None):
         if not isinstance(settings, SessionSettings):
@@ -129,9 +125,6 @@ class Session(object):
 
     def send(self, flush=False):
         "Serialise, sequence, add header, and send payload"
-        self.logger.debug(
-            "buffering payload with outgoing sequence %d: %s",
-            self.outseq, LazyCall(MessageToString, self.out_payload))
         sent_seq = self.buf_outseq
         self.out_payload.eto_payload.seq = sent_seq
         self.send_buffer.put_nowait(self.out_payload.SerializeToString())
@@ -141,7 +134,6 @@ class Session(object):
 
     def flush(self):
         "Flush payloads to the socket"
-        self.flush_logger.debug("flushing %d payloads", self.send_buffer.qsize())
         while not self.send_buffer.empty():
             try:
                 msg_bytes = self.send_buffer.get_nowait()
@@ -158,14 +150,11 @@ class Session(object):
         self._handle_in_payload()
         if self.in_payload.eto_payload.seq == self.inseq:
             # Go ahead
-            self.logger.debug("received sequence %d", self.inseq)
             self.inseq += 1
             return self.in_payload
         elif self.in_payload.eto_payload.type == eto.PAYLOAD_REPLAY:
             # Just a replay message, sequence not important
             seq = self.in_payload.eto_payload.replay.seq
-            self.logger.debug(
-                "received a replay message with sequence %d", seq)
             return None
         elif self.in_payload.eto_payload.seq > self.inseq:
             # Need a replay
@@ -188,7 +177,6 @@ class Session(object):
     def _handle_in_payload(self):
         "Pre-consume the login response message"
         msg = self.in_payload
-        self.logger.debug("received message to dispatch: %s", LazyCall(MessageToString, msg))
         if msg.eto_payload.type == eto.PAYLOAD_LOGIN_RESPONSE:
             self.session = msg.eto_payload.login_response.session
             self.outseq = msg.eto_payload.login_response.reset
@@ -212,7 +200,6 @@ class SessionSocket(object):
 
     "Wraps a socket with basic framing/deframing"
     logger = private(logging.getLogger('smarkets.session.socket'))
-    wire_logger = private(logging.getLogger('smarkets.session.wire'))
 
     def __init__(self, settings):
         if not isinstance(settings, SessionSettings):
@@ -275,12 +262,8 @@ class SessionSocket(object):
         byte_count = len(msg_bytes)
         # Pad to 4 bytes
         padding = '\x00' * max(0, 3 - byte_count)
-        self.logger.debug(
-            "payload has %d bytes and needs %d padding",
-            byte_count, len(padding))
         frame = _encode_varint(byte_count) + msg_bytes + padding
         try:
-            self.wire_logger.debug("sending frame bytes %r", frame)
             self._sock.sendall(frame)
         except socket.error as e:
             reraise(ConnectionError("Error while writing to socket", e))
@@ -303,7 +286,6 @@ class SessionSocket(object):
             if not (cbit & 0x80):
                 self._buffer = self._buffer[pos:]
                 to_read = max(0, result - len(self._buffer))
-                self.logger.debug("next message is %d bytes long", to_read)
                 if to_read:
                     # Read the actual message if necessary
                     while to_read > self.settings.read_chunksize:
@@ -313,7 +295,6 @@ class SessionSocket(object):
                     if to_read > 0:
                         self._fill_buffer(to_read + len(self._buffer))
                 msg_bytes = self._buffer[:result]
-                self.wire_logger.debug("received bytes %r", msg_bytes)
                 # Consume the buffer
                 self._buffer = self._buffer[result:]
                 return msg_bytes
@@ -329,7 +310,6 @@ class SessionSocket(object):
             self._buffer = ''
         while len(self._buffer) < min_size:
             bytes_needed = min_size - len(self._buffer)
-            self.logger.debug("receiving %d bytes", bytes_needed)
             try:
                 if self.settings.ssl:
                     inbytes = self._recv_msg_ssl(bytes_needed)
