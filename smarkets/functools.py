@@ -90,6 +90,7 @@ def overrides(ancestor_class):
 
 _CacheInfo = namedtuple("CacheInfo", ["hits", "misses", "maxsize", "currsize"])
 
+
 class _HashedSeq(list):
     __slots__ = 'hashvalue'
 
@@ -100,10 +101,11 @@ class _HashedSeq(list):
     def __hash__(self):
         return self.hashvalue
 
+
 def _make_key(args, kwds, typed,
-             kwd_mark = (object(),),
-             fasttypes = set([int, str, frozenset, type(None)]),
-             sorted=sorted, tuple=tuple, type=type, len=len):
+              kwd_mark=(object(),),
+              fasttypes=set([int, str, frozenset, type(None)]),
+              sorted=sorted, tuple=tuple, type=type, len=len):
     'Make a cache key from optionally typed positional and keyword arguments'
     key = args
     if kwds:
@@ -118,6 +120,7 @@ def _make_key(args, kwds, typed,
     elif len(key) == 1 and type(key[0]) in fasttypes:
         return key[0]
     return _HashedSeq(key)
+
 
 def lru_cache(maxsize=100, typed=False):
     """Least-recently-used cache decorator.
