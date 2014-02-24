@@ -29,10 +29,8 @@ test: build
 		--with-coverage --cover-package=smarkets smarkets
 
 check:
-	mkdir -p build/pylint build/pep8
-	pylint --rcfile=./.pylintrc --ignore=eto.py --ignore=seto.py -f parseable \
-		-r n smarkets; test $$(( $$? & 3 )) -eq 0
-	pep8 --exclude=eto.py,seto.py --ignore=E501,W292 smarkets
+	mkdir -p build/pep8
+	flake8 --exclude=eto.py,seto.py --max-line-length=110 smarkets *.py
 
 docs:
 	$(MAKE) -C docs html

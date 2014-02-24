@@ -39,32 +39,35 @@ class UuidTag(UuidTagBase):  # pylint: disable=E1001
         "Splits a number into the ID and tag"
         return divmod(number, cls.tag_mult)
 
+TAGS = (
+    UuidTag('Account', int('acc1', 16), 'a'),
+    UuidTag('ContractGroup', int('c024', 16), 'm'),
+    UuidTag('Contract', int('cccc', 16), 'c'),
+    UuidTag('Order', int('fff0', 16), 'o'),
+    UuidTag('Comment', int('b1a4', 16), 'b'),
+    UuidTag('Entity', int('0444', 16), 'n'),
+    UuidTag('Event', int('1100', 16), 'e'),
+    UuidTag('Session', int('9999', 16), 's'),
+    UuidTag('User', int('0f00', 16), 'u'),
+    UuidTag('Referrer', int('4e4e', 16), 'r'),
+)
+
 
 class Uuid(UuidBase):  # pylint: disable=E1001
 
     "Represents a UUID"
     __slots__ = ()
-    chars = '0123456789' \
-        'abcdefghijklmnopqrstuvwxyz' \
+    chars = (
+        '0123456789'
+        'abcdefghijklmnopqrstuvwxyz'
         'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    tag_list = (
-        UuidTag('Account', int('acc1', 16), 'a'),
-        UuidTag('ContractGroup', int('c024', 16), 'm'),
-        UuidTag('Contract', int('cccc', 16), 'c'),
-        UuidTag('Order', int('fff0', 16), 'o'),
-        UuidTag('Comment', int('b1a4', 16), 'b'),
-        UuidTag('Entity', int('0444', 16), 'n'),
-        UuidTag('Event', int('1100', 16), 'e'),
-        UuidTag('Session', int('9999', 16), 's'),
-        UuidTag('User', int('0f00', 16), 'u'),
-        UuidTag('Referrer', int('4e4e', 16), 'r'),
     )
 
     # Various indexes into uuid map
-    tags = dict((t.name, t) for t in tag_list)
-    tags_by_hex_str = dict((t.hex_str, t) for t in tag_list)
-    tags_by_prefix = dict((t.prefix, t) for t in tag_list)
-    tags_by_int_tag = dict((t.int_tag, t) for t in tag_list)
+    tags = dict((t.name, t) for t in TAGS)
+    tags_by_hex_str = dict((t.hex_str, t) for t in TAGS)
+    tags_by_prefix = dict((t.prefix, t) for t in TAGS)
+    tags_by_int_tag = dict((t.int_tag, t) for t in TAGS)
     mask64 = (1 << 64) - 1
 
     @property

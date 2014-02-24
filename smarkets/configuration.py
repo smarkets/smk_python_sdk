@@ -65,7 +65,8 @@ class ConfigurationReader(object):
         found = [path for path in paths if os.path.isfile(path)]
 
         if not found:
-            raise ValueError("Cannot find the file %r (checked in %s)" % (filename, ", ".join(self.directories)))
+            raise ValueError("Cannot find the file %r (checked in %s)" % (
+                filename, ", ".join(self.directories)))
 
         ancestors_first = tuple(reversed(found))
 
@@ -82,7 +83,8 @@ class ConfigurationReader(object):
 
         # Yell about misspellings
         if tempconfig.has_section("inherits"):
-            raise ValueError("Your configuration file has an [inherits] section - the correct name is [inherit].")
+            raise ValueError(
+                "Your configuration file has an [inherits] section - the correct name is [inherit].")
 
         # Return ourselves and our parent
         for path in ancestors_first:
