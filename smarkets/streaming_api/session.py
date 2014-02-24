@@ -154,7 +154,6 @@ class Session(object):
             return self.in_payload
         elif self.in_payload.eto_payload.type == eto.PAYLOAD_REPLAY:
             # Just a replay message, sequence not important
-            seq = self.in_payload.eto_payload.replay.seq
             return None
         elif self.in_payload.eto_payload.seq > self.inseq:
             # Need a replay
