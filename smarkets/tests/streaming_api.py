@@ -293,7 +293,7 @@ class UuidTestCase(unittest.TestCase):
 
     def test_uuid_tag_lengths(self):
         "Test that all uuid tags are 4 characters long (zero-padded)"
-        for tag in uuid.Uuid.tag_list:
+        for tag in uuid.TAGS:
             self.assertTrue(isinstance(tag.hex_str, types.StringTypes))
             self.assertEquals(4, len(tag.hex_str))
 
