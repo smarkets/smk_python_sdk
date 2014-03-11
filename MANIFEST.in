@@ -1,4 +1,4 @@
-include MANIFEST README.rst LICENSE INSTALL run_tests
+include MANIFEST README.rst LICENSE INSTALL
 include eto.piqi seto.piqi
 include smarkets.streaming_api.eto.proto smarkets.streaming_api.seto.proto
 recursive-include tests *.py
