@@ -6,7 +6,6 @@
 import logging
 import Queue
 import socket
-import types
 import ssl
 
 from google.protobuf.text_format import MessageToString
@@ -22,38 +21,20 @@ class SessionSettings(object):
 
     "Encapsulate settings necessary to create a new session"
 
-    def __init__(self, username, password):
-        if username is None:
-            raise ValueError("username cannot be None")
-        if password is None:
-            raise ValueError("password cannot be None")
+    def __init__(self, username, password, host='api-sandbox.smarkets.com', port=3801, ssl=True,
+                 socket_timeout=30, ssl_kwargs=None):
         self.username = username
         self.password = password
-        self.host = 'api-sandbox.smarkets.com'
-        self.port = 3701
-        self.socket_timeout = 30
-        self.ssl = True
-        self.ssl_kwargs = {}
+        self.host = host
+        self.port = port
+        self.socket_timeout = socket_timeout
+        self.ssl = ssl
+        self.ssl_kwargs = ssl_kwargs or {}
         # Most message are quite small, so this won't come into
         # effect. For larger messages, it needs some performance
         # testing to determine whether a single large recv() system
         # call is worse than many smaller ones.
         self.read_chunksize = 65536  # 64k
-
-    def validate(self):
-        "Do basic validation on the settings"
-        if not isinstance(self.socket_timeout, (types.NoneType, int)):
-            raise ValueError("socket_timeout must be an integer or None")
-        if self.socket_timeout is not None and self.socket_timeout <= 0:
-            raise ValueError("socket_timeout must be positive")
-        if not isinstance(self.read_chunksize, (types.NoneType, int, long)):
-            raise ValueError("read_chunksize must be an integer or None")
-        if self.read_chunksize is not None and self.read_chunksize <= 0:
-            raise ValueError("read_chunksize must be positive")
-        if not isinstance(self.ssl, (bool)):
-            raise ValueError("ssl must ba a bool")
-        if not isinstance(self.ssl_kwargs, (dict)):
-            raise ValueError("ssl_kwargs must be a dict")
 
 
 class Session(object):
@@ -63,9 +44,9 @@ class Session(object):
     flush_logger = private(logging.getLogger('smarkets.session.flush'))
 
     def __init__(self, settings, inseq=1, outseq=1, account_sequence=None):
-        if not isinstance(settings, SessionSettings):
-            raise ValueError("settings is not a SessionSettings")
-        settings.validate()
+        """
+        :type setting: :class:`SessionSettings`
+        """
         self.settings = settings
         self.account_sequence = account_sequence
         self.socket = SessionSocket(settings)
@@ -111,7 +92,7 @@ class Session(object):
                 login.login.account_sequence = self.account_sequence
 
             # Always flush outgoing login message
-            self.send(True)
+            self.send(flush=True)
 
     def logout(self):
         "Disconnects from the API"
@@ -121,7 +102,7 @@ class Session(object):
         logout.eto_payload.type = eto.PAYLOAD_LOGOUT
         logout.eto_payload.logout.reason = eto.LOGOUT_NONE
         self.logger.info("sending logout payload")
-        self.send(True)
+        self.send(flush=True)
 
     def disconnect(self):
         "Disconnects from the API"
