@@ -75,8 +75,7 @@ class Session(object):
     def connect(self):
         "Connects to the API and logs in if not already connected"
         if self.socket.connect():
-            # Clear the outgoing send buffer
-            self.send_buffer = Queue.Queue()
+            self._clear_send_buffer()
             # Reset separate outgoing buffer sequence number
             self.buf_outseq = self.outseq
             login = self.out_payload
@@ -93,6 +92,16 @@ class Session(object):
 
             # Always flush outgoing login message
             self.send(flush=True)
+
+    def _clear_send_buffer(self):
+        size = self.send_buffer.qsize()
+        if size > 0:
+            self.logger.warn('Clearing non-empty buffer, messages will be lost:')
+            index = 1
+            for index in xrange(size):
+                item = self.send_buffer.get_nowait()
+                self.logger.warn('%d/%d: %r', index + 1, size, item)
+        self.send_buffer = Queue.Queue()
 
     def logout(self):
         "Disconnects from the API"
@@ -173,7 +182,7 @@ class Session(object):
             self.session = msg.eto_payload.login_response.session
             self.outseq = msg.eto_payload.login_response.reset
             self.buf_outseq = self.outseq
-            self.send_buffer = Queue.Queue()
+            self._clear_send_buffer()
             self.logger.info("received login_response with session %r and outseq %d",
                              self.session, self.outseq)
         elif msg.eto_payload.type == eto.PAYLOAD_HEARTBEAT:
