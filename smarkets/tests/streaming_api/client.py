@@ -3,15 +3,13 @@ from __future__ import absolute_import
 import types
 import unittest
 
-from contextlib import contextmanager
 from itertools import chain, product
-from mock import Mock, patch
+from mock import patch
 from nose.tools import eq_
 
 
 from smarkets import uuid
-from smarkets.streaming_api.api import (
-    BUY, eto, InvalidCallbackError, OrderCancel, OrderCreate, seto, StreamingAPIClient)
+from smarkets.streaming_api.api import eto, InvalidCallbackError, seto, StreamingAPIClient
 
 
 class Handler(object):
@@ -39,45 +37,6 @@ class SmarketsTestCase(unittest.TestCase):
         self.mock_session = None
         self.client = None
 
-    def test_login(self):
-        "Test the `Smarkets.login` method"
-        payload = self._login_response()
-        self.mock_session.next_frame.return_value = payload
-        response = Mock()
-        self.client.add_handler('eto.login_response', response)
-        self.client.login()
-        self.assertEquals(
-            self.mock_session.method_calls,
-            [('connect', (), {}), ('next_frame', (), {})])
-        response.assert_called_once_with(payload)
-
-    def test_login_norecv(self):
-        "Test the `Smarkets.login` method"
-        payload = self._login_response()
-        self.mock_session.next_frame.return_value = payload
-        response = Mock()
-        self.client.add_handler('eto.login_response', response)
-        self.client.login(False)
-        self.assertEquals(
-            self.mock_session.method_calls,
-            [('connect', (), {})])
-        self.assertFalse(response.called)
-        self.mock_session.reset_mock()
-        self.client.read()
-        self.assertEquals(
-            self.mock_session.method_calls,
-            [('next_frame', (), {})])
-        response.assert_called_once_with(payload)
-
-    def test_logout(self):
-        "Test the `Smarkets.logout` method"
-        self.client.logout()
-        self.assertEquals(
-            self.mock_session.method_calls,
-            [('logout', (), {}),
-             ('next_frame', (), {}),
-             ('disconnect', (), {})])
-
     def test_logout_norecv(self):
         "Test the `Smarkets.logout` method"
         self.client.logout(False)
@@ -98,50 +57,6 @@ class SmarketsTestCase(unittest.TestCase):
         client_b.callbacks['seto.order_accepted']('also irrelevant')
         eq_(handler.call_count, 1)
 
-    def test_flush(self):
-        "Test the `Smarkets.flush` method"
-        self.client.flush()
-        self.assertEquals(
-            self.mock_session.method_calls,
-            [('flush', (), {})])
-
-    def test_order(self):
-        "Test the `Smarkets.order` method"
-        market_id = self.client.str_to_uuid128('1c024')
-        contract_id = self.client.str_to_uuid128('1cccc')
-        with self._clear_send():
-            order = OrderCreate()
-            order.price = 2500
-            order.quantity = 10000
-            order.side = BUY
-            order.market = market_id
-            order.contract = contract_id
-            order.validate_new()
-            self.client.send(order)
-
-    def test_order_cancel(self):
-        "Test the `Smarkets.order_cancel` method"
-        order_id = self.client.str_to_uuid128('1fff0')
-        with self._clear_send():
-            self.client.send(OrderCancel(order_id))
-
-    def test_ping(self):
-        "Test the `Smarkets.ping` method"
-        with self._clear_send():
-            self.client.ping()
-
-    def test_subscribe(self):
-        "Test the `Smarkets.subscribe` method"
-        market_id = self.client.str_to_uuid128('1c024')
-        with self._clear_send():
-            self.client.subscribe(market_id)
-
-    def test_unsubscribe(self):
-        "Test the `Smarkets.unsubscribe` method"
-        market_id = self.client.str_to_uuid128('1c024')
-        with self._clear_send():
-            self.client.unsubscribe(market_id)
-
     def test_add_bad_handler(self):
         "Test trying to add a bad handler either as a global or normal"
         for bad_handler in (
@@ -158,17 +73,6 @@ class SmarketsTestCase(unittest.TestCase):
             InvalidCallbackError, self.client.add_handler, 'foo', handler)
         self.assertRaises(
             InvalidCallbackError, self.client.del_handler, 'foo', handler)
-
-    @contextmanager
-    def _clear_send(self):
-        """
-        Shortcut for asserting that the outgoing payload is cleared
-        and sent via the session
-        """
-        self.mock_session.out_payload.Clear = Mock()
-        yield
-        self.mock_session.send.assert_called_once_with(True)
-        self.assertEquals(1, self.mock_session.out_payload.Clear.call_count)
 
     @staticmethod
     def _login_response():
