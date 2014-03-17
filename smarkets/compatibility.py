@@ -19,9 +19,9 @@ class UTFFixedSysLogHandler(SysLogHandler):
     Fixes BOM issue, bug Reference: http://bugs.python.org/issue7077
     """
 
-    def __init__(self, join_lines=True, **kwargs):
-        self.join_lines = join_lines
-        SysLogHandler.__init__(self, **kwargs)
+    def __init__(self, *args, **kwargs):
+        self.join_lines = kwargs.pop('join_lines', True)
+        SysLogHandler.__init__(self, *args, **kwargs)
 
     def emit(self, record):
         """
