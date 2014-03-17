@@ -35,9 +35,8 @@ class StreamingAPIClient(object):
 
     logger = logging.getLogger(__name__ + '.SETOClient')
 
-    def __init__(self, session, auto_flush=True):
+    def __init__(self, session):
         self.session = session
-        self.auto_flush = auto_flush
         self.callbacks = dict((callback_name, Signal())
                               for callback_name in self.__class__.CALLBACKS)
         self.global_callback = Signal()
@@ -47,6 +46,7 @@ class StreamingAPIClient(object):
         self.session.connect()
         if receive:
             self.read()
+            self.flush()
 
     def logout(self, receive=True):
         """
@@ -56,6 +56,8 @@ class StreamingAPIClient(object):
         self.session.logout()
         if receive:
             self.read()
+            self.flush()
+
         self.session.disconnect()
 
     @property
@@ -67,12 +69,30 @@ class StreamingAPIClient(object):
         """
         return self.session.raw_socket
 
-    def read(self, num=1):
-        "Receive the next `num` payloads and block if needed"
-        for _ in xrange(0, num):
+    @property
+    def output_buffer_size(self):
+        return self.session.output_buffer_size
+
+    def read(self):
+        """
+        .. note::
+            This method will block until it can read *any* data from the remote endpoint. It doesn't mean
+            it will receive enough data to process it.
+        :return: Number of processed incoming messages.
+        :rtype: int
+        """
+        self.session.read()
+
+        processed = 0
+        while True:
             frame = self.session.next_frame()
             if frame:
                 self._dispatch(frame)
+                processed += 1
+            else:
+                break
+
+        return processed
 
     def flush(self):
         "Flush the send buffer"
@@ -189,7 +209,7 @@ class StreamingAPIClient(object):
         """
         Send a payload via the session.
         """
-        self.session.send(self.auto_flush)
+        self.session.send()
 
     def _dispatch(self, message):
         "Dispatch a frame to the callbacks"
