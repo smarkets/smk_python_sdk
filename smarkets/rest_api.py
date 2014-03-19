@@ -7,14 +7,17 @@ from smarkets.errors import Error as _Error
 
 
 class RestAPIException(_Error):
+
     '''Base class for every rest API exception'''
 
 
 class ResourceNotFound(RestAPIException):
+
     '''Given resource was not found'''
 
 
 class RestAPIClient(object):
+
     '''
     Smarkets REST API client. Please use :meth:`create_unauthenticated` to construct
     its instances.

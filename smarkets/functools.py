@@ -8,6 +8,7 @@ __all__ = ('overrides', 'OverrideError', 'lru_cache')
 
 
 class OverrideError(Exception):
+
     '''Method override fails'''
 
 

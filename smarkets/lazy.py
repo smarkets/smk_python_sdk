@@ -5,6 +5,7 @@ from six.moves import xrange
 
 
 class LazyCall(object):
+
     """Encapsulates a computation with defined arguments.
 
     Its main use case at the moment is to pass some relatively expensive to generate content

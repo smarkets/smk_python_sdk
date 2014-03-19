@@ -50,6 +50,7 @@ def swallow(exceptions, default=None):
 
 
 class _SwallowHandler(_namedtuple('_SwallowHandlerBase', 'exceptions default')):
+
     def __call__(self, something):
         @_decorator.decorator
         def _swallow_decorator(f, *args, **kwargs):

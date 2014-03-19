@@ -26,6 +26,7 @@ _SETO_PAYLOAD_TYPES = _get_payload_types(seto)
 
 
 class StreamingAPIClient(object):
+
     """
     Smarkets API implementation
 
