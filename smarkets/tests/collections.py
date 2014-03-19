@@ -4,7 +4,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import cPickle
 import copy
 import pickle
-import sys
 import unittest
 
 from smarkets.collections import namedtuple
@@ -79,8 +78,6 @@ class TestNamedTuple(unittest.TestCase):
         self.assertRaises(TypeError, Point._make, [11])                     # catch too few args
         self.assertRaises(TypeError, Point._make, [11, 22, 33])             # catch too many args
 
-    @unittest.skipIf(sys.flags.optimize >= 2,
-                     "Docstrings are omitted with -O2 and above")
     def test_factory_doc_attr(self):
         Point = namedtuple('Point', 'x y')
         self.assertEqual(Point.__doc__, 'Point(x, y)')
