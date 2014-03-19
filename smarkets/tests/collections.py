@@ -4,8 +4,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import cPickle
 import copy
 import pickle
-import unittest
 
+import unittest2 as unittest
 from smarkets.collections import namedtuple
 
 # This is namedtuple backported from CPython 2.7.5, it fixes http://bugs.python.org/issue15535

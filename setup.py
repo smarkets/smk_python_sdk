@@ -177,6 +177,7 @@ sdict = {
         'protobuf >= 2.5.0',
         'six',
         'simplejson',
+        'unittest2',
     ] + ([] if has_ordered_dict else ['ordereddict']) + ([] if has_greenlet else ['greenlet']),
     'zip_safe': False,
     'cmdclass': {
