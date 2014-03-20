@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import cPickle
 import copy
 import pickle
+import sys
 
 import unittest2 as unittest
 from smarkets.collections import namedtuple
@@ -206,6 +207,7 @@ class TestNamedTuple(unittest.TestCase):
             self.assertEqual(p, q)
             self.assertEqual(p._fields, q._fields)
 
+    @unittest.skipIf(sys.version_info < (2, 7))
     def test_pickling_bug_18015(self):
         # http://bugs.python.org/issue18015
         pt = pickle.loads(py273_named_tuple_pickle)
