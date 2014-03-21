@@ -172,23 +172,10 @@ class Session(object):
             self.logger.debug("received sequence %d", self.inseq)
             self.inseq += 1
             return self.in_payload
-        elif self.in_payload.eto_payload.type == eto.PAYLOAD_REPLAY:
-            # Just a replay message, sequence not important
-            seq = self.in_payload.eto_payload.replay.seq
-            self.logger.debug("received a replay message with sequence %d", seq)
-            return None
         elif self.in_payload.eto_payload.seq > self.inseq:
-            # Need a replay
-            self.logger.info(
-                "received incoming sequence %d, expected %d, need replay",
-                self.in_payload.eto_payload.seq,
-                self.inseq)
-            replay = self.out_payload
-            replay.Clear()
-            replay.type = seto.PAYLOAD_ETO
-            replay.eto_payload.type = eto.PAYLOAD_REPLAY
-            replay.eto_payload.replay.seq = self.inseq
-            self.send()
+            self.logger.warn(
+                'Received incoming sequence %d instead of expected %d',
+                self.in_payload.eto_payload.seq, self.inseq)
             return None
         else:
             return None
