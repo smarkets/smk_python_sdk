@@ -22,7 +22,7 @@ class SessionSettings(object):
     "Encapsulate settings necessary to create a new session"
 
     def __init__(self, username, password, host='api-sandbox.smarkets.com', port=3801, ssl=True,
-                 socket_timeout=30, ssl_kwargs=None):
+                 socket_timeout=30, ssl_kwargs=None, tcp_nodelay=True):
         self.username = username
         self.password = password
         self.host = host
@@ -30,6 +30,7 @@ class SessionSettings(object):
         self.socket_timeout = socket_timeout
         self.ssl = ssl
         self.ssl_kwargs = ssl_kwargs or {}
+        self.tcp_nodelay = tcp_nodelay
         # Most message are quite small, so this won't come into
         # effect. For larger messages, it needs some performance
         # testing to determine whether a single large recv() system
@@ -236,6 +237,8 @@ class SessionSocket(object):
                 "connecting with new socket to %s:%s",
                 self.settings.host, self.settings.port)
             sock.connect((self.settings.host, self.settings.port))
+            if self.settings.tcp_nodelay:
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         except socket.error as exc:
             reraise(ConnectionError(self._error_message(exc)))
 
