@@ -131,28 +131,28 @@ class OrdersForMarket(object):
 class OrderUpdate(object):
 
     """ Message to cancel the specified order"""
-    __slots__ = ('uid', 'new_quantity', 'seq', 'client', 'reference')
+    __slots__ = ('uid', 'market', 'quantity_difference', 'seq', 'client', 'reference')
 
-    def __init__(self, uid=None, new_quantity=None):
+    def __init__(self, uid=None, market=None, quantity_difference=None):
         for k in self.__slots__:
             setattr(self, k, None)
 
         self.uid = uid
-        self.new_quantity = new_quantity
+        self.market = market
+        self.quantity_difference = quantity_difference
 
     def validate_new(self):
         "Validate this order's properties as a new instruction"
         if not isinstance(self.uid, _seto.Uuid128):
             raise ValueError("order uid must be a valid _seto.Uuid128")
-        if not isinstance(self.new_quantity, (int, long)):
-            raise ValueError("quantity must be an integer")
-        if self.new_quantity < 1000:
-            raise ValueError("quantity must be at least 1,000")
-        if self.new_quantity > MAX_QUANTITY:
-            raise ValueError("quantity cannot exceed %r" % MAX_QUANTITY)
+        if not isinstance(self.market, _seto.Uuid128):
+            raise ValueError("market must be a valid _seto.Uuid128")
+        if not isinstance(self.quantity_difference, (int, long)):
+            raise ValueError("quantity difference must be an integer")
 
     def copy_to(self, payload):
         "Copy this instruction to a message `payload`"
         payload.type = _seto.PAYLOAD_ORDER_UPDATE
         payload.order_update.order.CopyFrom(self.uid)
-        payload.order_update.quantity = self.new_quantity
+        payload.order_create.market.CopyFrom(self.market)
+        payload.order_update.quantity_change = self.quantity_difference
