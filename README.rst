@@ -110,6 +110,8 @@ To build and install call:
 
     python setup.py clean build install
 
+Note: building the package does not fetch the most recent piqi files from their respective locations in setup.py.
+In order to do so, you must call python setup.py clean, and then python setup.py build.
 
 License
 -------

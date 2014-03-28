@@ -154,5 +154,5 @@ class OrderUpdate(object):
         "Copy this instruction to a message `payload`"
         payload.type = _seto.PAYLOAD_ORDER_UPDATE
         payload.order_update.order.CopyFrom(self.uid)
-        payload.order_create.market.CopyFrom(self.market)
+        payload.order_update.market.CopyFrom(self.market)
         payload.order_update.quantity_change = self.quantity_difference
