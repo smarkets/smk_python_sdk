@@ -4,6 +4,7 @@
 # This module is released under the MIT License:
 # http://www.opensource.org/licenses/mit-license.php
 import logging
+import sys
 
 from smarkets.signal import Signal
 from smarkets.streaming_api import eto
@@ -23,6 +24,11 @@ def _get_payload_types(module):
 
 _ETO_PAYLOAD_TYPES = _get_payload_types(eto)
 _SETO_PAYLOAD_TYPES = _get_payload_types(seto)
+
+
+READ_MODE_BUFFER_FROM_SOCKET = 1
+READ_MODE_DISPATCH_FROM_BUFFER = 2
+READ_MODE_BUFFER_AND_DISPATCH = READ_MODE_BUFFER_FROM_SOCKET | READ_MODE_DISPATCH_FROM_BUFFER
 
 
 class StreamingAPIClient(object):
@@ -74,7 +80,7 @@ class StreamingAPIClient(object):
     def output_buffer_size(self):
         return self.session.output_buffer_size
 
-    def read(self):
+    def read(self, read_mode=READ_MODE_BUFFER_AND_DISPATCH, limit=sys.maxint):
         """
         .. note::
             This method will block until it can read *any* data from the remote endpoint. It doesn't mean
@@ -82,16 +88,18 @@ class StreamingAPIClient(object):
         :return: Number of processed incoming messages.
         :rtype: int
         """
-        self.session.read()
+        if read_mode & READ_MODE_BUFFER_FROM_SOCKET:
+            self.session.read()
 
         processed = 0
-        while True:
-            frame = self.session.next_frame()
-            if frame:
-                self._dispatch(frame)
-                processed += 1
-            else:
-                break
+        if read_mode & READ_MODE_DISPATCH_FROM_BUFFER:
+            while processed < limit:
+                frame = self.session.next_frame()
+                if frame:
+                    self._dispatch(frame)
+                    processed += 1
+                else:
+                    break
 
         return processed
 
