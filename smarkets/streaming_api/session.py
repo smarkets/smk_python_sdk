@@ -56,7 +56,6 @@ class Session(object):
         self.outseq = outseq
         # Outgoing buffer sequence number
         self.buf_outseq = outseq
-        self.in_payload = seto.Payload()
         self.out_payload = seto.Payload()
         self.send_buffer = b''
         self.read_buffer = b''
@@ -165,25 +164,24 @@ class Session(object):
         data, self.buffered_incoming_payloads = (
             self.buffered_incoming_payloads[0], self.buffered_incoming_payloads[1:])
 
-        self.in_payload.Clear()
-        self.in_payload.ParseFromString(data)
-        self._handle_in_payload()
-        if self.in_payload.eto_payload.seq == self.inseq:
+        payload = seto.Payload()
+        payload.ParseFromString(data)
+        self._handle_in_payload(payload)
+        if payload.eto_payload.seq == self.inseq:
             # Go ahead
             self.logger.debug("received sequence %d", self.inseq)
             self.inseq += 1
-            return self.in_payload
-        elif self.in_payload.eto_payload.seq > self.inseq:
+            return payload
+        elif payload.eto_payload.seq > self.inseq:
             self.logger.warn(
                 'Received incoming sequence %d instead of expected %d',
-                self.in_payload.eto_payload.seq, self.inseq)
+                payload.eto_payload.seq, self.inseq)
             return None
         else:
             return None
 
-    def _handle_in_payload(self):
+    def _handle_in_payload(self, msg):
         "Pre-consume the login response message"
-        msg = self.in_payload
         self.logger.debug("received message to dispatch: %s", LazyCall(MessageToString, msg))
         if msg.eto_payload.type == eto.PAYLOAD_LOGIN_RESPONSE:
             self.session = msg.eto_payload.login_response.session
