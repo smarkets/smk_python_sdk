@@ -10,6 +10,7 @@ from smarkets.signal import Signal
 from smarkets.streaming_api import eto
 from smarkets.streaming_api import seto
 from smarkets.streaming_api.exceptions import InvalidCallbackError
+from smarkets.streaming_api.utils import set_payload_message
 
 
 def _get_payload_types(module):
@@ -110,7 +111,7 @@ class StreamingAPIClient(object):
     def send(self, message):
         payload = self.session.out_payload
         payload.Clear()
-        message.copy_to(payload)
+        set_payload_message(payload, message)
         self._send()
 
     def ping(self):
