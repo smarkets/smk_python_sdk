@@ -6,6 +6,7 @@
 import logging
 import sys
 
+from smarkets.functools import deprecated_with_message
 from smarkets.signal import Signal
 from smarkets.streaming_api import eto
 from smarkets.streaming_api import seto
@@ -192,6 +193,7 @@ class StreamingAPIClient(object):
         self.global_callback -= callback
 
     @staticmethod
+    @deprecated_with_message('Stop using UUID-s')
     def str_to_uuid128(uuid_str, uuid128=None, strip_tag=True):
         "Convert a string to a uuid128"
         if uuid128 is None:

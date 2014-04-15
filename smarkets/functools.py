@@ -1,8 +1,11 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import warnings
 from collections import namedtuple
-from functools import update_wrapper
+from functools import update_wrapper, wraps
 from threading import RLock
+
+from decorator import decorator
 
 __all__ = ('overrides', 'OverrideError', 'lru_cache')
 
@@ -251,3 +254,16 @@ def lru_cache(maxsize=100, typed=False):
         return update_wrapper(wrapper, user_function)
 
     return decorating_function
+
+
+def deprecated_with_message(message):
+    def decorator_(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            print("Aaaaaaaa")
+            warnings.warn(
+                ('Function %r is deprecated. %s') % (func.__name__, message),
+                DeprecationWarning, stacklevel=3)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator_
