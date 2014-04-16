@@ -5,8 +5,6 @@ from collections import namedtuple
 from functools import update_wrapper, wraps
 from threading import RLock
 
-from decorator import decorator
-
 __all__ = ('overrides', 'OverrideError', 'lru_cache')
 
 
