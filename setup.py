@@ -57,6 +57,9 @@ class SmarketsProtocolBuild(build.build):
 
     description = "build the protocol buffer output with protobuf-compiler"
 
+    def download(self, url):
+        check_call((self.find('wget'), url))
+
     def find(self, name):
         result = find_executable(name)
         if result is None:
@@ -68,11 +71,11 @@ class SmarketsProtocolBuild(build.build):
 
         eto_piqi = join(PROJECT_ROOT, 'eto.piqi')
         if not os.path.exists(eto_piqi):
-            check_call((self.find('curl'), '-o', eto_piqi, ETO_PIQI_URL))
+            self.download(ETO_PIQI_URL)
 
         seto_piqi = join(PROJECT_ROOT, 'seto.piqi')
         if not os.path.exists(seto_piqi):
-            check_call((self.find('curl'), '-o', seto_piqi, SETO_PIQI_URL))
+            self.download(SETO_PIQI_URL)
 
         eto_proto = join(PROJECT_ROOT, 'smarkets.streaming_api.eto.proto')
         if not os.path.exists(eto_proto):
