@@ -180,6 +180,7 @@ sdict = {
         'six',
         'simplejson',
         'unittest2',
+        'eventlet',
     ] + ([] if has_ordered_dict else ['ordereddict']) + ([] if has_greenlet else ['greenlet']),
     'zip_safe': False,
     'cmdclass': {
