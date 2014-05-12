@@ -13,8 +13,8 @@ matrix:
 install:
     - uname -a
     - sudo apt-get update -qq
-    - sudo apt-get install -qq curl protobuf-compiler libprotobuf-dev libncurses5 libc6
-    - sudo sh -c "curl -k https://raw.github.com/alavrik/piqi-binary/master/Linux-x86_64/piqi > /usr/bin/piqi"
+    - sudo apt-get install -qq curl protobuf-compiler libprotobuf-dev libncurses5 libc6 wget
+    - sudo wget https://raw.github.com/alavrik/piqi-binary/master/Linux-x86_64/piqi -O /usr/bin/piqi
     - sudo chmod +x /usr/bin/piqi
     - pip install --upgrade https://bitbucket.org/logilab/astroid/get/5ed6266cab78.zip
     - if [[ ${TRAVIS_PYTHON_VERSION:0:1} == '3' ]];
