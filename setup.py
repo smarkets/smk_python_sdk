@@ -176,7 +176,6 @@ sdict = {
         'decorator',
         'injector',
         'requests',
-        'requests-oauthlib',
         'protobuf >= 2.5.0',
         'six',
         'simplejson',
