@@ -6,7 +6,7 @@ from nose.tools import eq_
 from smarkets.greenlet import cooperative_iter
 
 
-def test_cooperative_iter():
+def test_cooperative_iter_is_cooperative():
     storage = []
 
     def process_stuff(identifier, count):
@@ -18,3 +18,8 @@ def test_cooperative_iter():
     for t in t1, t2:
         t.wait()
     eq_(storage, ['A', 'B', 'A', 'B'])
+
+
+def test_cooperative_iter_yields_correct_data():
+    data = ['a', 'b', 'c']
+    eq_(list(cooperative_iter(data)), data)
