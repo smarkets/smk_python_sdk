@@ -1,7 +1,7 @@
-from nose.tools import eq_
+from nose.tools import eq_, raises
 
 from smarkets.itertools import (
-    group, listitems, listkeys, listvalues, mapkeys, mapvalues,
+    group, inverse_mapping, listitems, listkeys, listvalues, mapkeys, mapvalues,
 )
 
 
@@ -40,3 +40,12 @@ def test_listxxx():
     eq_(sorted(keys), ['a', 'b', 'c'])
     eq_(sorted(values), [123, 'a', 'x'])
     eq_(sorted(items), [('a', 'a'), ('b', 'x'), ('c', 123)])
+
+
+def test_inverse_mapping_works():
+    eq_(inverse_mapping({'a': 123, 'x': 'x'}), {123: 'a', 'x': 'x'})
+
+
+@raises(ValueError)
+def test_inverse_mapping_raises_exception_when_values_arent_unique():
+    inverse_mapping({'a': 1, 'b': 1})

@@ -45,3 +45,16 @@ def listvalues(d):
 def listitems(d):
     """Return `d` item list"""
     return list(iteritems(d))
+
+
+def inverse_mapping(d):
+    """Return a dictionary with input mapping keys as values and values as keys.
+
+    :raises:
+        :ValueError: Input mapping values aren't uniqe.
+    """
+
+    new_mapping = {v: k for k, v in iteritems(d)}
+    if len(new_mapping) != len(d):
+        raise ValueError("Input mapping values aren't unique")
+    return new_mapping
