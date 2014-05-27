@@ -7,7 +7,7 @@ smk-python-sdk
 
 Smarkets Python library (streaming API client, id generation, more to come).
 
-Compatible with Python 2.x >= 2.6 and PyPy 1.9+.
+Compatible with Python 2.7 and PyPy 1.9+.
 
 Documentation: http://smarkets-python-sdk.readthedocs.org/en/latest/
 
