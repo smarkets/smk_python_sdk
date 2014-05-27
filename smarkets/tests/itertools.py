@@ -1,6 +1,8 @@
 from nose.tools import eq_
 
-from smarkets.itertools import group, mapkeys, mapvalues
+from smarkets.itertools import (
+    group, listitems, listkeys, listvalues, mapkeys, mapvalues,
+)
 
 
 def test_mapkeys():
@@ -25,3 +27,16 @@ def test_group():
 
 def check_group(i, n, o):
     eq_(tuple(group(i, n)), tuple(o))
+
+
+def test_listxxx():
+    data = dict(a='a', b='x', c=123)
+    keys = listkeys(data)
+    values = listvalues(data)
+    items = listitems(data)
+    types = map(type, (keys, values, items))
+    eq_(set(types), set([list]))
+
+    eq_(sorted(keys), ['a', 'b', 'c'])
+    eq_(sorted(values), [123, 'a', 'x'])
+    eq_(sorted(items), [('a', 'a'), ('b', 'x'), ('c', 123)])

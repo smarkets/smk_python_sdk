@@ -2,8 +2,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from itertools import islice
 
-from six import exec_, iteritems
+from six import exec_, iteritems, iterkeys, itervalues
 
+__all__ = ['listitems', 'listkeys', 'listvalues', 'mapkeys', 'mapvalues', ]
 
 try:
     exec_('''
@@ -29,3 +30,18 @@ def group(iterable, n):
         chunk = tuple(islice(iterator, n))
         if chunk:
             yield chunk
+
+
+def listkeys(d):
+    """Return `d` key list"""
+    return list(iterkeys(d))
+
+
+def listvalues(d):
+    """Return `d` value list"""
+    return list(itervalues(d))
+
+
+def listitems(d):
+    """Return `d` item list"""
+    return list(iteritems(d))
