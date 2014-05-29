@@ -1,3 +1,0 @@
--r requirements-dev-base.txt
-ez_setup
-https://github.com/smarkets/3rdparty/blob/master/protobuf-2.4.2-pre-python3.tar.gz?raw=true

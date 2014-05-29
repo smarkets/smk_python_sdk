@@ -20,6 +20,8 @@ from distutils.command import clean, build
 from setuptools import setup
 from itertools import chain
 
+is_py3 = sys.version_info.major == 3
+
 
 try:
     from collections import OrderedDict  # noqa
@@ -176,7 +178,7 @@ sdict = {
         'decorator',
         'injector',
         'requests',
-        'protobuf >= 2.5.0',
+        'protobuf >= 2.5.0' if not is_py3 else 'python3-protobuf >= 2.5.0',
         'six',
         'simplejson',
         'unittest2',
