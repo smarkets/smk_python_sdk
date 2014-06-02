@@ -5,7 +5,9 @@ from collections import namedtuple
 from functools import update_wrapper, wraps
 from threading import RLock
 
-__all__ = ('overrides', 'OverrideError', 'lru_cache')
+from six import iteritems
+
+__all__ = ('overrides', 'OverrideError', 'lru_cache', 'memoized')
 
 
 class OverrideError(Exception):
@@ -264,3 +266,17 @@ def deprecated_with_message(message):
             return func(*args, **kwargs)
         return wrapper
     return decorator_
+
+
+def memoized(fun):
+    storage = {}
+
+    @wraps(fun)
+    def wrapper(*args, **kwargs):
+        key = (args, tuple(iteritems(kwargs)))
+        try:
+            value = storage[key]
+        except KeyError:
+            value = storage[key] = fun(*args, **kwargs)
+        return value
+    return wrapper
