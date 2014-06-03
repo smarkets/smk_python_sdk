@@ -123,6 +123,7 @@ class StreamingAPIClient(object):
         msg.eto_payload.type = eto.PAYLOAD_PING
         self._send()
 
+    @deprecated_with_message('Create appropriate protobuf object and send it using send method')
     def subscribe(self, market):
         "Subscribe to a market"
         msg = self.session.out_payload
@@ -131,6 +132,7 @@ class StreamingAPIClient(object):
         msg.market_subscribe.market.CopyFrom(market)
         self._send()
 
+    @deprecated_with_message('Create appropriate protobuf object and send it using send method')
     def request_account_state(self):
         "Request Account State"
         msg = self.session.out_payload
@@ -138,6 +140,7 @@ class StreamingAPIClient(object):
         msg.type = seto.PAYLOAD_ACCOUNT_STATE_REQUEST
         self._send()
 
+    @deprecated_with_message('Create appropriate protobuf object and send it using send method')
     def request_orders_for_account(self):
         "Request an account's orders"
         msg = self.session.out_payload
@@ -145,6 +148,7 @@ class StreamingAPIClient(object):
         msg.type = seto.PAYLOAD_ORDERS_FOR_ACCOUNT_REQUEST
         self._send()
 
+    @deprecated_with_message('Create appropriate protobuf object and send it using send method')
     def request_orders_for_market(self, market):
         "Request an account's orders for a market"
         msg = self.session.out_payload
@@ -153,6 +157,7 @@ class StreamingAPIClient(object):
         msg.orders_for_market_request.market.CopyFrom(market)
         self._send()
 
+    @deprecated_with_message('Create appropriate protobuf object and send it using send method')
     def unsubscribe(self, market):
         "Unsubscribe from a market"
         msg = self.session.out_payload
@@ -161,6 +166,7 @@ class StreamingAPIClient(object):
         msg.market_unsubscribe.market.CopyFrom(market)
         self._send()
 
+    @deprecated_with_message('Create appropriate protobuf object and send it using send method')
     def request_events(self, request):
         "Send a structured events request"
         msg = self.session.out_payload
