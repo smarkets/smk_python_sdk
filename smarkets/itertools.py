@@ -58,3 +58,17 @@ def inverse_mapping(d):
     if len(new_mapping) != len(d):
         raise ValueError("Input mapping values aren't unique")
     return new_mapping
+
+
+def is_sorted(sequence, **kwargs):
+    """
+    :type sequence: tuple or list
+    :param kwargs: :func:`sorted` kwargs
+    """
+    if not isinstance(sequence, (tuple, list)):
+        raise TypeError('Sequence needs to be a tuple or a list')
+
+    if not isinstance(sequence, list):
+        sequence = list(sequence)
+
+    return sorted(sequence, **kwargs) == sequence

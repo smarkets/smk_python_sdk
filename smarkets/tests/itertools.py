@@ -1,7 +1,7 @@
 from nose.tools import eq_, raises
 
 from smarkets.itertools import (
-    group, inverse_mapping, listitems, listkeys, listvalues, mapkeys, mapvalues,
+    group, inverse_mapping, is_sorted, listitems, listkeys, listvalues, mapkeys, mapvalues,
 )
 
 
@@ -49,3 +49,32 @@ def test_inverse_mapping_works():
 @raises(ValueError)
 def test_inverse_mapping_raises_exception_when_values_arent_unique():
     inverse_mapping({'a': 1, 'b': 1})
+
+
+def test_is_sorted():
+    for sequence, kwargs, result in (
+        ((1, 2, 3), {}, True),
+        ([1, 2, 3], {}, True),
+        ([2, 1], {}, False),
+        ([1, 1], {}, True),
+        ((), {}, True),
+        ([], {}, True),
+        ((3, 2, 1), {'reverse': True}, True),
+        ((3, 2, 1), {'key': lambda e: -e}, True),
+        ((1, 2, 3), {'reverse': True, 'key': lambda e: -e}, True),
+    ):
+        yield check_is_sorted, sequence, kwargs, result
+
+
+def check_is_sorted(sequence, kwargs, result):
+    eq_(is_sorted(sequence, **kwargs), result)
+
+
+@raises(TypeError)
+def test_is_sorted_fails_on_sets():
+    is_sorted(set())
+
+
+@raises(TypeError)
+def test_is_sorted_fails_on_dictionaries():
+    is_sorted({})
