@@ -72,3 +72,7 @@ def is_sorted(sequence, **kwargs):
         sequence = list(sequence)
 
     return sorted(sequence, **kwargs) == sequence
+
+
+def has_unique_elements(sequence):
+    return len(set(sequence)) == len(sequence)

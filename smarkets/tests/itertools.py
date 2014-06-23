@@ -1,7 +1,15 @@
 from nose.tools import eq_, raises
 
 from smarkets.itertools import (
-    group, inverse_mapping, is_sorted, listitems, listkeys, listvalues, mapkeys, mapvalues,
+    group,
+    has_unique_elements,
+    inverse_mapping,
+    is_sorted,
+    listitems,
+    listkeys,
+    listvalues,
+    mapkeys,
+    mapvalues,
 )
 
 
@@ -78,3 +86,8 @@ def test_is_sorted_fails_on_sets():
 @raises(TypeError)
 def test_is_sorted_fails_on_dictionaries():
     is_sorted({})
+
+
+def test_has_unique_elements():
+    eq_(has_unique_elements([1, 2, 3]), True)
+    eq_(has_unique_elements([1, 2, 1]), False)
