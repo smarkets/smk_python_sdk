@@ -280,3 +280,9 @@ def memoized(fun):
             value = storage[key] = fun(*args, **kwargs)
         return value
     return wrapper
+
+
+def always_return(value):
+    def fun(*args, **kwargs):
+        return value
+    return fun
