@@ -22,8 +22,14 @@ class HalMessengerUDPClient(object):
         self._address = resolve_address_host(address)
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    def send(self, message, room):
-        payload = json.dumps(dict(message=message, room=room)).encode()
+    def send(self, raw_message, room, html_message=None, user=None):
+        assert raw_message or html_message
+        payload = json.dumps(dict(
+            raw_message=raw_message,
+            html_message=html_message,
+            room=room,
+            user=user,
+        )).encode()
         bytes_sent = self._socket.sendto(payload, self._address)
         if bytes_sent != len(payload):
             log.warn('Sent %s bytes instead of %s. Payload: %s', bytes_sent, len(payload), payload)
