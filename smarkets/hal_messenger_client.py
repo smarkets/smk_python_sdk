@@ -37,5 +37,5 @@ class HalMessengerUDPClient(object):
 
 class DummyHalMessengerClient(object):
 
-    def send(self, message, room):
+    def send(self, raw_message, room, html_message=None, user=None):
         pass
