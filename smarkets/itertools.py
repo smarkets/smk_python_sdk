@@ -76,3 +76,14 @@ def is_sorted(sequence, **kwargs):
 
 def has_unique_elements(sequence):
     return len(set(sequence)) == len(sequence)
+
+
+def copy_keys_if_present(source, destination, keys):
+    """Copy keys from source mapping to destination mapping while skipping nonexistent keys."""
+    for key in keys:
+        try:
+            value = source[key]
+        except KeyError:
+            pass
+        else:
+            destination[key] = value

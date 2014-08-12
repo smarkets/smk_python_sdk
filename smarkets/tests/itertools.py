@@ -1,6 +1,7 @@
 from nose.tools import eq_, raises
 
 from smarkets.itertools import (
+    copy_keys_if_present,
     group,
     has_unique_elements,
     inverse_mapping,
@@ -91,3 +92,13 @@ def test_is_sorted_fails_on_dictionaries():
 def test_has_unique_elements():
     eq_(has_unique_elements([1, 2, 3]), True)
     eq_(has_unique_elements([1, 2, 1]), False)
+
+
+def test_copy_keys_if_present():
+    destination = {'a': 'old val a'}
+    copy_keys_if_present(
+        {'a': 'new val a', 'b': 'val b'},
+        destination,
+        ['a', 'b', 'c']
+    )
+    eq_(destination, {'a': 'new val a', 'b': 'val b'})
