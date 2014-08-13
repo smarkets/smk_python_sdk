@@ -10,9 +10,12 @@ There are 3 main representations of IDs used in Smarkets:
 - "Friendly" IDs/slugs (used on user-facing bits of the site)
 
 """
+import logging
 import types
 
 from collections import namedtuple
+
+log = logging.getLogger(__name__)
 
 
 UuidTagBase = namedtuple('UuidTagBase', ['name', 'int_tag', 'prefix'])
@@ -225,6 +228,15 @@ def uuid_to_int(uuid, return_tag=None, split=False):
         return (number, uuid.tag.int_tag)
     else:
         return number
+
+
+def uid_or_int_to_int(value, expected_type):
+    if not isinstance(value, (int, long)):
+        value, type_ = uuid_to_int(value, return_tag='type')
+        if type_ != expected_type:
+            raise ValueError("Expected tag %r doesn't match %r" % (expected_type, type_))
+
+    return value
 
 
 def uuid_to_short(uuid):
