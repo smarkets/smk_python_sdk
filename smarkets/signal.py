@@ -7,20 +7,20 @@ from copy import copy
 
 class Signal(object):
 
-    '''
+    """
     All instance methods of this class are thread safe.
-    '''
+    """
 
     def __init__(self):
         self._handlers = set()
 
     def add(self, handler):
-        '''
+        """
         Add signal handler. You can also do::
 
             signal = Signal()
             signal += handler
-        '''
+        """
         self._handlers.add(handler)
 
         return self
@@ -29,13 +29,13 @@ class Signal(object):
     handle = add
 
     def remove(self, handler):
-        '''
+        """
         Remove signal handler. You can also do::
 
             signal = Signal()
             # add a handler "handler"
             signal -= handler
-        '''
+        """
         self._handlers.remove(handler)
 
         return self
@@ -44,7 +44,7 @@ class Signal(object):
     __unhandle__ = remove
 
     def fire(self, *args, **kwargs):
-        '''Execute all handlers associated with this Signal.
+        """Execute all handlers associated with this Signal.
 
         .. warning::
 
@@ -53,8 +53,8 @@ class Signal(object):
         You can also call signal object to get the same result::
 
             signal = Signal()
-            signal() # calls the signal handler
-        '''
+            signal()  # calls the signal handler
+        """
         if args:
             warnings.warn(
                 'Firing events using positional arguments is deprecated, please use keyword arguments',
