@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import warnings
 from copy import copy
 
 
@@ -45,11 +46,20 @@ class Signal(object):
     def fire(self, *args, **kwargs):
         '''Execute all handlers associated with this Signal.
 
+        .. warning::
+
+            Passing positional arguments is deprecated.
+
         You can also call signal object to get the same result::
 
             signal = Signal()
             signal() # calls the signal handler
         '''
+        if args:
+            warnings.warn(
+                'Firing events using positional arguments is deprecated, please use keyword arguments',
+                DeprecationWarning, stacklevel=3)
+
         for handler in copy(self._handlers):
             handler(*args, **kwargs)
 
