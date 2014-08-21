@@ -66,3 +66,11 @@ def cooperative_iter(iterable, chunk_size=1, interval=0):
         yield element
         if index % chunk_size == 0:
             sleep(interval)
+
+
+def cooperative_yield(secs=0):
+    """Yield to Eventlet hub for `secs` seconds.
+
+    This is equivalent to calling eventlet.sleep(secs) but better express the semantics.
+    """
+    sleep(secs)
