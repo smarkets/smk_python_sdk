@@ -6,7 +6,8 @@ import traceback
 try:
     from eventlet import sleep
 except ImportError:
-    from time import sleep
+    def sleep():
+        raise NotImplementedError('Eventlet not found')
 
 import greenlet
 
