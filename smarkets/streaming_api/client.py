@@ -161,10 +161,10 @@ class StreamingAPIClient(object):
             self.logger.debug("dispatching callback %s", name)
             callback = self.callbacks.get(name)
             if callback is not None:
-                callback(message)
+                callback(message=message)
             else:
                 self.logger.error("no callback %s", name)
             self.logger.debug("ignoring unknown message: %s", name)
 
         self.logger.debug('Dispatching global callbacks for %s', name)
-        self.global_callback(name, message)
+        self.global_callback(name=name, message=message)

@@ -27,7 +27,7 @@ class SignalTest(unittest.TestCase):
         self.callback += handler
         self.assertFalse(handler.called)
         self.assertEquals(1, len(self.callback))
-        self.callback(sentinel.message)
+        self.callback(message=sentinel.message)
         handler.assert_called_once_with(sentinel.message)
         self.assertEquals(1, len(self.callback))
 
@@ -39,7 +39,7 @@ class SignalTest(unittest.TestCase):
         self.assertEquals(1, len(self.callback))
         self.callback -= handler
         self.assertEquals(0, len(self.callback))
-        self.callback(sentinel.message)
+        self.callback(message=sentinel.message)
         self.assertFalse(handler.called)
 
     def test_2_handlers(self):
@@ -51,7 +51,7 @@ class SignalTest(unittest.TestCase):
         self.assertFalse(handler1.called)
         self.assertFalse(handler2.called)
         self.assertEquals(2, len(self.callback))
-        self.callback(sentinel.message)
+        self.callback(message=sentinel.message)
         handler1.assert_called_once_with(sentinel.message)
         handler2.assert_called_once_with(sentinel.message)
         self.assertEquals(2, len(self.callback))
@@ -64,7 +64,7 @@ class SignalTest(unittest.TestCase):
         self.assertEquals(len(handlers), len(self.callback))
         for handler in handlers:
             self.assertFalse(handler.called)
-        self.callback(sentinel.message)
+        self.callback(message=sentinel.message)
         for handler in handlers:
             handler.assert_called_once_with(sentinel.message)
         self.assertEquals(len(handlers), len(self.callback))
@@ -80,7 +80,7 @@ class SignalTest(unittest.TestCase):
         for handler in to_unhandle:
             self.callback -= handler
         self.assertEquals(len(real_handlers), len(self.callback))
-        self.callback(sentinel.message)
+        self.callback(message=sentinel.message)
         for handler in to_unhandle:
             self.assertFalse(handler.called)
         for handler in real_handlers:
@@ -90,7 +90,7 @@ class SignalTest(unittest.TestCase):
         "Test that an exception is raised by the callback method"
         handler = Mock(side_effect=self._always_raise)
         self.callback += handler
-        self.assertRaises(Exception, self.callback, sentinel.message)
+        self.assertRaises(Exception, self.callback, message=sentinel.message)
 
     def test_2_handle_exception(self):
         "Test that an exception is raised by the callback method"
@@ -98,7 +98,7 @@ class SignalTest(unittest.TestCase):
         handler2 = Mock()
         self.callback += handler1
         self.callback += handler2
-        self.assertRaises(Exception, self.callback, sentinel.message)
+        self.assertRaises(Exception, self.callback, message=sentinel.message)
         # Because the collection of handlers in the `Signal` is a
         # `set` the 'firing' order is undefined. However, if handler2
         # is called, we assert that it is called correctly here.
