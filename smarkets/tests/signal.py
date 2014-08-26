@@ -28,7 +28,7 @@ class SignalTest(unittest.TestCase):
         self.assertFalse(handler.called)
         self.assertEquals(1, len(self.callback))
         self.callback(message=sentinel.message)
-        handler.assert_called_once_with(sentinel.message)
+        handler.assert_called_once_with(message=sentinel.message)
         self.assertEquals(1, len(self.callback))
 
     def test_unhandle(self):
@@ -52,8 +52,8 @@ class SignalTest(unittest.TestCase):
         self.assertFalse(handler2.called)
         self.assertEquals(2, len(self.callback))
         self.callback(message=sentinel.message)
-        handler1.assert_called_once_with(sentinel.message)
-        handler2.assert_called_once_with(sentinel.message)
+        handler1.assert_called_once_with(message=sentinel.message)
+        handler2.assert_called_once_with(message=sentinel.message)
         self.assertEquals(2, len(self.callback))
 
     def test_many_handlers(self):
@@ -66,7 +66,7 @@ class SignalTest(unittest.TestCase):
             self.assertFalse(handler.called)
         self.callback(message=sentinel.message)
         for handler in handlers:
-            handler.assert_called_once_with(sentinel.message)
+            handler.assert_called_once_with(message=sentinel.message)
         self.assertEquals(len(handlers), len(self.callback))
 
     def test_many_unhandle(self):
@@ -84,7 +84,7 @@ class SignalTest(unittest.TestCase):
         for handler in to_unhandle:
             self.assertFalse(handler.called)
         for handler in real_handlers:
-            handler.assert_called_once_with(sentinel.message)
+            handler.assert_called_once_with(message=sentinel.message)
 
     def test_handle_exception(self):
         "Test that an exception is raised by the callback method"
@@ -103,7 +103,7 @@ class SignalTest(unittest.TestCase):
         # `set` the 'firing' order is undefined. However, if handler2
         # is called, we assert that it is called correctly here.
         if handler2.called:
-            handler2.assert_called_once_with(sentinel.message)
+            handler2.assert_called_once_with(message=sentinel.message)
 
     @staticmethod
     def _always_raise(*args, **kwargs):
