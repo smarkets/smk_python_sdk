@@ -8,6 +8,7 @@ from smarkets.itertools import (
     is_sorted,
     listitems,
     listkeys,
+    listmap,
     listvalues,
     mapkeys,
     mapvalues,
@@ -102,3 +103,8 @@ def test_copy_keys_if_present():
         ['a', 'b', 'c']
     )
     eq_(destination, {'a': 'new val a', 'b': 'val b'})
+
+
+def test_listmap_works_and_returns_a_list():
+    result = listmap(str, [1, 2])
+    eq_((result, type(result)), (['1', '2'], list))

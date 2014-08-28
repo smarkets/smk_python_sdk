@@ -2,9 +2,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from itertools import islice
 
-from six import exec_, iteritems, iterkeys, itervalues
+from six import exec_, iteritems, iterkeys, itervalues, PY2
 
-__all__ = ['listitems', 'listkeys', 'listvalues', 'mapkeys', 'mapvalues', ]
+__all__ = ['listitems', 'listkeys', 'listvalues', 'mapkeys', 'mapvalues', 'merge_dicts', 'listmap']
 
 try:
     exec_('''
@@ -87,3 +87,34 @@ def copy_keys_if_present(source, destination, keys):
             pass
         else:
             destination[key] = value
+
+
+def merge_dicts(*dicts):
+    """Return `dicts` merged together.
+
+    If keys clash the ubsequent dictionaries have priority over preceding ones.
+
+    >>> merge_dicts() == {}
+    True
+    >>> merge_dicts({'a': 2}) == {'a': 2}
+    True
+    >>> merge_dicts({'a': 2, 'b': 3}, {'a': 1, 'c': 4}) == {'a': 1, 'b': 3, 'c': 4}
+    True
+    """
+    try:
+        first = dicts[0]
+    except IndexError:
+        return {}
+    else:
+        rest = dicts[1:]
+        result = dict(first)
+        for d in rest:
+            result.update(d)
+        return result
+
+
+if PY2:
+    listmap = map
+else:
+    def listmap(*args):
+        return list(map(*args))
