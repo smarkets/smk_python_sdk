@@ -239,6 +239,12 @@ def uid_or_int_to_int(value, expected_type):
     return value
 
 
+contract_group_id_to_uid = lambda id_: int_to_uuid(id_, 'ContractGroup')
+contract_id_to_uid = lambda id_: int_to_uuid(id_, 'Contract')
+event_id_to_uid = lambda id_: int_to_uuid(id_, 'Event')
+order_id_to_uid = lambda id_: int_to_uuid(id_, 'Order')
+
+
 def uuid_to_short(uuid):
     "Converts a full UUID to the shortened version"
     return uuid[:-4].lstrip('0')
