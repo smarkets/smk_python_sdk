@@ -22,14 +22,6 @@ from itertools import chain
 
 is_py3 = sys.version_info.major == 3
 
-
-try:
-    from collections import OrderedDict  # noqa
-    has_ordered_dict = True
-except ImportError:
-    has_ordered_dict = False
-
-
 try:
     import greenlet  # noqa
     has_greenlet = True
@@ -183,7 +175,7 @@ sdict = {
         'simplejson',
         'unittest2',
         'eventlet',
-    ] + ([] if has_ordered_dict else ['ordereddict']) + ([] if has_greenlet else ['greenlet']),
+    ] + ([] if has_greenlet else ['greenlet']),
     'zip_safe': False,
     'cmdclass': {
         'build': SmarketsProtocolBuild,

@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from collections import OrderedDict
 from operator import itemgetter as _itemgetter
 from keyword import iskeyword as _iskeyword
 import sys as _sys
 
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ordereddict import OrderedDict
-
-
-def namedtuple_asdict(nt):
-    return OrderedDict(zip(nt._fields, nt))
-
+__all__ = [
+    'namedtuple',
+]
 
 # This is namedtuple backported from CPython 2.7.5, it fixes http://bugs.python.org/issue15535
 # Copyright © 2001-2014 Python Software Foundation; All Rights Reserved

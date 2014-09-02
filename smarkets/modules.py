@@ -1,6 +1,5 @@
 from injector import inject, Module, provides, singleton
 
-from smarkets.collections import namedtuple_asdict
 from smarkets.interfaces import Redis, RedisConfiguration
 
 
@@ -14,4 +13,4 @@ class RedisModule(Module):
     @provides(Redis)
     @inject(c=RedisConfiguration)
     def provide_redis(self, c):
-        return self.client_class(**namedtuple_asdict(c))
+        return self.client_class(**c._asdict())
