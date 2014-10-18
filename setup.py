@@ -173,7 +173,6 @@ sdict = {
         'protobuf >= 2.5.0' if not is_py3 else 'python3-protobuf >= 2.5.0',
         'six',
         'simplejson',
-        'unittest2',
         'eventlet',
     ] + ([] if has_greenlet else ['greenlet']),
     'zip_safe': False,
