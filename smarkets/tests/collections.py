@@ -1,11 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import cPickle
 import copy
 import pickle
 import sys
 import unittest
+
+try:
+    import cPickle
+    pickles = [pickle, cPickle]
+except ImportError:
+    pickles = [pickle]
+
+from six import PY2
+
 
 from smarkets.collections import namedtuple
 
@@ -15,7 +23,7 @@ from smarkets.collections import namedtuple
 
 TestNT = namedtuple('TestNT', 'x y z')    # type used for pickle tests
 
-py273_named_tuple_pickle = '''\
+py273_named_tuple_pickle = b'''\
 ccopy_reg
 _reconstructor
 p0
@@ -150,6 +158,7 @@ class TestNamedTuple(unittest.TestCase):
         self.assertEqual(p.y, y)
         self.assertRaises(AttributeError, eval, 'p.z', locals())
 
+    @unittest.skipIf(sys.version_info[0] > 2, 'Test case is irrelevant for Python 3')
     def test_odd_sizes(self):
         Zero = namedtuple('Zero', '')
         self.assertEqual(Zero(), ())
@@ -192,7 +201,7 @@ class TestNamedTuple(unittest.TestCase):
 
     def test_pickle(self):
         p = TestNT(x=10, y=20, z=30)
-        for module in pickle, cPickle:
+        for module in pickles:
             loads = getattr(module, 'loads')
             dumps = getattr(module, 'dumps')
             for protocol in -1, 0, 1, 2:
