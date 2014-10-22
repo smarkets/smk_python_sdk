@@ -1,5 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from six import indexbytes, int2byte
+
 
 def frame_encode(payload):
     """
@@ -53,10 +55,10 @@ def uleb128_encode(value):
     value >>= 7
     ret = b''
     while value:
-        ret += chr(CONTINUATION_MARK | bits)
+        ret += int2byte(CONTINUATION_MARK | bits)
         bits = value & LEAST_MEANINGFUL_PART_MASK
         value >>= 7
-    return ret + chr(bits)
+    return ret + int2byte(bits)
 
 
 class IncompleteULEB128(Exception):
@@ -80,7 +82,7 @@ def uleb128_decode(string):
 
     while True:
         try:
-            current_byte = ord(string[position])
+            current_byte = indexbytes(string, position)
         except IndexError:
             raise IncompleteULEB128('String does not start with a ULEB128-encoded value')
         else:
