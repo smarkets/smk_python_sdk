@@ -13,6 +13,8 @@ There are 3 main representations of IDs used in Smarkets:
 import logging
 import types
 
+from six import integer_types, string_types
+
 from collections import namedtuple
 
 log = logging.getLogger(__name__)
@@ -129,7 +131,7 @@ class Uuid(UuidBase):  # pylint: disable=E1001
         "Convert an integer and tag type to a Uuid"
         if isinstance(number, tuple):
             number = cls.unsplit64(*number)
-        if not isinstance(number, (int, long)):
+        if not isinstance(number, integer_types):
             raise TypeError("Number must be an integer: %r" % number)
         if number < 0:
             raise TypeError("Number cannot be negative: %r" % number)
@@ -169,7 +171,7 @@ class Uuid(UuidBase):  # pylint: disable=E1001
     @classmethod
     def from_hex(cls, hex_str):
         "Convert a hex uuid into a Uuid"
-        if not isinstance(hex_str, types.StringTypes):
+        if not isinstance(hex_str, string_types):
             raise TypeError("hex_str must be a string: %r" % hex_str)
         hex_tag = hex_str[-4:]
         number = int(hex_str[:-4], 16)
@@ -231,7 +233,7 @@ def uuid_to_int(uuid, return_tag=None, split=False):
 
 
 def uid_or_int_to_int(value, expected_type):
-    if not isinstance(value, (int, long)):
+    if not isinstance(value, integer_types):
         value, type_ = uuid_to_int(value, return_tag='type')
         if type_ != expected_type:
             raise ValueError("Expected tag %r doesn't match %r" % (expected_type, type_))
