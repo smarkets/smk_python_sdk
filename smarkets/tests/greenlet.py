@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from eventlet import spawn
 from nose.tools import eq_
+from six.moves import xrange
 
 from smarkets.greenlet import cooperative_iter
 
