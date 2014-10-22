@@ -60,7 +60,7 @@ class SmarketsTestCase(unittest.TestCase):
     def test_add_bad_handler(self):
         "Test trying to add a bad handler either as a global or normal"
         for bad_handler in (
-                50, 'foo', False, True, u'foo', 1.2, 1L):
+                50, 'foo', False, True, u'foo', 1.2, 1):
             self.assertRaises(
                 ValueError, self.client.add_handler, 'eto.pong', bad_handler)
             self.assertRaises(
@@ -130,7 +130,7 @@ class UuidTestCase(unittest.TestCase):
     def test_uuid_high_low(self):
         "Test Uuid class support for high/low number"
         tag = uuid.Uuid.tags.get('Account')
-        uuid1 = uuid.Uuid(73786976294838235846L, tag)
+        uuid1 = uuid.Uuid(73786976294838235846, tag)
         self.assertEquals(uuid1.low, 29382)
         self.assertEquals(uuid1.high, 4)
         uuid2 = uuid.Uuid(5, tag)
@@ -140,7 +140,7 @@ class UuidTestCase(unittest.TestCase):
     def test_uuid_shorthex(self):
         "Test Uuid class support for short hex values"
         tag = uuid.Uuid.tags.get('Account')
-        uuid1 = uuid.Uuid(73786976294838235846L, tag)
+        uuid1 = uuid.Uuid(73786976294838235846, tag)
         self.assertEquals(uuid1.shorthex, '400000000000072c6')
         uuid2 = uuid.Uuid(5, tag)
         self.assertEquals(uuid2.shorthex, '5')
@@ -148,7 +148,7 @@ class UuidTestCase(unittest.TestCase):
     def test_bad_base_raises(self):
         "Test that Uuid class raises TypeError when given a bad 'base' value"
         tag = uuid.Uuid.tags.get('Account')
-        uuid1 = uuid.Uuid(73786976294838235846L, tag)
+        uuid1 = uuid.Uuid(73786976294838235846, tag)
         self.assertRaises(TypeError, lambda: uuid1.to_slug(base=90))
         self.assertRaises(TypeError, lambda: uuid1.to_slug(base=1))
         self.assertRaises(TypeError, lambda: uuid1.to_slug(base=-1))
@@ -157,7 +157,7 @@ class UuidTestCase(unittest.TestCase):
     def test_slug(self):
         "Test that Uuid can be converted to/from slugs"
         tag = uuid.Uuid.tags.get('Account')
-        uuid1 = uuid.Uuid(73786976294838235846L, tag)
+        uuid1 = uuid.Uuid(73786976294838235846, tag)
         slug = 'a-lvgb2h48s4kweqbl'
         self.assertEquals(uuid1.to_slug(), slug)
         self.assertEquals(uuid1.to_slug(base=16)[2:], uuid1.to_hex().lstrip('0'))
@@ -167,7 +167,7 @@ class UuidTestCase(unittest.TestCase):
     def test_hex(self):
         "Test that Uuid can be converted to/from hex"
         tag = uuid.Uuid.tags.get('Account')
-        uuid1 = uuid.Uuid(73786976294838235846L, tag)
+        uuid1 = uuid.Uuid(73786976294838235846, tag)
         hex_str = '00000000000400000000000072c6acc1'
         self.assertEquals(uuid1.to_hex(), hex_str)
         self.assertEquals(uuid1.shorthex, hex_str.lstrip('0')[:-4])
@@ -180,7 +180,7 @@ class UuidTestCase(unittest.TestCase):
     def test_int(self):
         "Test that Uuid can be converted to/from integer"
         tag = uuid.Uuid.tags.get('Account')
-        number = 73786976294838235846L
+        number = 73786976294838235846
         low = 29382
         high = 4
         uuid1 = uuid.Uuid(number, tag)

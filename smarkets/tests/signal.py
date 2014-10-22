@@ -5,6 +5,7 @@ from itertools import chain
 
 from mock import Mock, sentinel
 from nose.tools import eq_, raises
+from six.moves import xrange
 
 from smarkets.signal import Signal
 
