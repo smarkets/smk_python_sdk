@@ -23,10 +23,7 @@ release: dist
 	python setup.py bdist_wheel upload
 
 test: build
-	mkdir -p build/test
-	nosetests --with-xunit --with-ignore-docstrings --verbose --all-modules \
-		--xunit-file=build/test/nosetests.xml --with-doctest \
-		--with-coverage --cover-package=smarkets smarkets
+	nosetests smarkets
 
 check:
 	mkdir -p build/pep8
