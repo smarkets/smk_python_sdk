@@ -170,7 +170,7 @@ sdict = {
         'decorator',
         'injector',
         'requests',
-        'protobuf >= 2.6.0',
+        'protobuf >= 2.6.0' if not is_py3 else 'protobuf-py3 >= 2.5.0',
         'six',
         'simplejson',
         'eventlet',
