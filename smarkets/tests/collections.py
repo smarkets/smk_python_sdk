@@ -216,7 +216,7 @@ class TestNamedTuple(unittest.TestCase):
             self.assertEqual(p, q)
             self.assertEqual(p._fields, q._fields)
 
-    @unittest.skipIf(sys.version_info < (2, 7), 'Test case is 2.7 specific')
+    @unittest.skipIf(not PY2)
     def test_pickling_bug_18015(self):
         # http://bugs.python.org/issue18015
         pt = pickle.loads(py273_named_tuple_pickle)
