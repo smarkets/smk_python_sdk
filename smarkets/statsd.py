@@ -85,8 +85,8 @@ class StatsD(object):
         try:
             for stat, value in sampled_data.items():
                 self.udp_sock.sendto("%s:%s" % (stat, value), self.addr)
-        except:
-            pass
+        except Exception as e:
+            log.exception('Failed to send data to the server: %r', e)
 
 
 if __name__ == '__main__':

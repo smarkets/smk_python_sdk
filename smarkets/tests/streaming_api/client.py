@@ -2,11 +2,10 @@ from __future__ import absolute_import
 
 import types
 import unittest
-
 from itertools import chain, product
+
 from mock import patch
 from nose.tools import eq_
-
 
 from smarkets import uuid
 from smarkets.streaming_api.api import eto, InvalidCallbackError, seto, StreamingAPIClient

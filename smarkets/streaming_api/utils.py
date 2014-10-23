@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from smarkets.string import camel_case_to_underscores
 from smarkets.streaming_api import seto
+from smarkets.string import camel_case_to_underscores
 
 __all__ = ('int_to_uuid128', 'set_payload_message',)
 

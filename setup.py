@@ -8,17 +8,17 @@ import os
 import shutil
 import subprocess
 import sys
-
+from distutils.command import build, clean
+from distutils.spawn import find_executable
+from itertools import chain
 from os.path import abspath, dirname, join
+
+from setuptools import setup
 
 
 PROJECT_ROOT = abspath(dirname(__file__))
 sys.path.insert(0, PROJECT_ROOT)
 
-from distutils.spawn import find_executable
-from distutils.command import clean, build
-from setuptools import setup
-from itertools import chain
 
 is_py3 = sys.version_info.major == 3
 

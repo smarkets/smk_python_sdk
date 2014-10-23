@@ -12,10 +12,9 @@ There are 3 main representations of IDs used in Smarkets:
 """
 import logging
 import types
+from collections import namedtuple
 
 from six import integer_types, string_types
-
-from collections import namedtuple
 
 log = logging.getLogger(__name__)
 

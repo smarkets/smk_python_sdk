@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from time import time
 from contextlib import contextmanager
+from time import time
 
 
 class TimedResult(object):

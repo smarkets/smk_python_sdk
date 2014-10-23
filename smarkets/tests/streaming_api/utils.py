@@ -2,8 +2,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from nose.tools import eq_
 
-from smarkets.streaming_api.utils import int_to_uuid128, set_payload_message
 from smarkets.streaming_api.seto import OrderCreate, Payload, PAYLOAD_ORDER_CREATE
+from smarkets.streaming_api.utils import int_to_uuid128, set_payload_message
 
 
 def test_set_payload_message():

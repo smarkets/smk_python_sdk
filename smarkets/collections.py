@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from collections import OrderedDict
-from operator import itemgetter as _itemgetter
-from keyword import iskeyword as _iskeyword
-from six import exec_, PY2
 import sys as _sys
+from collections import OrderedDict
+from keyword import iskeyword as _iskeyword
+from operator import itemgetter as _itemgetter
+
+from six import exec_, PY2
 
 __all__ = [
     'namedtuple',
