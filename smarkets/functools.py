@@ -36,6 +36,7 @@ def overrides(ancestor_class):
         ...     @overrides(Parent)
         ...     def methd(self):
         ...         pass
+        ... # doctest: +IGNORE_EXCEPTION_DETAIL
         ...
         Traceback (most recent call last):
         OverrideError: No method 'methd' in class <class 'smarkets.functools.Parent'> to override
@@ -44,6 +45,7 @@ def overrides(ancestor_class):
         ...     @overrides(Parent)
         ...     def method(self):
         ...         'child method docstring'
+        ... # doctest: +IGNORE_EXCEPTION_DETAIL
         ...
         Traceback (most recent call last):
         OverrideError: No docstrings allowed in overriding method
@@ -55,6 +57,7 @@ def overrides(ancestor_class):
         ...     @overrides(IntermediateChild)
         ...     def method(self):
         ...         pass
+        ... # doctest: +IGNORE_EXCEPTION_DETAIL
         ...
         Traceback (most recent call last):
         OverrideError: No method 'method' in class <class 'smarkets.functools.IntermediateChild'> to override
