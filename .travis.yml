@@ -21,5 +21,4 @@ install:
             else pip install -r requirements-dev-py2.txt;
         fi;
     - python setup.py build
-    - python setup.py install
 script: make test && make check
