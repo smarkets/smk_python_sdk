@@ -244,6 +244,10 @@ contract_group_id_to_uid = lambda id_: int_to_uuid(id_, 'ContractGroup')
 contract_id_to_uid = lambda id_: int_to_uuid(id_, 'Contract')
 event_id_to_uid = lambda id_: int_to_uuid(id_, 'Event')
 order_id_to_uid = lambda id_: int_to_uuid(id_, 'Order')
+account_id_to_uid = lambda id_: int_to_uuid(id_, 'Account')
+entity_id_to_uid = lambda id_: int_to_uuid(id_, 'Entity')
+user_id_to_uid = lambda id_: int_to_uuid(id_, 'User')
+session_id_to_uid = lambda id_: int_to_uuid(id_, 'Session')
 
 
 def uuid_to_short(uuid):
