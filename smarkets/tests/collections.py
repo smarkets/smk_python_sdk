@@ -3,7 +3,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import copy
 import pickle
-import sys
 import unittest
 
 try:
@@ -13,7 +12,6 @@ except ImportError:
     pickles = [pickle]
 
 from six import PY2
-
 
 from smarkets.collections import namedtuple
 
@@ -62,6 +60,8 @@ b.
 
 
 class TestNamedTuple(unittest.TestCase):
+
+    __test__ = PY2
 
     def test_factory(self):
         Point = namedtuple('Point', 'x y')
@@ -158,7 +158,6 @@ class TestNamedTuple(unittest.TestCase):
         self.assertEqual(p.y, y)
         self.assertRaises(AttributeError, eval, 'p.z', locals())
 
-    @unittest.skipIf(sys.version_info[0] > 2, 'Test case is irrelevant for Python 3')
     def test_odd_sizes(self):
         Zero = namedtuple('Zero', '')
         self.assertEqual(Zero(), ())
@@ -216,7 +215,6 @@ class TestNamedTuple(unittest.TestCase):
             self.assertEqual(p, q)
             self.assertEqual(p._fields, q._fields)
 
-    @unittest.skipIf(not PY2)
     def test_pickling_bug_18015(self):
         # http://bugs.python.org/issue18015
         pt = pickle.loads(py273_named_tuple_pickle)
