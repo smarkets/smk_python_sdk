@@ -39,9 +39,9 @@ def check_loads(string, value):
 
 def test_loads_and_dumps_are_consistent():
     for i in chain(
-        xrange(2 ** 20),
-        xrange(2 ** 20, 2 ** 26, 3333),
-        xrange(2 ** 26, 2 ** 32, 77777),
+        xrange(2 ** 18),
+        xrange(2 ** 20, 2 ** 26, 33333),
+        xrange(2 ** 26, 2 ** 32, 777777),
     ):
         byte_dump = uleb128_encode(i)
         eq_(uleb128_decode(byte_dump), (i, len(byte_dump)))
