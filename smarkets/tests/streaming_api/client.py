@@ -6,6 +6,7 @@ from itertools import chain, product
 
 from mock import patch
 from nose.tools import eq_
+from six.moves import xrange
 
 from smarkets import uuid
 from smarkets.streaming_api.api import eto, InvalidCallbackError, seto, StreamingAPIClient

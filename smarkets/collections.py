@@ -6,7 +6,7 @@ from collections import OrderedDict
 from keyword import iskeyword as _iskeyword
 from operator import itemgetter as _itemgetter
 
-from six import exec_, PY2
+from six import exec_, PY2, string_types
 
 __all__ = [
     'namedtuple',
@@ -96,7 +96,7 @@ if PY2:
 
         # Validate the field names.  At the user's option, either generate an error
         # message or automatically replace the field name with a valid name.
-        if isinstance(field_names, basestring):
+        if isinstance(field_names, string_types):
             field_names = field_names.replace(',', ' ').split()
         field_names = map(str, field_names)
         if rename:

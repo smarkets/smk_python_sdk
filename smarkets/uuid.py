@@ -15,6 +15,7 @@ import types
 from collections import namedtuple
 
 from six import integer_types, string_types
+from six.moves import reduce
 
 log = logging.getLogger(__name__)
 

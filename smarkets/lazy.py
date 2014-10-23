@@ -56,4 +56,4 @@ class LazyCall(object):
         return str(self.get_value())
 
     def __unicode__(self):
-        return unicode(self.get_value())
+        return str(self.get_value()).decode()
