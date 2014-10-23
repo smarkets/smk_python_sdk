@@ -1,6 +1,6 @@
 import os
 
-from smarkets.compatibility import configparser
+from six.moves import configparser
 
 
 class ConfigurationReader(object):

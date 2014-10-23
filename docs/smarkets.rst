@@ -11,14 +11,6 @@ Subpackages
 Submodules
 ----------
 
-smarkets.compatibility module
------------------------------
-
-.. automodule:: smarkets.compatibility
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 smarkets.configuration module
 -----------------------------
 
