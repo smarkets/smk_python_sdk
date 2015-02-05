@@ -51,10 +51,10 @@ class SmarketsTestCase(unittest.TestCase):
         client_a.add_handler('seto.order_accepted', handler)
         eq_(handler.call_count, 0)
 
-        client_a.callbacks['seto.order_accepted']('irrelevant')
+        client_a.callbacks['seto.order_accepted'](message='irrelevant')
         eq_(handler.call_count, 1)
 
-        client_b.callbacks['seto.order_accepted']('also irrelevant')
+        client_b.callbacks['seto.order_accepted'](message='also irrelevant')
         eq_(handler.call_count, 1)
 
     def test_add_bad_handler(self):
