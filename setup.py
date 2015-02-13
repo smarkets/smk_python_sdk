@@ -167,8 +167,10 @@ sdict = {
         'Operating System :: OS Independent',
         'Programming Language :: Python'],
     'install_requires': [
+        'babel',
         'decorator',
         'injector',
+        'iso8601',
         'requests',
         'protobuf >= 2.6.0' if not is_py3 else 'protobuf-py3 >= 2.5.0',
         'six',
