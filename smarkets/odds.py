@@ -1,11 +1,10 @@
-"""
-Odds conversion classes
-"""
+"""Odds conversion classes"""
 import bisect
 import re
 from decimal import Decimal
 
 from babel.numbers import format_percent
+
 from smarkets.utils import memoized_by_args, slots_repr
 
 
@@ -568,7 +567,7 @@ class Odds(object):
         return Odds.snap_to_decimal_move_out_by(side, odds, 0)
 
     @classmethod
-    def safe_snap_to_decimal_move_out_by(cls, side, odds, move_out_by):
+    def snap_to_decimal_move_out_by(cls, side, odds, move_out_by):
         decimal = cls(odds).decimal
         snapped = False
         if side == 'buy':
@@ -627,5 +626,5 @@ class Odds(object):
         return cls(percent)
 
 
-safe_snap_to_decimal_move_out_by = memoized_by_args('side', 'odds', 'move_out_by')(
-    Odds.safe_snap_to_decimal_move_out_by)
+snap_to_decimal_move_out_by = memoized_by_args('side', 'odds', 'move_out_by')(
+    Odds.snap_to_decimal_move_out_by)
