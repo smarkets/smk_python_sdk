@@ -4,7 +4,11 @@ from itertools import islice
 
 from six import exec_, iteritems, iterkeys, itervalues, PY2
 
-__all__ = ['listitems', 'listkeys', 'listvalues', 'mapkeys', 'mapvalues', 'merge_dicts', 'listmap']
+__all__ = [
+    'listitems', 'listkeys', 'listvalues', 'mapkeys', 'mapvalues',
+    'merge_dicts', 'listmap', 'inverse_mapping', 'is_sorted', 'has_unique_elements',
+    'copy_keys_if_present', 'listmap',
+]
 
 try:
     exec_('''
