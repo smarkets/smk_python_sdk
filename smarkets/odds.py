@@ -1,4 +1,6 @@
+from __future__ import absolute_import
 """Odds conversion classes"""
+
 import bisect
 import functools
 import re
