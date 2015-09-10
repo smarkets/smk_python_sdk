@@ -1,8 +1,10 @@
 """Odds conversion classes"""
 import bisect
+import functools
 import re
 from decimal import Decimal
 
+import six
 from babel.numbers import format_percent
 
 from smarkets.utils import memoized_by_args, slots_repr
@@ -156,7 +158,7 @@ _RAW_TABLE = {
     (1, 10000): (Decimal('99.99'), Decimal('0.01')),
 }
 
-_RAW_ALL = _RAW_TABLE.keys() + [(k[1], k[0]) for k in _RAW_TABLE.keys()]
+_RAW_ALL = list(_RAW_TABLE.keys()) + [(k[1], k[0]) for k in _RAW_TABLE.keys()]
 
 # TODO: Add three places of precision to back end
 
@@ -446,12 +448,13 @@ _DEC_TO_PCT = {
     Decimal('1000'): Decimal('0.10'),
     Decimal('10000'): Decimal('0.01')}
 
-_PCT_TO_DEC = dict((y, x) for x, y, in _DEC_TO_PCT.iteritems())
+_PCT_TO_DEC = dict((y, x) for x, y, in _DEC_TO_PCT.items())
 
 _DEC_TO_PCT_KEYS = sorted(_DEC_TO_PCT.keys())
 _PCT_TO_DEC_KEYS = sorted(_PCT_TO_DEC.keys())
 
 
+@functools.total_ordering
 class OddsTableEntry(object):
     __slots__ = ('numerator', 'denominator', 'percent')
 
@@ -460,11 +463,17 @@ class OddsTableEntry(object):
         self.denominator = denominator
         self.percent = percent
 
-    def __cmp__(self, other):
+    def __lt__(self, other):
         if hasattr(other, 'percent'):
-            return cmp(self.percent, other.percent)
+            return self.percent < other.percent
         else:
-            return cmp(self.percent, other)
+            return self.percent < other
+
+    def __eq__(self, other):
+        if hasattr(other, 'percent'):
+            return self.percent == other.percent
+        else:
+            return self.percent == other
 
     @classmethod
     def from_raw(cls, nfrom, nto, nhigh, nlow):
@@ -477,7 +486,7 @@ class OddsTable(object):
 
     def __init__(self, raw_table):
         self._table = []
-        for key, val in raw_table.iteritems():
+        for key, val in six.iteritems(raw_table):
             num, den = key
             left, right = val
             self.append(num, den, left, right)
