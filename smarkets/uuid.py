@@ -220,7 +220,10 @@ def slug_to_uuid(slug):
 
 
 def int_to_uuid(number, ttype):
-    "Convert an untagged integer into a tagged uuid"
+    """Convert an untagged integer into a tagged uuid
+
+    :type ttype: str or unicode on Python 2, str on Python 3
+    """
     return Uuid.from_int(number, ttype).to_hex()
 
 
