@@ -14,7 +14,7 @@ import logging
 import types
 from collections import namedtuple
 
-from six import integer_types, string_types
+from six import binary_type, integer_types, string_types
 from six.moves import reduce
 
 log = logging.getLogger(__name__)
@@ -170,7 +170,11 @@ class Uuid(UuidBase):  # pylint: disable=E1001
 
     @classmethod
     def from_hex(cls, hex_str):
-        "Convert a hex uuid into a Uuid"
+        """Convert a hex uuid into a Uuid
+        :type hex_str: byte string or unicode string
+        """
+        if isinstance(hex_str, binary_type):
+            hex_str = hex_str.decode()
         if not isinstance(hex_str, string_types):
             raise TypeError("hex_str must be a string: %r" % hex_str)
         hex_tag = hex_str[-4:]
