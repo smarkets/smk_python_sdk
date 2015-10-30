@@ -10,7 +10,6 @@ import pytz
 __all__ = (
     'rfc2822_to_datetime',
 
-    'iso8601_to_datetime',
     'datetime_to_iso8601',
     'parse_datetime',
 
@@ -29,32 +28,14 @@ def rfc2822_to_datetime(rfc_date):
     return raw_dt.replace(tzinfo=pytz.utc)
 
 
-def iso8601_to_datetime(iso_date, naive=False):
-    """Converts an ISO-8601 date string to a Python datetime.
-
-    Usage: >>> iso8601_to_datetime('2009-04-24T15:48:26,483772Z')
-           datetime.datetime(2009, 04, 24, 15, 48, 26, 483772)
-    """
-    if iso_date is None:
-        return None
-    iso_date = iso_date.replace(',', '.')
-    try:
-        new_date = iso8601.parse_date(iso_date).astimezone(pytz.utc)
-        if naive:
-            new_date = new_date.replace(tzinfo=None)
-    except iso8601.ParseError:
-        new_date = None
-    return new_date
-
-
 def parse_datetime(iso):
     """Convert ISO8601 formatted timestamp to timezone-naive, UTC-normalized datetime object."""
     return iso8601.parse_date(iso).astimezone(pytz.utc).replace(tzinfo=None)
 
 
 def iso8601_to_date(iso_date):
-    """As above, but just returns a date object"""
-    return iso8601_to_datetime(iso_date + 'T00:00:00').date()
+    """Parse a string representation of a data and return a date object"""
+    return parse_datetime(iso_date + 'T00:00:00').date()
 
 
 def date_to_iso8601(date):
