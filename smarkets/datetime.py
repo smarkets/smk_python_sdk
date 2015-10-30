@@ -30,6 +30,7 @@ def rfc2822_to_datetime(rfc_date):
 
 def parse_datetime(iso):
     """Convert ISO8601 formatted timestamp to timezone-naive, UTC-normalized datetime object."""
+    iso = iso.replace(',', '.')
     return iso8601.parse_date(iso).astimezone(pytz.utc).replace(tzinfo=None)
 
 
