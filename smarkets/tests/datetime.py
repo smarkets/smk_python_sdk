@@ -14,7 +14,7 @@ class DateTests(unittest.TestCase):
 
     def test_valid_iso_conversion(self):
         valid_iso_dates = (
-            ('2009-04-24T15:48:26.000000Z', datetime.datetime(2009, 0o4, 24, 15, 48, 26, 0)),
+            ('2009-04-24T15:48:26,000000Z', datetime.datetime(2009, 0o4, 24, 15, 48, 26, 0)),
             ('2009-04-24T15:48:26', datetime.datetime(2009, 0o4, 24, 15, 48, 26, 0)),
             ('2009-04-24T15:48:26.000000Z', datetime.datetime(2009, 0o4, 24, 15, 48, 26, 0)),
         )
