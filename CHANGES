@@ -1,8 +1,17 @@
-4.0.0 (not released yet)
-------------------------
+4.0.0
+-----
+
+Backwards compatible:
+
+- Fixed installation on Python 3 (not the whole package is Python 3-compatible
+  yet but installation works)
+
+
+Backwards incompatible:
 
 - Removed smarkets.datetime.iso8601_to_datetime (parse_datetime is recommended
   instead, do note they have different interfaces)
+
 
 0.6.0
 -----
