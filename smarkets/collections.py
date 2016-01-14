@@ -102,12 +102,12 @@ if PY2:
         if rename:
             seen = set()
             for index, name in enumerate(field_names):
-                if (not all(c.isalnum() or c == '_' for c in name)
-                        or _iskeyword(name)
-                        or not name
-                        or name[0].isdigit()
-                        or name.startswith('_')
-                        or name in seen):
+                if (not all(c.isalnum() or c == '_' for c in name) or
+                        _iskeyword(name) or
+                        not name or
+                        name[0].isdigit() or
+                        name.startswith('_') or
+                        name in seen):
                     field_names[index] = '_%d' % index
                 seen.add(name)
         for name in [typename] + field_names:
