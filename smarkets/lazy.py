@@ -22,10 +22,13 @@ class LazyCall(object):
         ...     counter[0] += 1
         ...     return 'result value'
         >>>
-        >>> result = LazyCall(computation, 1, 2, a='b')
+        >>> # str() convertion for the output below to not have
+        >>> # the "u" prefix on Python 2 which makes this doctest
+        >>> # Python 2 and Python 3 compatible.
+        >>> result = LazyCall(computation, 1, 2, a=str('b'))
         >>> for i in xrange(3):
         ...     print(result.get_value())
-        call! (1, 2) {'a': u'b'}
+        call! (1, 2) {'a': 'b'}
         result value
         result value
         result value
