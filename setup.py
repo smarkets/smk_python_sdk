@@ -4,6 +4,7 @@
 # This module is released under the MIT License:
 # http://www.opensource.org/licenses/mit-license.php
 import glob
+import io
 import os
 import shutil
 import subprocess
@@ -133,7 +134,7 @@ class SmarketsProtocolClean(clean.clean):
 
 readme_path = join(PROJECT_ROOT, 'README.rst')
 
-with open(readme_path) as f:
+with io.open(readme_path, encoding='utf-8') as f:
     long_description = f.read()
 
 
