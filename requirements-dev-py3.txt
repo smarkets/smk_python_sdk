@@ -1,2 +1,2 @@
 -r requirements-dev-base.txt
-protobuf-py3>=2.5.0
+protobuf>=3.0.0b2
