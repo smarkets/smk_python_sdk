@@ -39,7 +39,7 @@ class StreamingAPIClient(object):
 
     Provides a simple interface wrapping the protobufs.
     """
-    CALLBACKS = _ETO_PAYLOAD_TYPES.values() + _SETO_PAYLOAD_TYPES.values()
+    CALLBACKS = list(_ETO_PAYLOAD_TYPES.values()) + list(_SETO_PAYLOAD_TYPES.values())
 
     logger = logging.getLogger(__name__ + '.SETOClient')
 
@@ -81,7 +81,7 @@ class StreamingAPIClient(object):
     def output_buffer_size(self):
         return self.session.output_buffer_size
 
-    def read(self, read_mode=READ_MODE_BUFFER_AND_DISPATCH, limit=sys.maxint):
+    def read(self, read_mode=READ_MODE_BUFFER_AND_DISPATCH, limit=sys.maxsize):
         """
         .. note::
             This method will block until it can read *any* data from the remote endpoint. It doesn't mean
