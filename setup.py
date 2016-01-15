@@ -21,15 +21,6 @@ PROJECT_ROOT = abspath(dirname(__file__))
 sys.path.insert(0, PROJECT_ROOT)
 
 
-is_py3 = sys.version_info.major == 3
-
-try:
-    import greenlet  # noqa
-    has_greenlet = True
-except ImportError:
-    has_greenlet = False
-
-
 def check_call(*args, **kwargs):
     print('Calling %s, %s' % (args, kwargs,))
     subprocess.check_call(*args, **kwargs)
@@ -168,16 +159,10 @@ sdict = {
         'Operating System :: OS Independent',
         'Programming Language :: Python'],
     'install_requires': [
-        'babel',
         'decorator',
-        'injector',
         'iso8601',
-        'requests',
-        'protobuf >= 2.6.0' if not is_py3 else 'protobuf >= 3.0.0b2',
         'six',
-        'simplejson',
-        'eventlet',
-    ] + ([] if has_greenlet else ['greenlet']),
+    ],
     'zip_safe': False,
     'cmdclass': {
         'build': SmarketsProtocolBuild,

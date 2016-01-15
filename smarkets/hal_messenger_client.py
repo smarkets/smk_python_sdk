@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 import socket
 
-import simplejson as json
+from smarkets.compatibility import json
 
 log = logging.getLogger(__name__)
 

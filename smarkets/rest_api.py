@@ -1,8 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 
 import requests as _requests
-import simplejson as _json
 
+from smarkets.compatibility import json as _json
 from smarkets.errors import Error as _Error
 
 
