@@ -11,7 +11,6 @@ There are 3 main representations of IDs used in Smarkets:
 
 """
 import logging
-import types
 from collections import namedtuple
 
 from six import binary_type, integer_types, string_types
@@ -143,7 +142,7 @@ class Uuid(UuidBase):  # pylint: disable=E1001
     @classmethod
     def from_slug(cls, slug, base=36, chars=None):
         "Convert a slug into a Uuid"
-        if not isinstance(slug, types.StringTypes):
+        if not isinstance(slug, string_types):
             raise TypeError("slug must be a string: %r" % slug)
         if chars is None:
             chars = cls.chars

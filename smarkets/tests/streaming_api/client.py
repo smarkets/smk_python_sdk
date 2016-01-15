@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
-import types
 import unittest
 from itertools import chain, product
 
+import six
 from mock import patch
 from nose.tools import eq_
 from six.moves import xrange
@@ -198,7 +198,7 @@ class UuidTestCase(unittest.TestCase):
     def test_uuid_tag_lengths(self):
         "Test that all uuid tags are 4 characters long (zero-padded)"
         for tag in uuid.TAGS:
-            self.assertTrue(isinstance(tag.hex_str, types.StringTypes))
+            self.assertTrue(isinstance(tag.hex_str, six.string_types))
             self.assertEquals(4, len(tag.hex_str))
 
     def test_slugs_without_prefix(self):
