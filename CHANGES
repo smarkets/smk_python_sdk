@@ -1,3 +1,15 @@
+4.1.0
+-----
+
+- 4.0.0 uploaded to PyPI is broken (it misses some files causing the package
+  to initiate a full piqi -> protobuf -> Python build process on installation),
+  4.1.0 fixes it
+- Made most of the package's dependencies optional
+- Improved Python 3 compatibility (all tests pass now), the package isn't
+  advertised as Python 3 compatible because there are some parts of it not
+  tested on Python 3 yet.
+
+
 4.0.0
 -----
 
