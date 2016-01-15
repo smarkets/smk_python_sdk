@@ -37,6 +37,13 @@ def _safe_glob(pathname):
         yield source.replace('/', '\\') if is_win32 else source
 
 
+protobuf_modules = ['eto', 'seto']
+
+
+def protobuf_module_file(name):
+    return join(PROJECT_ROOT, 'smarkets', 'streaming_api', '%s.py' % (name,))
+
+
 class SmarketsProtocolBuild(build.build):
 
     "Class to build the protobuf output"
@@ -75,8 +82,8 @@ class SmarketsProtocolBuild(build.build):
                                   'import "eto.piqi.proto"',
                                   'import "smarkets.streaming_api.eto.proto"'))
 
-        for pkg in ('eto', 'seto'):
-            dst_pkg_file = join(PROJECT_ROOT, 'smarkets', 'streaming_api', '%s.py' % (pkg,))
+        for pkg in protobuf_modules:
+            dst_pkg_file = protobuf_module_file(pkg)
             tmp_pkg_file = dst_pkg_file.replace('.py', '_pb2.py')
 
             if not os.path.exists(dst_pkg_file):
@@ -170,5 +177,23 @@ sdict = {
     },
 }
 
+
+def creating_a_distribution():
+    command_line = ' '.join(sys.argv)
+    return 'sdist' in command_line or 'bdist' in command_line
+
+
+def make_sure_the_package_is_built():
+    # It used to be *very* easy to create a sdist/bdist without building
+    # the package first and the resulting distribution would be incomplete,
+    # this is to prevent that from happening.
+    for name in protobuf_modules:
+        file_name = protobuf_module_file(name)
+        assert os.path.isfile(file_name), '%r not built' % (file_name,)
+
+
 if __name__ == '__main__':
+    if creating_a_distribution():
+        make_sure_the_package_is_built()
+
     setup(**sdict)
