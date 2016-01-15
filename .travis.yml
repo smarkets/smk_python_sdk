@@ -20,7 +20,15 @@ matrix:
 install:
     - uname -a
     - sudo apt-get update -qq
-    - sudo apt-get install -qq curl protobuf-compiler libprotobuf-dev libncurses5 libc6 wget
+    - sudo apt-get install -qq curl libncurses5 libc6 wget
+
+    # We need protobuf compiler 2.6+, 2.4 produces Python files incompatible
+    # with Python 3
+    #
+    - sudo sh -c "echo deb http://cz.archive.ubuntu.com/ubuntu vivid main >> /etc/apt/sources.list"
+    - sudo apt-get update -qq
+    - sudo apt-get install -qq protobuf-compiler libprotobuf-dev
+
     - sudo wget https://raw.github.com/alavrik/piqi-binary/master/Linux-x86_64/piqi -O /usr/bin/piqi
     - sudo chmod +x /usr/bin/piqi
     - pip install --upgrade https://bitbucket.org/logilab/astroid/get/5ed6266cab78.zip
