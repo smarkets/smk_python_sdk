@@ -45,15 +45,6 @@ smarkets.itertools module
     :show-inheritance:
 
 
-smarkets.rest_api module
--------------------------
-
-.. automodule:: smarkets.rest_api
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
 smarkets.signal module
 ----------------------
 
