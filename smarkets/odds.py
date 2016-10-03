@@ -639,3 +639,88 @@ class Odds(object):
 
 snap_to_decimal_move_out_by = memoized_by_args('side', 'odds', 'move_out_by')(
     Odds.snap_to_decimal_move_out_by)
+
+
+_ALL_TICKS = sorted(_PCT_TO_DEC)
+
+
+def ticks_gt(exact_price):
+    """
+    Returns a generator for all the ticks above the given price.
+
+    >>> list(ticks_gt(Decimal('97.5')))
+    [Decimal('98.04'), Decimal('99.01'), Decimal('99.99')]
+    >>> list(ticks_gt(Decimal('98.04')))
+    [Decimal('99.01'), Decimal('99.99')]
+    >>> list(ticks_gt(Decimal('99.99')))
+    []
+    """
+    first_viable = bisect.bisect_right(_ALL_TICKS, exact_price)
+    first_invalid_index, step = len(_ALL_TICKS), 1
+    return (_ALL_TICKS[i] for i in range(first_viable, first_invalid_index, step))
+
+
+def ticks_geq(exact_price):
+    """
+    Like `'ticks_gt' but if the given price is a tick, it is included as well.
+
+    >>> list(ticks_geq(Decimal('97.5')))
+    [Decimal('98.04'), Decimal('99.01'), Decimal('99.99')]
+    >>> list(ticks_geq(Decimal('98.04')))
+    [Decimal('98.04'), Decimal('99.01'), Decimal('99.99')]
+    >>> list(ticks_geq(Decimal('99.99')))
+    [Decimal('99.99')]
+    >>> list(ticks_geq(Decimal('99.991')))
+    []
+    """
+    first_viable = bisect.bisect_left(_ALL_TICKS, exact_price)
+    first_invalid_index, step = len(_ALL_TICKS), 1
+    return (_ALL_TICKS[i] for i in range(first_viable, first_invalid_index, step))
+
+
+def ticks_lt(exact_price):
+    """
+    Returns a generator for all the ticks below the given price.
+
+    >>> list(ticks_lt(Decimal('0.35')))
+    [Decimal('0.34'), Decimal('0.33'), Decimal('0.20'), Decimal('0.10'), Decimal('0.01')]
+    >>> list(ticks_lt(Decimal('0.20')))
+    [Decimal('0.10'), Decimal('0.01')]
+    >>> list(ticks_lt(Decimal('0.0001')))
+    []
+    """
+    first_viable = bisect.bisect_left(_ALL_TICKS, exact_price) - 1
+    first_invalid_index, step = -1, -1
+    return (_ALL_TICKS[i] for i in range(first_viable, first_invalid_index, step))
+
+
+def ticks_leq(exact_price):
+    """
+    Like `'ticks_lt' but if the given price is a tick, it is included as well.
+
+    >>> list(ticks_leq(Decimal('0.35')))
+    [Decimal('0.34'), Decimal('0.33'), Decimal('0.20'), Decimal('0.10'), Decimal('0.01')]
+    >>> list(ticks_leq(Decimal('0.20')))
+    [Decimal('0.20'), Decimal('0.10'), Decimal('0.01')]
+    >>> list(ticks_leq(Decimal('0.0001')))
+    []
+    """
+    first_viable = bisect.bisect_right(_ALL_TICKS, exact_price) - 1
+    first_invalid_index, step = -1, -1
+    return (_ALL_TICKS[i] for i in range(first_viable, first_invalid_index, step))
+
+
+def is_a_tick(exact_price):
+    """
+    Is the given price one of the available prices?
+
+    >>> is_a_tick(Decimal('0.32'))
+    False
+    >>> all(is_a_tick(price) for price in ticks_lt(Decimal('0.35')))
+    True
+    """
+    candidate = bisect.bisect_left(_ALL_TICKS, exact_price)
+    return candidate != len(_ALL_TICKS) and _ALL_TICKS[candidate] == exact_price
+
+
+MIN_TICK, MAX_TICK = next(ticks_gt(0)), next(ticks_lt(100))
