@@ -3,8 +3,8 @@ babel
 coverage==3.7.1
 decorator
 eventlet
-flake8
-flake8-blind-except
+flake8==3.2.0
+flake8-blind-except==0.1.1
 # Lower bound since we use the the smarkets style
 flake8-import-order>=0.7
 injector
