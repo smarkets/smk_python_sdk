@@ -43,6 +43,7 @@ class UuidTag(UuidTagBase):  # pylint: disable=E1001
         "Splits a number into the ID and tag"
         return divmod(number, cls.tag_mult)
 
+
 TAGS = (
     UuidTag('Account', int('acc1', 16), 'a'),
     UuidTag('ContractGroup', int('c024', 16), 'm'),

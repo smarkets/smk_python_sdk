@@ -30,6 +30,7 @@ def native_str_result(function, *args, **kwargs):
     '''
     return n(function(*args, **kwargs))
 
+
 _camel_case_re = re.compile('([A-Z]+)')
 
 

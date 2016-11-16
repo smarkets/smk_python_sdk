@@ -10,4 +10,5 @@ def private(something):
     something.__private__ = True
     return something
 
+
 __all__ = ()
