@@ -570,8 +570,7 @@ class Odds(object):
         >>> Odds.snap_to_decimal('sell', Decimal('0.3')).percent
         Decimal('0.20')
 
-        :param side: See :class:`Odds` constructor `snap` parameter
-        :type side: string
+        :type side: 'buy' or 'sell' string
         :type odds: :class:`decimal.Decimal`
         :rtype: :class:`Odds`
         """
