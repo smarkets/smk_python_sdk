@@ -116,6 +116,6 @@ In order to do so, you must call python setup.py clean, and then python setup.py
 License
 -------
 
-Copyright (C) 2011-2013 Smarkets Limited <support@smarkets.com>
+Copyright (C) Smarkets Limited <support@smarkets.com>
 
 This module is released under the MIT License: http://www.opensource.org/licenses/mit-license.php (or see the LICENSE file)
