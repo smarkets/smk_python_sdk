@@ -37,3 +37,11 @@ def test_to_decimal_str_1_zero():
 
 def test_to_decimal_str_2_zeros():
     eq_(Odds.snap_to_decimal('sell', Decimal('50')).decimal_str, '2.0')
+
+
+def test_snap_to_decimal_buy_rounding():
+    eq_(Decimal('45.05'), Odds.snap_to_decimal('buy', Decimal('45.045')).percent)
+
+
+def test_snap_to_decimal_sell_rounding():
+    eq_(Decimal('44.64'), Odds.snap_to_decimal('sell', Decimal('45.045')).percent)

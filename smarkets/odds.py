@@ -514,7 +514,6 @@ class OddsTable(object):
 TABLE = OddsTable(_RAW_TABLE)
 QUANT = Decimal('0.01')
 ONE_HUNDRED = Decimal('100')
-ONE_OVER_TEN_THOUSAND = Decimal('0.0001')
 
 
 class Odds(object):
@@ -554,7 +553,7 @@ class Odds(object):
         try:
             value = _PCT_TO_DEC[self.percent]
         except KeyError:
-            value = (ONE_HUNDRED / self.percent).quantize(ONE_OVER_TEN_THOUSAND)
+            value = ONE_HUNDRED / self.percent
         return value
 
     @classmethod
