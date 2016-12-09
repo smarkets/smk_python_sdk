@@ -1,3 +1,23 @@
+6.3.0
+-----
+
+- Add functions to query available prices, ie ticks
+- Fix flake8 and pin versions
+
+
+6.2.0
+-----
+
+- Upgrade smk_api_common to 5.2.0
+
+
+6.1.0
+-----
+
+- Bump smk_api_common to 5.1.0: reduction messages, cancel all feature
+- Fix the broken flake8 build because of flake8-import-order
+
+
 6.0.0
 -----
 
