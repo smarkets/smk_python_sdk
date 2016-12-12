@@ -1,3 +1,9 @@
+6.4.0
+-----
+
+- Remove call to quantize in Odds.decimal
+
+
 6.3.0
 -----
 
