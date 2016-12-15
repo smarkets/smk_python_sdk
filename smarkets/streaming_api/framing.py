@@ -23,8 +23,8 @@ def frame_decode_all(string):
     :rtype: tuple of (list of payloads) and remaining string
     """
     payloads = []
-    frame_size = 4
-    while len(string) >= frame_size:
+    min_frame_size = 4
+    while len(string) >= min_frame_size:
         try:
             decoded = uleb128_decode(string)
         except IncompleteULEB128:
@@ -32,7 +32,7 @@ def frame_decode_all(string):
             break
         else:
             payload_size, header_size = decoded
-            frame_size = max(payload_size + header_size, 4)
+            frame_size = max(payload_size + header_size, min_frame_size)
             if len(string) >= frame_size:
                 frame, string = string[:frame_size], string[frame_size:]
                 payloads.append(frame[header_size:header_size + payload_size])

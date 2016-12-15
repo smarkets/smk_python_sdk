@@ -97,6 +97,9 @@ def test_frame_decode_all():
         # so let's make sure decoding doesn't fail at header decoding stage
         (b'\x80\x80\x80\x80', ([], b'\x80\x80\x80\x80')),
         (b'\x80\x80\x80\x80\x80', ([], b'\x80\x80\x80\x80\x80')),
+
+        # regression: if the second frame is shorter, we still want to decode both...
+        (b'\x05abcde\x03abc', ([b'abcde', b'abc'], b'')),
     ):
         yield check_frame_decode_all, input_, output
 
