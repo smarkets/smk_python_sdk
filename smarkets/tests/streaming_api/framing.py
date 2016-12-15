@@ -88,6 +88,7 @@ def test_frame_decode_all():
         # ends with complete header but only part of a message
         (b'\x03ab', ([], b'\x03ab')),
         (b'\x01a\x00\x00\x02ab\x00\x03abc\x04abcd\x03ab', ([b'a', b'ab', b'abc', b'abcd'], b'\x03ab')),
+        (b'\x05abcd', ([], b'\x05abcd')),
 
         # ends with incomplete header
         (b'\x80', ([], b'\x80')),

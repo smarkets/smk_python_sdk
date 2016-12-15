@@ -36,6 +36,8 @@ def frame_decode_all(string):
             if len(string) >= frame_size:
                 frame, string = string[:frame_size], string[frame_size:]
                 payloads.append(frame[header_size:header_size + payload_size])
+            else:
+                break
 
     return payloads, string
 
