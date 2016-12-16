@@ -57,8 +57,8 @@ class Session(object):
         # Outgoing buffer sequence number
         self.buf_outseq = outseq
         self.out_payload = seto.Payload()
-        self.send_buffer = b''
-        self.read_buffer = b''
+        self.send_buffer = bytearray()
+        self.read_buffer = bytearray()
         self.buffered_incoming_payloads = []
 
     @property
@@ -105,7 +105,7 @@ class Session(object):
                 'Clearing non-empty buffer, %d bytes will be lost: %r',
                 len(self.send_buffer), self.send_buffer,
             )
-        self.send_buffer = b''
+        self.send_buffer = bytearray()
 
     def logout(self):
         "Disconnects from the API"
@@ -129,7 +129,7 @@ class Session(object):
             LazyCall(MessageToString, self.out_payload))
         sent_seq = self.buf_outseq
         self.out_payload.eto_payload.seq = sent_seq
-        self.send_buffer += frame_encode(self.out_payload.SerializeToString())
+        frame_encode(self.send_buffer, self.out_payload.SerializeToString())
         self.buf_outseq += 1
 
     def flush(self):
@@ -138,7 +138,7 @@ class Session(object):
         if self.send_buffer:
             bytes_sent = self.socket.send(self.send_buffer)
             self.flush_logger.debug("Flushed %d bytes out of %d", bytes_sent, len(self.send_buffer))
-            self.send_buffer = self.send_buffer[bytes_sent:]
+            self.send_buffer[0:] = self.send_buffer[bytes_sent:]
 
     def read(self):
         self.read_buffer += self.socket.recv()
@@ -260,17 +260,17 @@ class SessionSocket(object):
             self.logger.debug('Exception when disconnecting: %r', e)
         self._sock = None
 
-    def send(self, data):
+    def send(self, byte_array):
         """
-        :type data: byte string
+        :type byte_array: bytearray
         :return: Number of sent bytes
         :rtype: int
         """
         if self._sock is None:
             raise SocketDisconnected('Trying to write to socket when disconnected')
         try:
-            self.wire_logger.debug("sending %d bytes: %r", len(data), data)
-            sent = self._sock.send(data)
+            self.wire_logger.debug("sending %d bytes: %r", len(byte_array), byte_array)
+            sent = self._sock.send(byte_array)
             if sent == 0:
                 raise SocketDisconnected('Socket disconnected when writing to it, 0 bytes written')
             return sent

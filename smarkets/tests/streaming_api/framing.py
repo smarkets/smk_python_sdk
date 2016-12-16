@@ -30,11 +30,11 @@ def check_dumps(value, string):
 
 def test_loads():
     for value, string in test_data:
-        yield check_loads, string, value
+        yield check_loads, bytearray(string), value
 
 
-def check_loads(string, value):
-    eq_(uleb128_decode(string), (value, len(string)))
+def check_loads(byte_array, value):
+    eq_(uleb128_decode(byte_array), (value, len(byte_array)))
 
 
 def test_loads_and_dumps_are_consistent():
@@ -53,10 +53,10 @@ def test_uleb128_encode_fails_on_negative_number():
 
 
 def test_uleb128_decode_fails_on_invalid_input():
-    data = uleb128_encode(12345678)
+    byte_array = uleb128_encode(12345678)
 
-    for i in xrange(len(data)):
-        yield check_uleb128_decode_fails_on_invalid_input, data[:i]
+    for i in xrange(len(byte_array)):
+        yield check_uleb128_decode_fails_on_invalid_input, byte_array[:i]
 
 
 @raises(IncompleteULEB128)
@@ -72,11 +72,13 @@ def test_frame_encode():
         (b'abc', b'\x03abc'),
         (b'abcd', b'\x04abcd'),
     ):
-        yield check_frame_encode, input_, output
+        yield check_frame_encode, bytearray(input_), output
 
 
-def check_frame_encode(input_, output):
-    eq_(frame_encode(input_), output)
+def check_frame_encode(byte_array, output):
+    frame = bytearray()
+    frame_encode(frame, byte_array)
+    eq_(frame, output)
 
 
 def test_frame_decode_all():
@@ -102,8 +104,8 @@ def test_frame_decode_all():
         # regression: if the second frame is shorter, we still want to decode both...
         (b'\x05abcde\x03abc', ([b'abcde', b'abc'], b'')),
     ):
-        yield check_frame_decode_all, input_, output
+        yield check_frame_decode_all, bytearray(input_), output
 
 
-def check_frame_decode_all(input_, output):
-    eq_(frame_decode_all(input_), output)
+def check_frame_decode_all(byte_array, output):
+    eq_(frame_decode_all(byte_array), output)
