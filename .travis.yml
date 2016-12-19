@@ -22,7 +22,7 @@ install:
     # We need protobuf compiler 2.6+, 2.4 produces Python files incompatible
     # with Python 3
     #
-    - sudo sh -c "echo deb http://cz.archive.ubuntu.com/ubuntu vivid main >> /etc/apt/sources.list"
+    - sudo sh -c "echo deb http://archive.ubuntu.com/ubuntu vivid main >> /etc/apt/sources.list"
     - sudo apt-get update -qq
     - sudo apt-get install -qq protobuf-compiler libprotobuf-dev
 
