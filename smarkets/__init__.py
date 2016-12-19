@@ -3,7 +3,7 @@
 # This module is released under the MIT License:
 # http://www.opensource.org/licenses/mit-license.php
 
-__version__ = '6.4.0'
+__version__ = '7.0.0'
 
 
 def private(something):

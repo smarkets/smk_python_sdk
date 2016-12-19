@@ -1,3 +1,11 @@
+7.0.0
+
+- Use bytearray for buffers instead of byte strings
+  (changes smarkets.streaming_api.framing API)
+- BUGFIX: frames_decode_all may hang
+- BUGFIX: frame_decode_all could miss frames
+
+
 6.4.0
 -----
 
