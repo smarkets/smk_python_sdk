@@ -165,7 +165,7 @@ class Session(object):
             self.buffered_incoming_payloads[0], self.buffered_incoming_payloads[1:])
 
         payload = seto.Payload()
-        payload.ParseFromString(data)
+        payload.ParseFromString(bytes(data))
         self._handle_in_payload(payload)
         if payload.eto_payload.seq == self.inseq:
             # Go ahead
