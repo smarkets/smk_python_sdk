@@ -14,5 +14,5 @@ def test_next_frame_regression():
             session_string.encode('utf-8') +
             b'\x10\x02'
         )]
-    payload = session.next_frame()
+    payload = session.next_frame().protobuf
     eq_(payload.eto_payload.login_response.session, session_string)

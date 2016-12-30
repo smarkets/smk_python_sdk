@@ -6,6 +6,7 @@
 import logging
 import socket
 import ssl
+from collections import namedtuple
 
 from google.protobuf.text_format import MessageToString
 
@@ -36,6 +37,10 @@ class SessionSettings(object):
         # testing to determine whether a single large recv() system
         # call is worse than many smaller ones.
         self.read_chunksize = 65536  # 64k
+
+
+class Frame(namedtuple('Frame', 'bytes protobuf')):
+    pass
 
 
 class Session(object):
@@ -155,7 +160,7 @@ class Session(object):
 
         :return: A payload or None if no payloads in buffer.
 
-        :rtype: :class:`smarkets.streaming_api.seto.Payload` or None
+        :rtype: :class:`smarkets.streaming_api.session.Frame` or None
 
         """
         if not self.buffered_incoming_payloads:
@@ -167,11 +172,12 @@ class Session(object):
         payload = seto.Payload()
         payload.ParseFromString(bytes(data))
         self._handle_in_payload(payload)
+        frame = Frame(bytes=data, protobuf=payload)
         if payload.eto_payload.seq == self.inseq:
             # Go ahead
             self.logger.debug("received sequence %d", self.inseq)
             self.inseq += 1
-            return payload
+            return frame
         elif payload.eto_payload.seq > self.inseq:
             self.logger.warn(
                 'Received incoming sequence %d instead of expected %d',

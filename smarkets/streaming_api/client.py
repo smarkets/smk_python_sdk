@@ -152,9 +152,10 @@ class StreamingAPIClient(object):
         """
         self.session.send()
 
-    def _dispatch(self, message):
+    def _dispatch(self, frame):
         "Dispatch a frame to the callbacks"
-        name = _SETO_PAYLOAD_TYPES.get(message.type)
+        message = frame.protobuf
+        name = _SETO_PAYLOAD_TYPES.get(message.type, 'seto.unknown')
         if name == 'seto.eto':
             name = _ETO_PAYLOAD_TYPES.get(message.eto_payload.type)
         if name in self.callbacks:
@@ -167,4 +168,4 @@ class StreamingAPIClient(object):
             self.logger.debug("ignoring unknown message: %s", name)
 
         self.logger.debug('Dispatching global callbacks for %s', name)
-        self.global_callback(name=name, message=message)
+        self.global_callback(name=name, message=frame)

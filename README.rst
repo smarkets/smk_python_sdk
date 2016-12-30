@@ -72,11 +72,11 @@ Registering callbacks
 
     from google.protobuf import text_format
 
-    def login_response(msg):
+    def login_response(message):
         print("eto.login_response", text_format.MessageToString(msg))
 
-    def global_callback(name, msg):
-        print(name, text_format.MessageToString(msg))
+    def global_callback(name, message):
+        print(name, text_format.MessageToString(message.protobuf))
 
     client.add_handler('eto.login_response', login_response)
     client.add_global_handler(global_callback)

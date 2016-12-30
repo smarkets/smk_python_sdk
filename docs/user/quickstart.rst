@@ -94,7 +94,7 @@ buffers package to simply print the message to stdout::
     >>>         text_format.MessageToString(message))
     >>> def global_callback(message_name, message):
     >>>     print "[global] Received a %s: %s" % (
-    >>>         message_name, text_format.MessageToString(message))
+    >>>         message_name, text_format.MessageToString(message.protobuf))
 
 First, we register the callback for the eto.login_response message::
 
