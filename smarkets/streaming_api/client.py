@@ -165,6 +165,7 @@ class StreamingAPIClient(object):
                 callback(message=message)
             else:
                 self.logger.error("no callback %s", name)
+        else:
             self.logger.debug("ignoring unknown message: %s", name)
 
         self.logger.debug('Dispatching global callbacks for %s', name)
