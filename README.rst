@@ -5,9 +5,9 @@ smk-python-sdk
    :alt: Build status
    :target: https://travis-ci.org/smarkets/smk_python_sdk
 
-Smarkets Python library (streaming API client, id generation, more to come).
+Smarkets Streaming API Python client.
 
-Compatible with Python 2.7 and PyPy 1.9+.
+Compatible with Python 2.7, 3.5 and PyPy 1.9+.
 
 Documentation: http://smarkets-python-sdk.readthedocs.org/en/latest/
 
@@ -33,14 +33,15 @@ Getting Started
     logging.basicConfig(level=logging.DEBUG)
 
     from smarkets.streaming_api.api import (
-        BUY, GOOD_TIL_CANCELLED, OrderCreate, SessionSettings, Session, StreamingAPIClient)
+        SessionSettings, Session, StreamingAPIClient,
+    )
 
     username = 'username'
     password = 'password'
 
     settings = SessionSettings(username, password)
     settings.host = 'api.smarkets.com'
-    settings.port = 3701
+    settings.port = 3801
 
     session = Session(settings)
 
@@ -51,17 +52,6 @@ Getting Started
     client.read()
     client.flush()
 
-    market_id = client.str_to_uuid128('fc024')
-
-    order = OrderCreate()
-    order.quantity = 400000 # £40 payout
-    order.price = 2500 # 25.00%
-    order.side = BUY
-    order.market = market_id
-    order.contract = client.str_to_uuid128('fcccc')
-    order.time_in_force = GOOD_TIL_CANCELLED
-
-    client.send(order)
     client.logout()
 
 
@@ -70,16 +60,81 @@ Registering callbacks
 
 .. code-block:: python
 
-    from google.protobuf import text_format
-
     def login_response(message):
-        print("eto.login_response", text_format.MessageToString(msg))
+        print('eto.login_response', msg)
 
     def global_callback(name, message):
-        print(name, text_format.MessageToString(message.protobuf))
+        print(name, message.protobuf)
 
     client.add_handler('eto.login_response', login_response)
     client.add_global_handler(global_callback)
+
+
+Placing orders
+'''''''''''''''''''''
+
+.. code-block:: python
+
+    from smarkets.streaming_api.api import SIDE_BID
+    from smarkets.streaming_api.seto import OrderCreate
+
+    def order_accepted(message):
+        reference = message.order_accepted.reference
+        order_id = message.order_accepted.order_id
+        print(
+            'ORDER_ACCEPTED: reference {} corresponding to order_id {}'.format(
+                reference, order_id,
+            )
+        )
+
+    def order_rejected(message):
+        reference = message.order_rejected.reference
+        reason = message.order_rejected.reason
+        print('ORDER_REJECTED with reference {} with reason {}'.format(reference, reason))
+
+    client.add_handler('seto.order_accepted', order_accepted)
+    client.add_handler('seto.order_rejected', order_rejected)
+
+    market_id = 100000
+    contract_id = 200000
+
+    order = OrderCreate()
+    order.quantity = 400000 # £40 payout
+    order.price = 2500 # 25.00%
+    order.side = SIDE_BID
+    order.market_id = market_id
+    order.contract_id = contract_id
+
+    client.send(order)
+    client.flush()
+
+
+Cancelling orders
+'''''''''''''''''''''
+
+.. code-block:: python
+
+    from smarkets.streaming_api.seto import OrderCancel
+
+    order_id = ...  # received in seto.order_accepted message
+
+    def order_cancelled(message):
+        order_id = message.order_cancelled.order_id
+        reason = message.order_cancelled.reason
+        print('ORDER_CANCELLED order_id {} with reason {}'.format(order_id, reason))
+
+    def order_cancel_rejected(message):
+        order_id = message.order_cancel_rejected.order_id
+        reason = message.order_cancel_rejected.reason
+        print('ORDER_CANCEL_REJECTED: with order_id {} with reason {}'.format(order_id, reason))
+
+    client.add_handler('seto.order_cancelled', order_cancelled)
+    client.add_handler('seto.order_cancel_rejected', order_cancel_rejected)
+
+    cancel = OrderCancel()
+    cancel.order_id = order_id
+    client.send(cancel)
+    client.flush()
 
 
 Thread Safety
