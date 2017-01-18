@@ -1,9 +1,28 @@
+8.0.0
+-----
+
+- The streaming API now dispatches frames instead of payload. This
+  lets you access raw bytes
+- Fix examples in README
+- Simplify requirements
+- Require protobuf when installing
+- Use Smarkets' piqi binary fork
+
+7.1.0
+-----
+
+- Account sequences in reduce quantity messages
+- Keep in play orders
+- Trading suspended reasons
+
 7.0.1
+-----
 
 - ParseFromString expects string not bytearray
 
 
 7.0.0
+-----
 
 - Use bytearray for buffers instead of byte strings
   (changes smarkets.streaming_api.framing API)
