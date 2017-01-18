@@ -26,7 +26,7 @@ install:
     - sudo apt-get update -qq
     - sudo apt-get install -qq protobuf-compiler libprotobuf-dev
 
-    - sudo wget https://raw.github.com/alavrik/piqi-binary/master/Linux-x86_64/piqi -O /usr/bin/piqi
+    - sudo wget https://raw.github.com/smarkets/piqi-binary/master/Linux-x86_64/piqi -O /usr/bin/piqi
     - sudo chmod +x /usr/bin/piqi
     - pip install --upgrade https://bitbucket.org/logilab/astroid/get/5ed6266cab78.zip
     - pip install -r requirements.txt
