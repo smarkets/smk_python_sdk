@@ -29,9 +29,6 @@ install:
     - sudo wget https://raw.github.com/alavrik/piqi-binary/master/Linux-x86_64/piqi -O /usr/bin/piqi
     - sudo chmod +x /usr/bin/piqi
     - pip install --upgrade https://bitbucket.org/logilab/astroid/get/5ed6266cab78.zip
-    - if [[ ${TRAVIS_PYTHON_VERSION:0:1} == '3' ]];
-            then pip install -r requirements-dev-py3.txt;
-            else pip install -r requirements-dev-py2.txt;
-        fi;
+    - pip install -r requirements.txt
     - python setup.py build
 script: make test && make check

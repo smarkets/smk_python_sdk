@@ -101,7 +101,7 @@ You can install Python dependencies by executing:
 
 ::
 
-    pip install -r requirements-dev-py2.txt
+    pip install -r requirements.txt
 
 To build and install call:
 

@@ -12,6 +12,7 @@ iso8601
 nose==1.3.0
 nose-ignore-docstring
 pep8-naming>=0.2.2
+protobuf>=3.0.0b2
 simplejson
 six
 sphinx
