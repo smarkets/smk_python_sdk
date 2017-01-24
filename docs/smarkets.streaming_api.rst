@@ -17,14 +17,6 @@ smarkets.streaming_api.exceptions module
     :undoc-members:
     :show-inheritance:
 
-smarkets.streaming_api.orders module
-------------------------------------
-
-.. automodule:: smarkets.streaming_api.orders
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 smarkets.streaming_api.session module
 -------------------------------------
 
