@@ -22,10 +22,12 @@ class SessionSettings(object):
 
     "Encapsulate settings necessary to create a new session"
 
-    def __init__(self, username, password, host='api-sandbox.smarkets.com', port=3801, ssl=True,
+    def __init__(self, username=None, password=None, token=None,
+                 host='api-sandbox.smarkets.com', port=3801, ssl=True,
                  socket_timeout=30, ssl_kwargs=None, tcp_nodelay=True):
         self.username = username
         self.password = password
+        self.token = token
         self.host = host
         self.port = port
         self.socket_timeout = socket_timeout
@@ -93,8 +95,11 @@ class Session(object):
             login.Clear()
             login.type = seto.PAYLOAD_LOGIN
             login.eto_payload.type = eto.PAYLOAD_LOGIN
-            login.login.username = self.settings.username
-            login.login.password = self.settings.password
+            if self.settings.token:
+                login.login.cookie = self.settings.token.encode('utf-8')
+            else:
+                login.login.username = self.settings.username
+                login.login.password = self.settings.password
             self.logger.info("sending login payload")
             if self.account_sequence is not None:
                 self.logger.info("Attempting to resume session, account sequence %d",
