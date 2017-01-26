@@ -23,7 +23,7 @@ class SessionSettings(object):
     "Encapsulate settings necessary to create a new session"
 
     def __init__(self, username=None, password=None, token=None,
-                 host='api-sandbox.smarkets.com', port=3801, ssl=True,
+                 host='stream.smarkets.com', port=3801, ssl=True,
                  socket_timeout=30, ssl_kwargs=None, tcp_nodelay=True):
         self.username = username
         self.password = password

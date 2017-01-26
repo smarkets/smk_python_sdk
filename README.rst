@@ -40,8 +40,7 @@ Getting Started
     password = 'password'
 
     settings = SessionSettings(username, password)
-    settings.host = 'api.smarkets.com'
-    settings.port = 3801
+    settings.host = 'stream.smarkets.com'
 
     session = Session(settings)
 
