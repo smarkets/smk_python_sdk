@@ -169,7 +169,7 @@ sdict = {
     'install_requires': [
         'decorator',
         'iso8601',
-        'protobuf>=3.0.0b2',
+        'protobuf==3.0.0b2',
         'six',
     ],
     'zip_safe': False,
