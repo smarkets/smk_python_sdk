@@ -1,3 +1,8 @@
+8.0.1
+----
+
+- The streaming API now allows to cancel all orders by market
+
 8.0.0
 -----
 
