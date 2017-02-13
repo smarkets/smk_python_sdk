@@ -68,8 +68,8 @@ create a new order::
     >>> order.quantity = 400000  # 40.0000 GBP payout
     >>> order.price = 2500  # 25.00%
     >>> order.side = BUY
-    >>> order.market = client.str_to_uuid128('fc024')
-    >>> order.contract = client.str_to_uuid128('fcccc')
+    >>> order.market_id = some_market
+    >>> order.contract_id = some_contract
 
 The above order is a **buy** (or **back**) at 25.00% (or 4.0 in
 decimal format) for a £40.00 return. The buyer's liability if the
