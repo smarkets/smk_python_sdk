@@ -1,5 +1,11 @@
+9.0.0
+-----
+
+- The long deprecated uuid fields have been removed from the seto protocol. Use
+  ints instead.
+
 8.0.1
-----
+-----
 
 - The streaming API now allows to cancel all orders by market
 
