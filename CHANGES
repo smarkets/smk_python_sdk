@@ -1,3 +1,11 @@
+9.1.0
+-----
+
+- Add settings and settings-accepted messages
+- Add executed avg price/quantity on order-cancelled
+- Add a uint64 account sequence
+- Add account sequences in order quantity reduce rejected
+
 9.0.0
 -----
 
