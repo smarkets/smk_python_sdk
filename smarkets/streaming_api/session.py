@@ -104,7 +104,7 @@ class Session(object):
             if self.account_sequence is not None:
                 self.logger.info("Attempting to resume session, account sequence %d",
                                  self.account_sequence)
-                login.login.account_sequence = self.account_sequence
+                login.login.account_sequence = 0
                 login.login.account_sequence_64 = self.account_sequence
 
             self.send()
