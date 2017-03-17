@@ -1,3 +1,10 @@
+9.1.2
+-----
+- order-cancelled, order-executed, order-quantity-reduced,
+  order-execute-voided and order-reduced messages now include the following
+  additional order state information: total executed quantity,
+  average executed price, available quantity, origin price
+
 9.1.1
 -----
 - Fix: Don't set a uint64 value as the old account sequence which makes it overflow
