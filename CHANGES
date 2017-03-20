@@ -1,3 +1,8 @@
+9.1.3
+-----
+- Update smk_api_common to v6.0.6: https://github.com/smarkets/smk_api_common/issues/2
+  Version 9.1.2 is broken: do not use.
+
 9.1.2
 -----
 - order-cancelled, order-executed, order-quantity-reduced,
