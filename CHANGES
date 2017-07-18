@@ -1,3 +1,7 @@
+9.3.0
+-----
+- Update smk_api_common to v6.2.0: Introduce order void and balance changed messages.
+
 9.2.0
 -----
 - Update smk_api_common to v6.1.0: Introduce labels so users can tag special orders.
