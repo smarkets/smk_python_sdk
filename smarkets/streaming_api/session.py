@@ -59,8 +59,10 @@ class Session(object):
         self.account_sequence = account_sequence
         self.socket = SessionSocket(settings)
         self.inseq = inseq
+        self.init_inseq = inseq
         # Outgoing socket sequence number
         self.outseq = outseq
+        self.init_outseq = outseq
         # Outgoing buffer sequence number
         self.buf_outseq = outseq
         self.out_payload = seto.Payload()
@@ -132,6 +134,8 @@ class Session(object):
     def disconnect(self):
         "Disconnects from the API"
         self.socket.disconnect()
+        self.inseq = self.init_inseq
+        self.outseq = self.init_outseq
 
     def send(self):
         "Serialise, sequence, add header, and send payload"

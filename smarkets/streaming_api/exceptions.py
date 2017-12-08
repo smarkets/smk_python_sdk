@@ -5,7 +5,7 @@
 # http://www.opensource.org/licenses/mit-license.php
 
 from smarkets.errors import Error as _Error
-
+from smarkets.streaming_api import eto
 
 class ConnectionError(_Error):
 
@@ -47,3 +47,12 @@ class DownloadError(_Error):
 
     "Raised when a URL could not be fetched"
     pass
+
+
+class LoginError(_Error):
+    "Raised when a login is not successful"
+    def __init__(self, reason):
+        self.reason = reason
+        if reason < len(eto.LogoutReason.DESCRIPTOR.values):
+            self.reason_msg = eto.LogoutReason.DESCRIPTOR.values[reason].name
+        self.reason_msg = 'Unknown'
