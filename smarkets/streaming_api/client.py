@@ -9,7 +9,7 @@ import sys
 from smarkets.signal import Signal
 from smarkets.streaming_api import eto
 from smarkets.streaming_api import seto
-from smarkets.streaming_api.exceptions import InvalidCallbackError
+from smarkets.streaming_api.exceptions import InvalidCallbackError, LoginError
 from smarkets.streaming_api.utils import set_payload_message
 
 
@@ -48,19 +48,43 @@ class StreamingAPIClient(object):
         self.callbacks = dict((callback_name, Signal())
                               for callback_name in self.__class__.CALLBACKS)
         self.global_callback = Signal()
+        self.last_login = None
 
     def login(self, receive=True):
         "Connect and ensure the session is active"
         self.session.connect()
         if receive:
             self.read()
+            self.check_login()
             self.flush()
+
+    def check_login(self):
+        """
+        Check if login was successful.
+        Must be executed after a 'read()' and throws an exception if not successful
+        """
+        if not self.last_login:
+            raise LoginError(eto.LOGOUT_NONE)
+
+        logout_reason = self._check_logout_response_reason(self.last_login)
+        if logout_reason:
+            raise LoginError(logout_reason)
+
+        return True
+
+    def _check_logout_response_reason(self, message):
+        if message and message.eto_payload and message.eto_payload.type == eto.PAYLOAD_LOGOUT:
+            return message.eto_payload.logout.reason
+
+        return None
+
 
     def logout(self, receive=True):
         """
         Disconnect and send logout message, optionally waiting for
         confirmation.
         """
+        self.last_login = None
         self.session.logout()
         if receive:
             self.read()
@@ -158,6 +182,13 @@ class StreamingAPIClient(object):
         name = _SETO_PAYLOAD_TYPES.get(message.type, 'seto.unknown')
         if name == 'seto.eto':
             name = _ETO_PAYLOAD_TYPES.get(message.eto_payload.type)
+            
+            # handle login and logout messages
+            if message.eto_payload.type in [eto.PAYLOAD_LOGIN_RESPONSE, eto.PAYLOAD_LOGOUT]:
+                self.last_login = message
+                if message.eto_payload.type == eto.PAYLOAD_LOGOUT:
+                    self.session.disconnect()
+
         if name in self.callbacks:
             self.logger.debug("dispatching callback %s", name)
             callback = self.callbacks.get(name)
