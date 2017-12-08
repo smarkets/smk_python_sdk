@@ -9,7 +9,7 @@ import sys
 from smarkets.signal import Signal
 from smarkets.streaming_api import eto
 from smarkets.streaming_api import seto
-from smarkets.streaming_api.exceptions import InvalidCallbackError, LoginError
+from smarkets.streaming_api.exceptions import InvalidCallbackError, LoginError, LoginTimeout
 from smarkets.streaming_api.utils import set_payload_message
 
 
@@ -64,7 +64,7 @@ class StreamingAPIClient(object):
         Must be executed after a 'read()' and throws an exception if not successful
         """
         if not self.last_login:
-            raise LoginError(eto.LOGOUT_NONE)
+            raise LoginTimeout()
 
         logout_reason = self._check_logout_response_reason(self.last_login)
         if logout_reason:

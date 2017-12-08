@@ -56,3 +56,7 @@ class LoginError(_Error):
         if reason < len(eto.LogoutReason.DESCRIPTOR.values):
             self.reason_msg = eto.LogoutReason.DESCRIPTOR.values[reason].name
         self.reason_msg = 'Unknown'
+
+class LoginTimeout(_Error):
+    "Raised when no message is received after sending login request"
+    pass

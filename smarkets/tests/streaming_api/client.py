@@ -14,7 +14,7 @@ from six.moves import xrange
 
 from smarkets import uuid
 from smarkets.streaming_api.api import eto, InvalidCallbackError, seto, StreamingAPIClient
-from smarkets.streaming_api.exceptions import LoginError
+from smarkets.streaming_api.exceptions import LoginError, LoginTimeout
 from smarkets.streaming_api.framing import frame_decode_all, frame_encode
 
 SUCCESSFUL_LOGIN_RESPONSE_RAW = bytearray('@\x08\x01\x12<\x08\x01\x10\x08\x18\x0024\n\x129RK4DpIK9HY5FpZKTo\x10\x02\x1a\x13hanson@smarkets.com \x93\xa7\xb1\xc5\xa9\xa6\xd2\x18\x14\x08$\x12\x04\x08\x02\x18\x00\xaa\x02\t\x08\xf4\x03\x10\xe8\x07\x18\xc8\x01\n\x08\x01\x12\x06\x08\x03\x10\x05\x18\x00\n\x08\x01\x12\x06\x08\x04\x10\x05\x18\x00')
@@ -117,8 +117,7 @@ class SmarketsTestCase(unittest.TestCase):
 
         try:
             self.client.login()
-        except LoginError as ex:
-            self.assertEquals(eto.LOGOUT_NONE, ex.reason)
+        except LoginTimeout as ex:
             return
 
         assert False
