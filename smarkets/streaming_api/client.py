@@ -78,7 +78,6 @@ class StreamingAPIClient(object):
 
         return None
 
-
     def logout(self, receive=True):
         """
         Disconnect and send logout message, optionally waiting for
@@ -182,7 +181,7 @@ class StreamingAPIClient(object):
         name = _SETO_PAYLOAD_TYPES.get(message.type, 'seto.unknown')
         if name == 'seto.eto':
             name = _ETO_PAYLOAD_TYPES.get(message.eto_payload.type)
-            
+
             # handle login and logout messages
             if message.eto_payload.type in [eto.PAYLOAD_LOGIN_RESPONSE, eto.PAYLOAD_LOGOUT]:
                 self.last_login = message
