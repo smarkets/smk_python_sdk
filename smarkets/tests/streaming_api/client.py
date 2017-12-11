@@ -6,21 +6,27 @@ from itertools import chain, product
 
 import six
 
-from google.protobuf.text_format import MessageToString
-
-from mock import patch, MagicMock
+from mock import patch
 from nose.tools import eq_
 from six.moves import xrange
 
 from smarkets import uuid
 from smarkets.streaming_api.api import eto, InvalidCallbackError, seto, StreamingAPIClient
 from smarkets.streaming_api.exceptions import LoginError, LoginTimeout
-from smarkets.streaming_api.framing import frame_decode_all, frame_encode
+from smarkets.streaming_api.framing import frame_decode_all
 
-SUCCESSFUL_LOGIN_RESPONSE_RAW = bytearray('@\x08\x01\x12<\x08\x01\x10\x08\x18\x0024\n\x129RK4DpIK9HY5FpZKTo\x10\x02\x1a\x13hanson@smarkets.com \x93\xa7\xb1\xc5\xa9\xa6\xd2\x18\x14\x08$\x12\x04\x08\x02\x18\x00\xaa\x02\t\x08\xf4\x03\x10\xe8\x07\x18\xc8\x01\n\x08\x01\x12\x06\x08\x03\x10\x05\x18\x00\n\x08\x01\x12\x06\x08\x04\x10\x05\x18\x00')
-UNAUTHORIZED_LOGIN_RESPONSE_RAW = bytearray('\x0e\x08\x01\x12\n\x08\x01\x10\t\x18\x00:\x02\x08\x07')
-PAYLOAD_THROTTLE_LIMITS_RAW = bytearray('\x14\x08$\x12\x04\x08\x02\x18\x00\xaa\x02\t\x08\xf4\x03\x10\xe8\x07\x18\xc8\x01')
-LOGOUT_HEARTBEAT_TIMEOUT_RAW = bytearray('\x0e\x08\x01\x12\n\x08\x08\x10\t\x18\x00:\x02\x08\x02')
+SUCCESSFUL_LOGIN_RESPONSE_RAW = bytearray(
+    '@\x08\x01\x12<\x08\x01\x10\x08\x18\x0024\n\x129RK4DpIK9HY5FpZKTo\x10\x02\x1a\x13hanson'
+    '@smarkets.com \x93\xa7\xb1\xc5\xa9\xa6\xd2\x18\x14\x08$\x12\x04\x08\x02\x18\x00\xaa\x02'
+    '\t\x08\xf4\x03\x10\xe8\x07\x18\xc8\x01\n\x08\x01\x12\x06\x08\x03\x10\x05\x18\x00\n\x08'
+    '\x01\x12\x06\x08\x04\x10\x05\x18\x00')
+UNAUTHORIZED_LOGIN_RESPONSE_RAW = bytearray(
+    '\x0e\x08\x01\x12\n\x08\x01\x10\t\x18\x00:\x02\x08\x07')
+PAYLOAD_THROTTLE_LIMITS_RAW = bytearray(
+    '\x14\x08$\x12\x04\x08\x02\x18\x00\xaa\x02\t\x08\xf4\x03\x10\xe8\x07\x18\xc8\x01')
+LOGOUT_HEARTBEAT_TIMEOUT_RAW = bytearray(
+    '\x0e\x08\x01\x12\n\x08\x08\x10\t\x18\x00:\x02\x08\x02')
+
 
 class Frame(namedtuple('Frame', 'bytes protobuf')):
     pass
@@ -82,8 +88,11 @@ class SmarketsTestCase(unittest.TestCase):
     def test_login_ok_async(self):
         "Test the `Smarkets.login` method"
         self.client.login(False)
-        self.client.session.next_frame = read_session_buff_gen(SUCCESSFUL_LOGIN_RESPONSE_RAW + PAYLOAD_THROTTLE_LIMITS_RAW + PAYLOAD_THROTTLE_LIMITS_RAW)
-        self.client.read()        
+        self.client.session.next_frame = read_session_buff_gen(
+            SUCCESSFUL_LOGIN_RESPONSE_RAW +
+            PAYLOAD_THROTTLE_LIMITS_RAW +
+            PAYLOAD_THROTTLE_LIMITS_RAW)
+        self.client.read()
         self.assertTrue(self.client.check_login())
 
     def test_login_unauthorized(self):
@@ -100,7 +109,10 @@ class SmarketsTestCase(unittest.TestCase):
 
     def test_login_ok_then_timeout(self):
         "Test the `Smarkets.login` method for a sequence of messages"
-        self.client.session.next_frame = read_session_buff_gen(SUCCESSFUL_LOGIN_RESPONSE_RAW + PAYLOAD_THROTTLE_LIMITS_RAW + LOGOUT_HEARTBEAT_TIMEOUT_RAW)
+        self.client.session.next_frame = read_session_buff_gen(
+            SUCCESSFUL_LOGIN_RESPONSE_RAW +
+            PAYLOAD_THROTTLE_LIMITS_RAW +
+            LOGOUT_HEARTBEAT_TIMEOUT_RAW)
         try:
             self.client.login()
         except LoginError as ex:
@@ -110,14 +122,13 @@ class SmarketsTestCase(unittest.TestCase):
 
         assert False
 
-
     def test_login_noresponse(self):
         "Test the `Smarkets.login` when no login response has been received"
         self.client.session.next_frame = read_session_buff_gen('')
 
         try:
             self.client.login()
-        except LoginTimeout as ex:
+        except LoginTimeout:
             return
 
         assert False
