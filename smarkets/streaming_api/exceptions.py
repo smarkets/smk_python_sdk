@@ -53,10 +53,10 @@ class DownloadError(_Error):
 class LoginError(_Error):
     "Raised when a login is not successful"
     def __init__(self, reason):
+        self.reason_msg = 'Unknown'
         self.reason = reason
         if reason < len(eto.LogoutReason.DESCRIPTOR.values):
             self.reason_msg = eto.LogoutReason.DESCRIPTOR.values[reason].name
-        self.reason_msg = 'Unknown'
 
 
 class LoginTimeout(_Error):
