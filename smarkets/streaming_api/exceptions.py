@@ -5,7 +5,7 @@
 # http://www.opensource.org/licenses/mit-license.php
 
 from smarkets.errors import Error as _Error
-from smarkets.streaming_api import eto
+from smarkets.streaming_api.eto import LogoutReason
 
 
 class ConnectionError(_Error):
@@ -51,14 +51,16 @@ class DownloadError(_Error):
 
 
 class LoginError(_Error):
+
     "Raised when a login is not successful"
     def __init__(self, reason):
         self.reason_msg = 'Unknown'
         self.reason = reason
-        if reason < len(eto.LogoutReason.DESCRIPTOR.values):
-            self.reason_msg = eto.LogoutReason.DESCRIPTOR.values[reason].name
+        if reason in LogoutReason.values():
+            self.reason_msg = LogoutReason.Name(reason)
 
 
 class LoginTimeout(_Error):
+
     "Raised when no message is received after sending login request"
     pass
