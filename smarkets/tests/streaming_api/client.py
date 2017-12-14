@@ -103,7 +103,7 @@ class SmarketsTestCase(unittest.TestCase):
         except LoginError as ex:
             self.mock_session.disconnect.assert_called_once()
             self.assertEquals(eto.LOGOUT_UNAUTHORISED, ex.reason)
-            self.assertNotEquals(ex.reason_msg, 'Unknown')
+            self.assertEquals(ex.reason_msg, 'LOGOUT_UNAUTHORISED')
             return
 
         assert False
@@ -119,7 +119,7 @@ class SmarketsTestCase(unittest.TestCase):
         except LoginError as ex:
             self.mock_session.disconnect.assert_called_once()
             self.assertEquals(eto.LOGOUT_HEARTBEAT_TIMEOUT, ex.reason)
-            self.assertNotEquals(ex.reason_msg, 'Unknown')
+            self.assertEquals(ex.reason_msg, 'LOGOUT_HEARTBEAT_TIMEOUT')
             return
 
         assert False
