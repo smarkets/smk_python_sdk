@@ -1,3 +1,9 @@
+9.4.0
+-----
+- Update smk_api_common to v6.3.0: Add additional return information on order messages
+- Validate login operation
+- Minor fixes in log messages
+
 9.3.0
 -----
 - Update smk_api_common to v6.2.0: Introduce order void and balance changed messages.
