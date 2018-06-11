@@ -170,6 +170,7 @@ sdict = {
         'decorator',
         'iso8601',
         'protobuf==3.0.0b2',
+        'pytz',
         'six',
     ],
     'zip_safe': False,
