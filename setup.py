@@ -41,7 +41,7 @@ protobuf_modules = ['eto', 'seto']
 
 
 def protobuf_module_file(name):
-    return join(PROJECT_ROOT, 'smarkets', 'streaming_api', '%s.py' % (name,))
+    return join(PROJECT_ROOT, 'smarkets', 'streaming_api', '%s_pb2.py' % (name,))
 
 
 class SmarketsProtocolBuild(build.build):
@@ -84,14 +84,10 @@ class SmarketsProtocolBuild(build.build):
 
         for pkg in protobuf_modules:
             dst_pkg_file = protobuf_module_file(pkg)
-            tmp_pkg_file = dst_pkg_file.replace('.py', '_pb2.py')
 
             if not os.path.exists(dst_pkg_file):
                 check_call((self.find('protoc'),
                             '--python_out=.', 'smarkets.streaming_api.%s.proto' % (pkg,)))
-
-                shutil.move(tmp_pkg_file, dst_pkg_file)
-                self.replace_file(dst_pkg_file, lambda line: line.replace('_pb2', ''))
 
         build.build.run(self)
 
@@ -122,7 +118,7 @@ class SmarketsProtocolClean(clean.clean):
         for filename in chain(
                 _safe_glob('*.proto'),
                 _safe_glob('*.piqi'),
-                (join(PROJECT_ROOT, 'smarkets', 'streaming_api', '%s.py' % key)
+                (join(PROJECT_ROOT, 'smarkets', 'streaming_api', '%s_pb2.py' % key)
                  for key in ('eto', 'seto'))):
             if os.path.exists(filename):
                 os.unlink(filename)
@@ -169,7 +165,7 @@ sdict = {
     'install_requires': [
         'decorator',
         'iso8601',
-        'protobuf==3.0.0b2',
+        'protobuf',
         'pytz',
         'six',
     ],

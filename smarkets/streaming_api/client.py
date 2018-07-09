@@ -18,7 +18,7 @@ def _get_payload_types(module):
 
     return dict((
         (getattr(module, x),
-         '%s.%s' % (module_name, x.replace('PAYLOAD_', '').lower()))
+         '%s.%s' % (module_name.replace('_pb2', ''), x.replace('PAYLOAD_', '').lower()))
         for x in dir(module) if x.startswith('PAYLOAD_')
     ))
 

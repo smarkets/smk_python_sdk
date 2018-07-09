@@ -10,8 +10,8 @@ clean:
 	-rm -rf dist
 	-rm -rf build
 	-rm -rf smk.egg-info
-	-rm -rf smarkets/streaming_api/eto.py
-	-rm -rf smarkets/streaming_api/seto.py
+	-rm -rf smarkets/streaming_api/eto_pb2.py
+	-rm -rf smarkets/streaming_api/seto_pb2.py
 	find . -name "*.pyc" -exec rm {} \;
 
 dist: clean build
@@ -27,7 +27,7 @@ test: build
 
 check:
 	mkdir -p build/pep8
-	flake8 --exclude=eto.py,seto.py --max-line-length=110 smarkets *.py
+	flake8 --exclude=eto_pb2.py,seto_pb2.py --max-line-length=110 smarkets *.py
 
 docs:
 	$(MAKE) -C docs html

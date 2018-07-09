@@ -1,16 +1,14 @@
 language: python
 python:
     - "2.7"
-    - "3.3"
     - "3.4"
     - "3.5"
-    - "3.5-dev"
+    - "3.6"
     - "nightly"
     - "pypy"
     - "pypy3"
 matrix:
     allow_failures:
-        - python: "3.5-dev"
         - python: "nightly"
         - python: "pypy3"
     fast_finish: true

@@ -1,3 +1,8 @@
+9.4.3
+-----
+- Change protobuf generated file names to support newer versions of protobuf library.
+- Drop Python 3.3 support
+
 9.4.2
 -----
 - Explicitly depend on pytz
